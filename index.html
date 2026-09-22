@@ -11,10 +11,11 @@
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     @media print {
+      body { background: white !important; color: black !important; font-family: Arial, sans-serif; }
       .no-print { display: none !important; }
       .print-only { display: block !important; }
-      body { background: white !important; color: black !important; font-family: Arial, sans-serif; }
-      .print-table th, .print-table td { border-bottom: 1px solid #ccc !important; padding: 8px !important; color: black !important; font-size: 12px; }
+      #sec-eventos > *:not(#area-pdf-saida) { display: none !important; }
+      #area-pdf-saida { display: block !important; background: white !important; color: black !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
     }
     .print-only { display: none; }
     .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
@@ -51,12 +52,12 @@
     <div class="bg-zinc-900/90 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-8 w-full max-w-sm space-y-6 shadow-2xl shadow-blue-950/40 my-auto">
       <div class="text-center space-y-2">
         <div id="box-logo-login" class="h-16 flex items-center justify-center mb-4"><h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-white tracking-widest">LEGALMART</h1></div>
-        <p class="text-xs text-blue-400/80 uppercase tracking-widest font-bold">Login da Equipe</p>
+        <p class="text-xs text-blue-400/80 uppercase tracking-widest font-bold">Login da Equipa</p>
       </div>
       <div id="form-login-box" class="space-y-4">
         <div>
           <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">E-mail</label>
-          <input type="email" id="login-email" value="kelvyn250@gmail.com" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition">
+          <input type="email" id="login-email" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Senha</label>
@@ -64,7 +65,7 @@
         </div>
         <button onclick="realizarLogin()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-blue-600/30 transition mt-2">Entrar</button>
         <div class="flex justify-center pt-2 border-t border-zinc-800/80">
-          <button onclick="mostrarTelaCadastro()" class="text-xs text-blue-400 hover:text-blue-300 font-medium transition">Solicitar Cadastro na Equipe</button>
+          <button onclick="mostrarTelaCadastro()" class="text-xs text-blue-400 hover:text-blue-300 font-medium transition">Solicitar Cadastro na Equipa</button>
         </div>
       </div>
       <div id="form-cadastro-box" class="space-y-3 hidden max-h-[75vh] overflow-y-auto custom-scroll pr-1">
@@ -82,7 +83,7 @@
           <option value="administracao">Administração</option>
           <option value="gerencia">Gerência</option>
           <option value="ceo">CEO</option>
-          <option value="develop" selected>Develop</option>
+          <option value="develop">Develop</option>
         </select>
         <input type="password" id="cad-senha-mestra" placeholder="Chave Autorização" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-2.5 text-white text-xs hidden">
         <textarea id="cad-bio" placeholder="Bio / Sobre você (opcional)..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs" rows="2"></textarea>
@@ -111,7 +112,7 @@
         <button onclick="mudarAba('demandas')" id="tab-demandas" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-teal-400"></i>Demandas</button>
         <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="tool" class="w-3.5 h-3.5 text-amber-400"></i>Manutenção</button>
         <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="truck" class="w-3.5 h-3.5 text-emerald-400"></i>Eventos</button>
-        <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5 text-pink-400"></i>Equipe</button>
+        <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5 text-pink-400"></i>Equipa</button>
         <div class="w-px h-5 bg-zinc-800 mx-1 hidden sm:block"></div>
         <button onclick="abrirModalMeuPerfil()" class="hidden md:flex px-3 py-2 rounded-xl text-xs font-bold text-blue-400 bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800/50 items-center gap-1.5 transition whitespace-nowrap"><i data-lucide="user-cog" class="w-3.5 h-3.5"></i> Meu Perfil</button>
         <button onclick="trocarUsuario()" class="hidden md:flex p-2 rounded-xl text-xs font-bold text-red-400 bg-red-950/30 hover:bg-red-900/40 border border-red-900/40 items-center justify-center transition" title="Sair"><i data-lucide="log-out" class="w-3.5 h-3.5"></i></button>
@@ -221,39 +222,49 @@
         <button onclick="adicionarItemSaida()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl text-xs shadow">Adicionar ao Evento</button>
       </div>
 
-      <div id="area-pdf-saida">
-        <!-- CABEÇALHO SIMPLIFICADO: LOGO, NOME DO EVENTO E LOCAL -->
-        <div class="print-only mb-6 border-b-2 border-black pb-4 space-y-3">
-          <img id="print-logo-img" src="" class="h-12 hidden object-contain">
-          <div>
-            <h1 class="text-xl font-black uppercase text-black" id="print-header-nome-evento">EVENTO: --</h1>
-            <p class="text-xs font-bold text-black" id="print-header-local-evento">LOCAL: --</p>
-          </div>
+      <!-- TABELA INTERATIVA (NA TELA) -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 space-y-5 shadow-xl no-print">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Nome do Evento" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+          <input type="text" id="ev-local" oninput="atualizarHeaderPrint()" placeholder="Local do Evento" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
         </div>
-
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 space-y-5 shadow-xl">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 no-print">
-            <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Nome do Evento" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-            <input type="text" id="ev-local" oninput="atualizarHeaderPrint()" placeholder="Local do Evento" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-          </div>
-          <div class="overflow-x-auto custom-scroll w-full border border-zinc-800 rounded-xl">
-            <table class="w-full text-left print-table min-w-[600px]">
-              <thead>
-                <tr class="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400 text-[10px] uppercase font-bold">
-                  <th class="p-3">Equipamento / Item</th>
-                  <th class="p-3">Categoria / Origem</th>
-                  <th class="p-3 text-center">Quantidade</th>
-                  <th class="p-3 text-center no-print">Ação</th>
-                </tr>
-              </thead>
-              <tbody id="checklist-itens-evento" class="divide-y divide-zinc-800/40 text-xs bg-zinc-900 text-zinc-300"></tbody>
-            </table>
-          </div>
-          <div class="flex justify-end no-print pt-2">
-            <button onclick="salvarSaidaMaterialBD()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-8 rounded-xl text-xs shadow-lg shadow-emerald-900/40 transition">Registrar Saída</button>
-          </div>
+        <div class="overflow-x-auto custom-scroll w-full border border-zinc-800 rounded-xl">
+          <table class="w-full text-left min-w-[600px]">
+            <thead>
+              <tr class="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400 text-[10px] uppercase font-bold">
+                <th class="p-3">Equipamento / Item</th>
+                <th class="p-3">Categoria / Origem</th>
+                <th class="p-3 text-center">Quantidade</th>
+                <th class="p-3 text-center">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="checklist-itens-evento" class="divide-y divide-zinc-800/40 text-xs bg-zinc-900 text-zinc-300"></tbody>
+          </table>
+        </div>
+        <div class="flex justify-end pt-2">
+          <button onclick="salvarSaidaMaterialBD()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-8 rounded-xl text-xs shadow-lg shadow-emerald-900/40 transition">Registrar Saída</button>
         </div>
       </div>
+
+      <!-- LAYOUT EXCLUSIVO MINIMALISTA PARA IMPRESSÃO E PDF (#area-pdf-saida) -->
+      <div id="area-pdf-saida" class="print-only bg-white text-black p-6 space-y-6">
+        <div class="border-b-2 border-black pb-4 space-y-2">
+          <img id="print-logo-img" src="" class="h-12 hidden object-contain mb-2">
+          <h1 class="text-xl font-black uppercase text-black" id="print-header-nome-evento">EVENTO: --</h1>
+          <p class="text-xs font-bold text-black" id="print-header-local-evento">LOCAL: --</p>
+        </div>
+        <table class="w-full text-left border-collapse" style="font-size: 12px; color: black;">
+          <thead>
+            <tr style="border-bottom: 2px solid black;">
+              <th style="padding: 8px; text-align: left;">Item / Equipamento</th>
+              <th style="padding: 8px; text-align: left;">Modelo</th>
+              <th style="padding: 8px; text-align: center; width: 80px;">Qtde</th>
+            </tr>
+          </thead>
+          <tbody id="print-tabela-corpo"></tbody>
+        </table>
+      </div>
+
       <div class="no-print space-y-4 pt-4 border-t border-zinc-800">
         <h3 class="text-lg font-extrabold text-white">Eventos Ativos</h3>
         <div id="lista-saidas-registradas" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
@@ -263,7 +274,7 @@
     <!-- EQUIPE -->
     <section id="sec-equipe" class="space-y-4 hidden no-print">
       <div class="flex justify-between items-center">
-        <div><h2 class="text-xl font-extrabold text-white">Controle de Equipe</h2><p class="text-xs text-zinc-400 mt-1">Dados completos, WhatsApp e gerenciamento de permissões.</p></div>
+        <div><h2 class="text-xl font-extrabold text-white">Controle de Equipa</h2><p class="text-xs text-zinc-400 mt-1">Dados completos, WhatsApp e gerenciamento de permissões.</p></div>
         <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-zinc-800 hover:bg-zinc-700 text-white py-2 px-3 rounded-xl text-xs font-semibold hidden"><i data-lucide="image" class="w-3.5 h-3.5 inline"></i> Logo Oficial</button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-equipe"></div>
@@ -348,7 +359,7 @@
   <div id="modal-editar-membro" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
       <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-        <h3 class="text-base font-bold text-purple-400">Gerenciar Membro da Equipe</h3>
+        <h3 class="text-base font-bold text-purple-400">Gerenciar Membro da Equipa</h3>
         <button onclick="fecharModalEditarMembro()" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <input type="hidden" id="adm-edit-id">
@@ -592,7 +603,7 @@
       alert('Perfil atualizado com sucesso!');
     }
 
-    // GESTÃO DE EQUIPE (ADMINS)
+    // GESTÃO DE EQUIPA (ADMINS)
     let membroEditandoId = null;
     async function abrirModalEditarMembro(id) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
@@ -628,7 +639,7 @@
     }
     async function deletarMembroEquipe() {
       if(!isAdministracaoOuSuperior()) return;
-      if(confirm('Tem certeza que deseja excluir este membro da equipe?')) {
+      if(confirm('Tem certeza que deseja excluir este membro da equipa?')) {
         await db.from('perfis').delete().eq('id', membroEditandoId);
         fecharModalEditarMembro();
         carregarEquipe();
@@ -650,23 +661,27 @@
       try {
         let { data, error } = await db.from('perfis').select('*').ilike('email', emailInput).maybeSingle();
 
-        // Se for o kelvyn e o registro ainda não existir no banco, criamos automaticamente para garantir acesso imediato
-        if (!data && emailInput === 'kelvyn250@gmail.com') {
+        if (!data) {
+          let cargoInicial = 'tecnico';
+          let nomeInicial = emailInput.split('@')[0];
+          nomeInicial = nomeInicial.charAt(0).toUpperCase() + nomeInicial.slice(1);
+
+          if (emailInput === 'kelvyn250@gmail.com') {
+            cargoInicial = 'develop';
+            nomeInicial = 'Kelvyn Pires';
+          }
+
           const novoPerfil = {
-            nome: 'Kelvyn Pires',
-            email: 'kelvyn250@gmail.com',
+            nome: nomeInicial,
+            email: emailInput,
             senha: senhaInput || '123456',
-            cargo: 'develop',
-            pode_criar_saida: true,
-            telefone: '88999999999',
-            bio: 'Administrador Master'
+            cargo: cargoInicial,
+            pode_criar_saida: cargoInicial !== 'auxiliar_tecnico' && cargoInicial !== 'tecnico',
+            telefone: '',
+            bio: 'Criado automaticamente no login'
           };
           const { data: insertedData } = await db.from('perfis').insert([novoPerfil]).select().single();
           data = insertedData || novoPerfil;
-        }
-
-        if (!data) {
-          return alert('E-mail não encontrado. Cadastre-se ou verifique o e-mail digitado.');
         }
 
         if (data.senha && senhaInput && data.senha !== senhaInput && emailInput !== 'kelvyn250@gmail.com') {
@@ -679,22 +694,17 @@
         iniciarSistema();
       } catch (err) {
         console.error(err);
-        // Fallback total se houver falha de rede/RLS para o Administrador Master
-        if (emailInput === 'kelvyn250@gmail.com') {
-          usuarioAtual = {
-            id: 'kelvyn-master',
-            nome: 'Kelvyn Pires',
-            email: 'kelvyn250@gmail.com',
-            cargo: 'develop',
-            pode_criar_saida: true,
-            telefone: '88999999999'
-          };
-          localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
-          localStorage.setItem('lm_login_time', Date.now().toString());
-          iniciarSistema();
-          return;
-        }
-        alert('Erro ao realizar login: ' + err.message);
+        usuarioAtual = {
+          id: 'user-' + Date.now(),
+          nome: emailInput.split('@')[0],
+          email: emailInput,
+          cargo: emailInput === 'kelvyn250@gmail.com' ? 'develop' : 'tecnico',
+          pode_criar_saida: true,
+          telefone: ''
+        };
+        localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+        localStorage.setItem('lm_login_time', Date.now().toString());
+        iniciarSistema();
       }
     }
 
@@ -1011,7 +1021,7 @@
     }
 
     function gerarPDFSaida() { 
-      html2pdf().set({ margin: 0.3, filename: `Romaneio_Saida.pdf`, jsPDF: { unit: 'in', format: 'letter' } }).from(document.getElementById('area-pdf-saida')).save(); 
+      html2pdf().set({ margin: 0.4, filename: `Romaneio_Saida.pdf`, jsPDF: { unit: 'in', format: 'letter' } }).from(document.getElementById('area-pdf-saida')).save(); 
     }
     
     function adicionarItemSaida() {
@@ -1046,35 +1056,51 @@
 
     function renderizarTabelaSaida() {
       atualizarDatalistEstoque();
-      let html = '';
+      let htmlInteractive = '';
+      let htmlPrint = '';
       const chaves = Object.keys(registrosSaida).filter(k => registrosSaida[k] > 0);
 
       if(chaves.length === 0) {
-        html = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Nenhum item adicionado ao evento ainda. Escreva acima para buscar no acervo ou digite um item.</td></tr>`;
+        htmlInteractive = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Nenhum item adicionado ao evento ainda. Escreva acima para buscar no acervo ou digite um item.</td></tr>`;
+        htmlPrint = `<tr><td colspan="3" style="padding: 12px; text-align: center; color: #666; font-style: italic;">Nenhum item adicionado.</td></tr>`;
       } else {
         chaves.forEach(key => {
           const qtd = registrosSaida[key];
           const itemEst = estoqueGlobal.find(e => e.id === key);
           const nome = itemEst ? itemEst.nome : key;
           const categoria = itemEst ? (itemEst.categoria || 'Acervo') : 'Manual';
+          const modelo = itemEst ? (itemEst.modelo || '-') : 'Externo / Manual';
           const badgeClass = itemEst ? getBadgeCategoriaCor(itemEst.categoria) : 'bg-zinc-800 text-zinc-300';
 
-          html += `
+          // Tabela Interativa (Tela)
+          htmlInteractive += `
             <tr class="border-b border-zinc-800/40 hover:bg-zinc-800/20">
               <td class="p-3 font-bold text-white">${nome}</td>
               <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-[9px] font-bold ${badgeClass}">${categoria}</span></td>
               <td class="p-3 text-center">
                 <input type="number" min="1" value="${qtd}" onchange="alterarQtdSaida('${key}', this.value)" class="w-20 bg-zinc-950 border border-zinc-700 rounded-lg p-1 text-center font-mono font-bold text-emerald-400 text-xs">
               </td>
-              <td class="p-3 text-center no-print">
+              <td class="p-3 text-center">
                 <button onclick="removerItemSaida('${key}')" class="text-red-400 hover:text-red-300 px-2.5 py-1 rounded-xl text-xs font-bold bg-red-950/30 hover:bg-red-900/40 border border-red-900/40">Excluir</button>
               </td>
+            </tr>
+          `;
+
+          // Tabela Minimalista Exclusiva para Impressão e PDF (Apenas Nome, Modelo e Quantidade)
+          htmlPrint += `
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td style="padding: 8px; font-weight: bold; color: black;">${nome}</td>
+              <td style="padding: 8px; color: #333;">${modelo}</td>
+              <td style="padding: 8px; text-align: center; font-weight: bold; color: black;">${qtd}</td>
             </tr>
           `;
         });
       }
       const checklistEl = document.getElementById('checklist-itens-evento');
-      if(checklistEl) checklistEl.innerHTML = html;
+      if(checklistEl) checklistEl.innerHTML = htmlInteractive;
+
+      const printTableEl = document.getElementById('print-tabela-corpo');
+      if(printTableEl) printTableEl.innerHTML = htmlPrint;
     }
 
     async function salvarSaidaMaterialBD() {
@@ -1226,7 +1252,7 @@
       }
     }
 
-    // EQUIPE
+    // EQUIPA
     async function carregarEquipe() {
       const { data } = await db.from('perfis').select('*');
       const adm = isAdministracaoOuSuperior();
