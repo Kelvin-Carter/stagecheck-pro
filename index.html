@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LEGALMART</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,9 +16,12 @@
       .print-table th, .print-table td { border-bottom: 1px solid #ccc !important; padding: 8px !important; color: black !important; }
     }
     .print-only { display: none; }
+    /* Scrollbar personalizada e suave para telemóveis */
+    .custom-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen font-sans flex flex-col">
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
   <script>
     const SUPABASE_URL = 'https://havsqawfqzwvwppfvugd.supabase.co';
@@ -40,12 +43,12 @@
   </script>
 
   <!-- TELA DE AUTENTICAÇÃO -->
-  <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-8">
+  <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
       
       <div class="text-center space-y-2 flex flex-col items-center">
-        <div id="box-logo-login" class="h-16 flex items-center justify-center">
-          <h1 class="text-3xl font-black text-blue-500 tracking-wider">LEGALMART</h1>
+        <div id="box-logo-login" class="h-14 sm:h-16 flex items-center justify-center">
+          <h1 class="text-2xl sm:text-3xl font-black text-blue-500 tracking-wider">LEGALMART</h1>
         </div>
         <p class="text-xs text-gray-400" id="auth-subtitulo">Acesse sua conta para continuar</p>
       </div>
@@ -53,14 +56,14 @@
       <!-- FORMULÁRIO DE LOGIN -->
       <div id="form-login-box" class="space-y-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail (Login)</label>
-          <input type="email" id="login-email" placeholder="seuemail@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">E-mail (Login)</label>
+          <input type="email" id="login-email" placeholder="seuemail@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Senha</label>
-          <input type="password" id="login-senha" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Senha</label>
+          <input type="password" id="login-senha" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
         </div>
-        <button onclick="realizarLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition">
+        <button onclick="realizarLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition active:scale-95 text-sm">
           Entrar no Sistema
         </button>
         <div class="flex justify-between items-center text-xs pt-2">
@@ -72,49 +75,49 @@
       <!-- FORMULÁRIO DE CADASTRO -->
       <div id="form-cadastro-box" class="space-y-3 hidden">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
-          <input type="text" id="cad-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
+          <input type="text" id="cad-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto de Perfil (Câmera / Arquivo)</label>
-          <input type="file" id="cad-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Foto de Perfil</label>
+          <input type="file" id="cad-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail (Login Único)</label>
-          <input type="email" id="cad-email" placeholder="nome@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">E-mail</label>
+          <input type="email" id="cad-email" placeholder="nome@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Senha</label>
-          <input type="password" id="cad-senha" placeholder="Digite sua senha" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Senha</label>
+          <input type="password" id="cad-senha" placeholder="Digite sua senha" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">WhatsApp/Tel</label>
-            <input type="tel" id="cad-telefone" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+            <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">WhatsApp/Tel</label>
+            <input type="tel" id="cad-telefone" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nascimento</label>
-            <input type="date" id="cad-nascimento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+            <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nascimento</label>
+            <input type="date" id="cad-nascimento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Cargo / Função</label>
-          <select id="cad-cargo" onchange="verificarSelecaoCargoCadastro()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Cargo / Função</label>
+          <select id="cad-cargo" onchange="verificarSelecaoCargoCadastro()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
             <option value="auxiliar_tecnico">Auxiliar Técnico</option>
             <option value="tecnico">Técnico</option>
-            <option value="administrador">Administrador (ADM - Requer Senha)</option>
+            <option value="administrador">Administrador (ADM)</option>
           </select>
         </div>
 
         <div id="campo-senha-adm-cad" class="hidden">
-          <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Senha de Autorização ADM</label>
-          <input type="password" id="cad-senha-adm" placeholder="Digite a chave ADM" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1">Senha ADM</label>
+          <input type="password" id="cad-senha-adm" placeholder="Digite a chave ADM" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
         </div>
 
-        <button onclick="realizarCadastro()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg transition">
+        <button onclick="realizarCadastro()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg transition text-sm">
           Finalizar Cadastro
         </button>
-        <div class="text-center pt-2">
+        <div class="text-center pt-1">
           <button onclick="mostrarTelaLogin()" class="text-gray-400 text-xs hover:underline">Já possui conta? Faça Login</button>
         </div>
       </div>
@@ -123,42 +126,49 @@
   </div>
 
   <!-- HEADER -->
-  <header class="bg-gray-900 border-b border-blue-600/40 p-4 sticky top-0 z-40 no-print shadow-lg">
-    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center space-x-3">
-        <div id="header-logo-container" class="flex items-center">
-          <div class="bg-blue-600 p-2.5 rounded-xl text-black font-black text-xl">LM</div>
-        </div>
-        <div>
-          <h1 class="text-xl font-black tracking-wider text-blue-500" id="header-app-title">LEGALMART</h1>
-          <div class="flex items-center gap-2 mt-0.5">
-            <img id="header-user-avatar" src="" class="w-6 h-6 rounded-full object-cover hidden border border-blue-500">
-            <p class="text-xs text-gray-400 cursor-pointer hover:text-white" onclick="abrirModalMeuPerfil()" id="user-info-bar">Carregando usuário...</p>
+  <header class="bg-gray-900 border-b border-blue-600/40 p-3 sm:p-4 sticky top-0 z-40 no-print shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+      
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div id="header-logo-container" class="flex items-center">
+            <div class="bg-blue-600 p-2 rounded-xl text-black font-black text-lg">LM</div>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-black tracking-wider text-blue-500" id="header-app-title">LEGALMART</h1>
+            <div class="flex items-center gap-1.5">
+              <img id="header-user-avatar" src="" class="w-5 h-5 rounded-full object-cover hidden border border-blue-500">
+              <p class="text-[11px] sm:text-xs text-gray-400 cursor-pointer hover:text-white truncate max-w-[180px] sm:max-w-none" onclick="abrirModalMeuPerfil()" id="user-info-bar">Carregando...</p>
+            </div>
           </div>
         </div>
+        
+        <button onclick="trocarUsuario()" class="md:hidden px-3 py-1.5 rounded-lg text-xs font-bold text-red-400 bg-gray-950 border border-gray-800">
+          Sair
+        </button>
       </div>
       
-      <!-- MENU DE NAVEGAÇÃO -->
-      <nav class="flex flex-wrap gap-1.5 bg-gray-950 p-1.5 rounded-xl border border-gray-800">
-        <button onclick="mudarAba('estoque')" id="tab-estoque" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
+      <!-- MENU DE NAVEGAÇÃO RESPONSIVO -->
+      <nav class="flex items-center gap-1 bg-gray-950 p-1.5 rounded-xl border border-gray-800 overflow-x-auto custom-scroll max-w-full">
+        <button onclick="mudarAba('estoque')" id="tab-estoque" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <i data-lucide="box" class="w-4 h-4"></i> Estoque
         </button>
-        <button onclick="mudarAba('limpeza')" id="tab-limpeza" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <button onclick="mudarAba('limpeza')" id="tab-limpeza" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <i data-lucide="sparkles" class="w-4 h-4"></i> Limpeza
         </button>
-        <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <i data-lucide="wrench" class="w-4 h-4"></i> Manutenção
         </button>
-        <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <i data-lucide="truck" class="w-4 h-4"></i> Saída de Material
         </button>
-        <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <i data-lucide="users" class="w-4 h-4"></i> Equipe
         </button>
-        <button onclick="abrirModalMeuPerfil()" class="px-3 py-2 rounded-lg text-xs font-bold text-blue-400 hover:bg-gray-900 transition flex items-center gap-1">
+        <button onclick="abrirModalMeuPerfil()" class="px-3 py-2 rounded-lg text-xs font-bold text-blue-400 hover:bg-gray-900 transition flex items-center gap-1 whitespace-nowrap shrink-0">
           <i data-lucide="user" class="w-4 h-4"></i> Meu Perfil
         </button>
-        <button onclick="trocarUsuario()" class="px-3 py-2 rounded-lg text-xs font-bold text-red-400 hover:bg-gray-900 transition">
+        <button onclick="trocarUsuario()" class="hidden md:block px-3 py-2 rounded-lg text-xs font-bold text-red-400 hover:bg-gray-900 transition whitespace-nowrap shrink-0">
           Sair
         </button>
       </nav>
@@ -166,80 +176,82 @@
   </header>
 
   <!-- PRINCIPAL -->
-  <main class="max-w-7xl mx-auto p-4 flex-1 w-full space-y-6">
+  <main class="max-w-7xl mx-auto p-3 sm:p-4 flex-1 w-full space-y-6">
 
     <!-- ESTOQUE -->
-    <section id="sec-estoque" class="space-y-6 no-print">
-      <div class="flex justify-between items-center">
+    <section id="sec-estoque" class="space-y-4 sm:space-y-6 no-print">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-2xl font-black text-blue-400">Estoque de Equipamentos</h2>
+          <h2 class="text-xl sm:text-2xl font-black text-blue-400">Estoque de Equipamentos</h2>
           <p class="text-xs text-gray-400">Consulta geral do acervo</p>
         </div>
-        <button id="btn-add-estoque" onclick="abrirModalEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-xl hidden">
+        <button id="btn-add-estoque" onclick="abrirModalEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm hidden w-full sm:w-auto">
           + Novo Equipamento (ADM)
         </button>
       </div>
 
       <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-xs uppercase">
-              <th class="p-4">Foto</th>
-              <th class="p-4">Equipamento</th>
-              <th class="p-4">Modelo</th>
-              <th class="p-4">Categoria</th>
-              <th class="p-4">Qtde Total</th>
-              <th class="p-4 text-right adm-only">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-estoque" class="divide-y divide-gray-800/60 text-sm"></tbody>
-        </table>
+        <div class="overflow-x-auto custom-scroll w-full">
+          <table class="w-full text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-[11px] sm:text-xs uppercase whitespace-nowrap">
+                <th class="p-3 sm:p-4">Foto</th>
+                <th class="p-3 sm:p-4">Equipamento</th>
+                <th class="p-3 sm:p-4">Modelo</th>
+                <th class="p-3 sm:p-4">Categoria</th>
+                <th class="p-3 sm:p-4">Qtde Total</th>
+                <th class="p-3 sm:p-4 text-right adm-only">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="lista-estoque" class="divide-y divide-gray-800/60 text-xs sm:text-sm"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
     <!-- LIMPEZA -->
-    <section id="sec-limpeza" class="space-y-6 hidden no-print">
-      <div class="flex justify-between items-center">
+    <section id="sec-limpeza" class="space-y-4 sm:space-y-6 hidden no-print">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-2xl font-black text-teal-400">Pendências de Limpeza</h2>
+          <h2 class="text-xl sm:text-2xl font-black text-teal-400">Pendências de Limpeza</h2>
           <p class="text-xs text-gray-400">Higienização e revisão com controle de datas</p>
         </div>
-        <button onclick="abrirModalLimpeza()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-2.5 px-5 rounded-xl">
+        <button onclick="abrirModalLimpeza()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm w-full sm:w-auto">
           + Nova Limpeza
         </button>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-limpeza"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="cards-limpeza"></div>
     </section>
 
     <!-- MANUTENÇÃO -->
-    <section id="sec-manutencao" class="space-y-6 hidden no-print">
-      <div class="flex justify-between items-center">
+    <section id="sec-manutencao" class="space-y-4 sm:space-y-6 hidden no-print">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-2xl font-black text-amber-500">Fichas Técnicas de Manutenção</h2>
+          <h2 class="text-xl sm:text-2xl font-black text-amber-500">Fichas Técnicas de Manutenção</h2>
           <p class="text-xs text-gray-400">Controle de reparos, prazos e laudo técnico</p>
         </div>
-        <button onclick="abrirModalManutencao()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-5 rounded-xl">
+        <button onclick="abrirModalManutencao()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm w-full sm:w-auto">
           + Nova Ficha de Manutenção
         </button>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-manutencao"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="cards-manutencao"></div>
     </section>
 
     <!-- SAÍDA DE MATERIAL -->
-    <section id="sec-eventos" class="space-y-6 hidden">
-      <div class="flex justify-between items-center no-print flex-wrap gap-3">
+    <section id="sec-eventos" class="space-y-4 sm:space-y-6 hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between no-print gap-3">
         <div>
-          <h2 class="text-2xl font-black text-green-400">Saída de Material para Evento</h2>
+          <h2 class="text-xl sm:text-2xl font-black text-green-400">Saída de Material para Evento</h2>
           <p class="text-xs text-gray-400">Controle de saídas, responsável, impressão e download em PDF</p>
         </div>
-        <div class="flex gap-2">
-          <button onclick="window.print()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg border border-gray-700">
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+          <button onclick="window.print()" class="flex-1 md:flex-none bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex justify-center items-center gap-1.5 border border-gray-700">
             <i data-lucide="printer" class="w-4 h-4"></i> Imprimir
           </button>
-          <button onclick="gerarPDFSaida()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg">
+          <button onclick="gerarPDFSaida()" class="flex-1 md:flex-none bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex justify-center items-center gap-1.5">
             <i data-lucide="file-text" class="w-4 h-4"></i> Baixar PDF
           </button>
-          <button id="btn-finalizar-saida" onclick="salvarSaidaMaterialBD()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg hidden">
+          <button id="btn-finalizar-saida" onclick="salvarSaidaMaterialBD()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex justify-center items-center gap-1.5 hidden">
             <i data-lucide="check-circle" class="w-4 h-4"></i> Registrar Saída
           </button>
         </div>
@@ -256,223 +268,225 @@
         </div>
 
         <!-- FORMULÁRIO DE SAÍDA -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6 print:border-0 print:p-0">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 no-print">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6 print:border-0 print:p-0">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 no-print">
             <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome do Evento</label>
-              <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Ex: Show de Verão" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nome do Evento</label>
+              <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Ex: Show de Verão" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Contato do Evento</label>
-              <input type="text" id="ev-contato" oninput="atualizarHeaderPrint()" placeholder="Nome do Produtor" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Contato do Evento</label>
+              <input type="text" id="ev-contato" oninput="atualizarHeaderPrint()" placeholder="Nome do Produtor" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Telefone Contato</label>
-              <input type="tel" id="ev-telefone" oninput="atualizarHeaderPrint()" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Telefone Contato</label>
+              <input type="tel" id="ev-telefone" oninput="atualizarHeaderPrint()" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data Evento</label>
-              <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Data Evento</label>
+              <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Resp. pelo Material</label>
-              <input type="text" id="ev-responsavel" oninput="atualizarHeaderPrint()" placeholder="Técnico/Auxiliar" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Resp. pelo Material</label>
+              <input type="text" id="ev-responsavel" oninput="atualizarHeaderPrint()" placeholder="Técnico/Auxiliar" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
             </div>
           </div>
 
-          <table class="w-full text-left print-table">
-            <thead>
-              <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-xs uppercase print:bg-white print:text-black">
-                <th class="p-3">Equipamento</th>
-                <th class="p-3">Modelo / Categoria</th>
-                <th class="p-3 text-center no-print area-permissao-saida hidden">Saída (Qtde)</th>
-                <th class="p-3 text-center">Qtde p/ Evento</th>
-                <th class="p-3 text-center no-print area-permissao-saida hidden">Ação</th>
-              </tr>
-            </thead>
-            <tbody id="checklist-itens-evento" class="divide-y divide-gray-800/60 text-sm"></tbody>
-          </table>
+          <div class="overflow-x-auto custom-scroll w-full">
+            <table class="w-full text-left print-table min-w-[550px]">
+              <thead>
+                <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-[11px] uppercase print:bg-white print:text-black whitespace-nowrap">
+                  <th class="p-3">Equipamento</th>
+                  <th class="p-3">Modelo / Categoria</th>
+                  <th class="p-3 text-center no-print area-permissao-saida hidden">Saída (Qtde)</th>
+                  <th class="p-3 text-center">Qtde p/ Evento</th>
+                  <th class="p-3 text-center no-print area-permissao-saida hidden">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="checklist-itens-evento" class="divide-y divide-gray-800/60 text-xs sm:text-sm"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- LISTA DE SAÍDAS ATIVAS E CONFERÊNCIA DE RETORNO -->
       <div class="no-print space-y-4 pt-4 border-t border-gray-800">
-        <h3 class="text-xl font-bold text-amber-400">Eventos Cadastrados (Histórico & Baixas)</h3>
-        <div id="lista-saidas-registradas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <h3 class="text-lg sm:text-xl font-bold text-amber-400">Eventos Cadastrados (Histórico & Baixas)</h3>
+        <div id="lista-saidas-registradas" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
       </div>
     </section>
 
     <!-- EQUIPE & CONFIGURAÇÕES -->
-    <section id="sec-equipe" class="space-y-6 hidden no-print">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <section id="sec-equipe" class="space-y-4 sm:space-y-6 hidden no-print">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 class="text-2xl font-black text-purple-400">Equipe & Configurações da Empresa</h2>
+          <h2 class="text-xl sm:text-2xl font-black text-purple-400">Equipe & Configurações da Empresa</h2>
           <p class="text-xs text-gray-400">Gerenciar acessos, permissões de saída e contatos</p>
         </div>
-        <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">
+        <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden w-full sm:w-auto">
           🖼️ Definir Logo da Empresa (ADM)
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-equipe"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="cards-equipe"></div>
     </section>
 
   </main>
 
   <!-- MODAIS -->
-  <div id="modal-meu-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-      <h3 class="text-lg font-bold text-blue-400">Meu Perfil & Acesso</h3>
+  <div id="modal-meu-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
+      <h3 class="text-base sm:text-lg font-bold text-blue-400">Meu Perfil & Acesso</h3>
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Seu Nome</label>
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Seu Nome</label>
           <input type="text" id="my-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Enviar Foto (Câmera / Celular / PC)</label>
-          <input type="file" id="my-perf-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Enviar Foto (Câmera / Celular)</label>
+          <input type="file" id="my-perf-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
         </div>
         <div>
-          <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Sua Nova Senha</label>
+          <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1">Sua Nova Senha</label>
           <input type="password" id="my-perf-senha" placeholder="Digite para alterar sua senha" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
       </div>
-      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalMeuPerfil()" class="px-4 py-2 text-gray-400 text-sm">Cancelar</button>
-        <button onclick="salvarMeuPerfil()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm">Salvar Alterações</button>
+      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalMeuPerfil()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
+        <button onclick="salvarMeuPerfil()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar Alterações</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-logo" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-      <h3 class="text-lg font-bold text-purple-400">Logo Oficial da Empresa</h3>
+  <div id="modal-logo" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
+      <h3 class="text-base sm:text-lg font-bold text-purple-400">Logo Oficial da Empresa</h3>
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Upload da Logo (Celular / PC)</label>
-        <input type="file" id="input-logo-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Upload da Logo</label>
+        <input type="file" id="input-logo-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
       </div>
-      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalLogo()" class="px-4 py-2 text-gray-400 text-sm">Cancelar</button>
-        <button onclick="salvarLogoEmpresa()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm">Atualizar Logo</button>
+      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalLogo()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
+        <button onclick="salvarLogoEmpresa()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Atualizar Logo</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-estoque" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
-      <h3 class="text-lg font-bold text-white">Cadastrar Equipamento</h3>
-      <input type="text" id="est-nome" placeholder="Nome do Equipamento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-      <div class="grid grid-cols-2 gap-3">
-        <input type="text" id="est-modelo" placeholder="Modelo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-        <input type="number" id="est-qtd" value="1" min="1" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+  <div id="modal-estoque" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
+      <h3 class="text-base sm:text-lg font-bold text-white">Cadastrar Equipamento</h3>
+      <input type="text" id="est-nome" placeholder="Nome do Equipamento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input type="text" id="est-modelo" placeholder="Modelo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        <input type="number" id="est-qtd" value="1" min="1" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
       </div>
-      <select id="est-categoria" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+      <select id="est-categoria" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         <option value="Som">Som</option>
         <option value="Iluminação">Iluminação</option>
         <option value="Painel de LED">Painel de LED</option>
         <option value="Cabos & AC">Cabos & AC</option>
       </select>
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto do Equipamento (Câmera / Galeria)</label>
-        <input type="file" id="est-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Foto do Equipamento</label>
+        <input type="file" id="est-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
       </div>
-      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalEstoque()" class="px-4 py-2 text-gray-400">Cancelar</button>
-        <button onclick="salvarEstoque()" class="bg-blue-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-limpeza" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
-      <h3 class="text-lg font-bold text-white">Nova Pendência de Limpeza</h3>
-      <input type="text" id="limp-item" placeholder="Item (Ex: Baú de cabos Speakon)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-      <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data Agendada</label>
-        <input type="date" id="limp-data" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-      </div>
-      <textarea id="limp-obs" placeholder="Observações..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
-      <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto do Estado/Sujeira (Câmera / Galeria)</label>
-        <input type="file" id="limp-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
-      </div>
-      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalLimpeza()" class="px-4 py-2 text-gray-400">Cancelar</button>
-        <button onclick="salvarLimpeza()" class="bg-teal-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar</button>
+      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalEstoque()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
+        <button onclick="salvarEstoque()" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-8">
-      <h3 class="text-lg font-bold text-white" id="modal-man-titulo">Nova Ficha de Manutenção</h3>
+  <div id="modal-limpeza" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
+      <h3 class="text-base sm:text-lg font-bold text-white">Nova Pendência de Limpeza</h3>
+      <input type="text" id="limp-item" placeholder="Item (Ex: Baú de cabos Speakon)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+      <div>
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Data Agendada</label>
+        <input type="date" id="limp-data" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+      </div>
+      <textarea id="limp-obs" placeholder="Observações..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none" rows="2"></textarea>
+      <div>
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Foto da Sujeira/Estado</label>
+        <input type="file" id="limp-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
+      </div>
+      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalLimpeza()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
+        <button onclick="salvarLimpeza()" class="bg-teal-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
+      <h3 class="text-base sm:text-lg font-bold text-white" id="modal-man-titulo">Nova Ficha de Manutenção</h3>
       <input type="hidden" id="man-id">
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Equipamento / Item</label>
-        <input type="text" id="man-item" placeholder="Ex: Mesa PM5D RH" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Equipamento / Item</label>
+        <input type="text" id="man-item" placeholder="Ex: Mesa PM5D RH" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Status da Manutenção</label>
-          <select id="man-status" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Status</label>
+          <select id="man-status" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
             <option value="PENDENTE">PENDENTE</option>
             <option value="ATRASADO">ATRASADO</option>
             <option value="FINALIZADO">FINALIZADO</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data Limite / Prazo</label>
-          <input type="date" id="man-data-limite" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Data Limite</label>
+          <input type="date" id="man-data-limite" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
       </div>
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Técnico Responsável</label>
-        <input type="text" id="man-tecnico" placeholder="Nome do técnico responsável" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Técnico Responsável</label>
+        <input type="text" id="man-tecnico" placeholder="Nome do técnico responsável" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
       </div>
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Defeito Relatado</label>
-        <textarea id="man-defeito" placeholder="Descreva o defeito..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Defeito Relatado</label>
+        <textarea id="man-defeito" placeholder="Descreva o defeito..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none" rows="2"></textarea>
       </div>
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Solução Aplicada / Observações</label>
-        <textarea id="man-solucao" placeholder="Descreva os componentes trocados..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Solução Aplicada</label>
+        <textarea id="man-solucao" placeholder="Descreva os componentes trocados..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none" rows="2"></textarea>
       </div>
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto do Defeito / Equipamento (Câmera / Galeria)</label>
-        <input type="file" id="man-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Foto do Defeito</label>
+        <input type="file" id="man-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
       </div>
-      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalManutencao()" class="px-4 py-2 text-gray-400">Cancelar</button>
-        <button onclick="salvarManutencao()" class="bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Ficha</button>
+      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalManutencao()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
+        <button onclick="salvarManutencao()" class="bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar Ficha</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
-      <h3 class="text-lg font-bold text-purple-400">Redefinir Perfil e Permissões (ADM)</h3>
+  <div id="modal-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
+      <h3 class="text-base sm:text-lg font-bold text-purple-400">Redefinir Perfil e Permissões (ADM)</h3>
       <input type="hidden" id="edit-perf-id">
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
+        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
         <input type="text" id="edit-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail (Login)</label>
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">E-mail</label>
           <input type="email" id="edit-perf-email" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Nova Senha</label>
+          <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1">Nova Senha</label>
           <input type="text" id="edit-perf-senha" placeholder="Digite nova senha" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">WhatsApp / Telefone</label>
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">WhatsApp / Telefone</label>
           <input type="tel" id="edit-perf-telefone" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Cargo</label>
+          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Cargo</label>
           <select id="edit-perf-cargo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
             <option value="auxiliar_tecnico">Auxiliar Técnico</option>
             <option value="tecnico">Técnico</option>
@@ -481,8 +495,7 @@
         </div>
       </div>
 
-      <!-- CAIXA DE PERMISSÃO DE SAÍDA DE MATERIAL -->
-      <div class="bg-gray-950 p-3.5 rounded-xl border border-gray-800 flex items-center gap-3">
+      <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 flex items-center gap-3">
         <input type="checkbox" id="edit-perf-pode-saida" class="w-5 h-5 accent-green-600 rounded">
         <div>
           <label for="edit-perf-pode-saida" class="text-xs font-bold text-white cursor-pointer">Permitir criar e adicionar Saídas de Material</label>
@@ -490,9 +503,9 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalPerfil()" class="px-4 py-2 text-gray-400">Cancelar</button>
-        <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Alterações</button>
+      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalPerfil()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
+        <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar Alterações</button>
       </div>
     </div>
   </div>
@@ -530,8 +543,8 @@
 
     function aplicarLogoNaInterface() {
       if (logoEmpresaUrl) {
-        document.getElementById('box-logo-login').innerHTML = `<img src="${logoEmpresaUrl}" class="max-h-16 object-contain">`;
-        document.getElementById('header-logo-container').innerHTML = `<img src="${logoEmpresaUrl}" class="h-9 object-contain">`;
+        document.getElementById('box-logo-login').innerHTML = `<img src="${logoEmpresaUrl}" class="max-h-14 sm:max-h-16 object-contain">`;
+        document.getElementById('header-logo-container').innerHTML = `<img src="${logoEmpresaUrl}" class="h-8 sm:h-9 object-contain">`;
         document.getElementById('print-logo-img').src = logoEmpresaUrl;
         document.getElementById('print-logo-img').classList.remove('hidden');
       }
@@ -721,12 +734,12 @@
       document.getElementById(`sec-${aba}`).classList.remove('hidden');
 
       document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.className = "nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5";
+        btn.className = "nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0";
       });
 
       const tabAtiva = document.getElementById(`tab-${aba}`);
       if (tabAtiva) {
-        tabAtiva.className = "nav-btn px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-md transition flex items-center gap-1.5";
+        tabAtiva.className = "nav-btn px-3 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap shrink-0";
       }
 
       if(aba === 'estoque') carregarEstoque();
@@ -797,16 +810,16 @@
       const isAdm = usuarioAtual.cargo === 'administrador';
 
       container.innerHTML = (data || []).map(item => `
-        <tr class="hover:bg-gray-950/50 transition border-b border-gray-800/40">
-          <td class="p-4">
-            ${item.foto_url ? `<img src="${item.foto_url}" class="w-10 h-10 rounded-lg object-cover border border-gray-700">` : '<div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-xs text-gray-500">📦</div>'}
+        <tr class="hover:bg-gray-950/50 transition border-b border-gray-800/40 whitespace-nowrap">
+          <td class="p-3 sm:p-4">
+            ${item.foto_url ? `<img src="${item.foto_url}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover border border-gray-700">` : '<div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 flex items-center justify-center text-xs text-gray-500">📦</div>'}
           </td>
-          <td class="p-4 font-bold text-white">${item.nome}</td>
-          <td class="p-4 text-gray-400 font-mono">${item.modelo || '-'}</td>
-          <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-950 text-blue-400 border border-blue-800/60">${item.categoria}</span></td>
-          <td class="p-4 font-mono font-bold text-lg text-blue-400">${item.quantidade}</td>
-          <td class="p-4 text-right ${isAdm ? '' : 'hidden'}">
-            <button onclick="deletarEstoque('${item.id}')" class="text-red-400 hover:text-red-300 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          <td class="p-3 sm:p-4 font-bold text-white">${item.nome}</td>
+          <td class="p-3 sm:p-4 text-gray-400 font-mono">${item.modelo || '-'}</td>
+          <td class="p-3 sm:p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-950 text-blue-400 border border-blue-800/60">${item.categoria}</span></td>
+          <td class="p-3 sm:p-4 font-mono font-bold text-base sm:text-lg text-blue-400">${item.quantidade}</td>
+          <td class="p-3 sm:p-4 text-right ${isAdm ? '' : 'hidden'}">
+            <button onclick="deletarEstoque('${item.id}')" class="text-red-400 hover:text-red-300 p-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           </td>
         </tr>
       `).join('');
@@ -841,20 +854,20 @@
       const isAdm = usuarioAtual.cargo === 'administrador';
 
       container.innerHTML = (data || []).map(l => `
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 flex flex-col justify-between">
           <div class="space-y-2">
-            ${l.foto_url ? `<img src="${l.foto_url}" class="w-full h-36 rounded-xl object-cover border border-teal-800/50 mb-2">` : ''}
+            ${l.foto_url ? `<img src="${l.foto_url}" class="w-full h-32 sm:h-36 rounded-xl object-cover border border-teal-800/50 mb-2">` : ''}
             <div class="flex justify-between items-start">
-              <h3 class="font-bold text-lg text-white">${l.item}</h3>
-              <span class="text-xs px-2.5 py-1 rounded-full font-bold ${l.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-teal-950 text-teal-400'}">
+              <h3 class="font-bold text-base sm:text-lg text-white">${l.item}</h3>
+              <span class="text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-bold ${l.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-teal-950 text-teal-400'}">
                 ${l.status || 'PENDENTE'}
               </span>
             </div>
-            <p class="text-sm text-gray-400">${l.observacao || 'Sem observações.'}</p>
-            <p class="text-xs text-teal-400 font-semibold">📅 Data Agendada: ${l.data_limpeza || 'Não informada'}</p>
+            <p class="text-xs sm:text-sm text-gray-400">${l.observacao || 'Sem observações.'}</p>
+            <p class="text-xs text-teal-400 font-semibold">📅 Data: ${l.data_limpeza || 'Não informada'}</p>
           </div>
           <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
-            <span>Cadastrado por: <b class="text-gray-300">${l.criado_por || 'Anônimo'}</b></span>
+            <span>Por: <b class="text-gray-300">${l.criado_por || 'Anônimo'}</b></span>
             <div class="flex gap-2">
               <button onclick="mudarStatusLimpeza('${l.id}', '${l.status}')" class="text-teal-400 font-bold">Status</button>
               ${isAdm ? `<button onclick="deletarLimpeza('${l.id}')" class="text-red-400 font-bold">Excluir</button>` : ''}
@@ -903,12 +916,12 @@
         if (m.status === 'FINALIZADO') statusCor = 'bg-green-950 text-green-400 border border-green-800';
 
         return `
-          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 flex flex-col justify-between">
             <div class="space-y-2">
-              ${m.foto_url ? `<img src="${m.foto_url}" class="w-full h-36 rounded-xl object-cover border border-amber-800/50 mb-2">` : ''}
+              ${m.foto_url ? `<img src="${m.foto_url}" class="w-full h-32 sm:h-36 rounded-xl object-cover border border-amber-800/50 mb-2">` : ''}
               <div class="flex justify-between items-start">
-                <h3 class="font-bold text-lg text-white">${m.item}</h3>
-                <span class="text-xs px-2.5 py-1 rounded-full font-bold ${statusCor}">
+                <h3 class="font-bold text-base sm:text-lg text-white">${m.item}</h3>
+                <span class="text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-bold ${statusCor}">
                   ${m.status || 'PENDENTE'}
                 </span>
               </div>
@@ -920,7 +933,7 @@
             <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
               <span>Por: <b class="text-gray-300">${m.criado_por || 'Anônimo'}</b></span>
               <div class="flex gap-2">
-                <button onclick='abrirModalManutencao(${JSON.stringify(m)})' class="text-amber-400 font-bold">Ficha Técnica</button>
+                <button onclick='abrirModalManutencao(${JSON.stringify(m)})' class="text-amber-400 font-bold">Ficha</button>
                 ${isAdm ? `<button onclick="deletarManutencao('${m.id}')" class="text-red-400 font-bold">Excluir</button>` : ''}
               </div>
             </div>
@@ -984,17 +997,17 @@
       container.innerHTML = estoqueGlobal.map(i => {
         const qtdeNoEvento = registrosSaida[i.id] || 0;
         return `
-          <tr class="border-b border-gray-800/60 print:border-gray-300">
+          <tr class="border-b border-gray-800/60 print:border-gray-300 whitespace-nowrap">
             <td class="p-3 font-bold text-white print:text-black">${i.nome}</td>
             <td class="p-3 text-gray-400 print:text-black font-mono text-xs">${i.modelo || '-'} (${i.categoria})</td>
             <td class="p-3 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
-              <input type="number" id="qtd-saida-${i.id}" value="1" min="1" max="${i.quantidade}" class="w-16 bg-gray-950 border border-gray-800 rounded-lg p-1.5 text-center text-white text-xs">
+              <input type="number" id="qtd-saida-${i.id}" value="1" min="1" max="${i.quantidade}" class="w-14 sm:w-16 bg-gray-950 border border-gray-800 rounded-lg p-1 text-center text-white text-xs">
             </td>
-            <td class="p-3 text-center font-bold font-mono text-lg ${qtdeNoEvento > 0 ? 'text-amber-400 print:text-black' : 'text-gray-500 print:text-black'}">
+            <td class="p-3 text-center font-bold font-mono text-base sm:text-lg ${qtdeNoEvento > 0 ? 'text-amber-400 print:text-black' : 'text-gray-500 print:text-black'}">
               ${qtdeNoEvento}
             </td>
             <td class="p-3 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
-              <button onclick="registrarSaidaItem('${i.id}')" class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+              <button onclick="registrarSaidaItem('${i.id}')" class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
                 + Selecionar
               </button>
             </td>
@@ -1081,16 +1094,16 @@
       const podeCriar = temPermissaoSaida();
 
       container.innerHTML = data.map(s => `
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
-          <div class="flex justify-between items-start">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3">
+          <div class="flex justify-between items-start gap-2">
             <div>
               <h4 class="font-bold text-white text-base">${s.evento_nome}</h4>
-              <p class="text-xs text-amber-400 font-semibold">👤 Resp. Material: ${s.responsavel || 'Não informado'}</p>
+              <p class="text-xs text-amber-400 font-semibold">👤 Resp.: ${s.responsavel || 'Não informado'}</p>
               <p class="text-xs text-gray-400">📞 Contato: ${s.contato_evento || '-'} (${s.telefone_evento || '-'})</p>
               <p class="text-xs text-gray-400">📅 Data: ${s.data_evento || 'Sem data'}</p>
             </div>
-            <span class="text-xs px-2.5 py-1 rounded-full font-bold ${s.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-amber-950 text-amber-400'}">
-              ${s.status === 'CONCLUIDO' ? 'DEVOLVIDO / BAIXADO' : 'EM EVENTO'}
+            <span class="text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-bold whitespace-nowrap ${s.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-amber-950 text-amber-400'}">
+              ${s.status === 'CONCLUIDO' ? 'BAIXADO' : 'EM EVENTO'}
             </span>
           </div>
 
@@ -1101,7 +1114,7 @@
 
           ${(s.status !== 'CONCLUIDO' && podeCriar) ? `
             <button onclick="darBaixaMaterialGalpao('${s.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 rounded-xl text-xs flex justify-center items-center gap-1">
-              ✅ Conferir e Dar Baixa de Retorno no Galpão
+              ✅ Conferir e Dar Baixa no Galpão
             </button>
           ` : (s.status === 'CONCLUIDO' ? '<p class="text-center text-xs text-green-400 font-bold">✓ Todos os itens conferidos e devolvidos</p>' : '')}
         </div>
@@ -1129,7 +1142,7 @@
         const linkWhatsapp = telLimpo ? `https://wa.me/55${telLimpo}` : '#';
 
         return `
-          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 flex flex-col justify-between">
             <div class="space-y-2">
               <div class="flex items-center gap-3">
                 ${p.foto_url ? `<img src="${p.foto_url}" class="w-10 h-10 rounded-full object-cover border border-purple-500">` : '<div class="w-10 h-10 rounded-full bg-purple-900/60 border border-purple-500 flex items-center justify-center font-bold text-purple-300">👤</div>'}
@@ -1152,7 +1165,7 @@
                   💬 WhatsApp
                 </a>
               ` : '<span class="text-gray-500">Sem WhatsApp</span>'}
-              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Editar Acessos (ADM)</button>` : ''}
+              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Editar Acessos</button>` : ''}
             </div>
           </div>
         `;
@@ -1193,5 +1206,4 @@
   </script>
 </body>
 </html>
-
 
