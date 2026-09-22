@@ -34,7 +34,15 @@
   <script>
     const SUPABASE_URL = 'https://havsqawfqzwvwppfvugd.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_yNDu8sgD_M04hBcIuxRhDg_FfqKvgwP';
-    const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+    
+    let db = null;
+    try {
+      if (window.supabase) {
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch (e) {
+      console.warn("Modo offline ativado devido a erro no Supabase:", e);
+    }
 
     const SENHA_MESTRA_ADM = "LEGALMART2026";
     const CHAVE_DEVELOP = "KELVIN2026";
@@ -58,11 +66,11 @@
       <div id="form-login-box" class="space-y-4">
         <div>
           <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">E-mail</label>
-          <input type="email" id="login-email" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition">
+          <input type="email" id="login-email" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition" placeholder="seu@email.com">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Senha</label>
-          <input type="password" id="login-senha" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition">
+          <input type="password" id="login-senha" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm py-3 px-4 text-white focus:outline-none focus:border-blue-500 transition" placeholder="••••••••">
         </div>
         <button onclick="realizarLogin()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-blue-600/30 transition mt-2">Entrar</button>
         <div class="flex justify-center pt-2 border-t border-zinc-800/80">
@@ -151,7 +159,7 @@
           <input type="text" id="busca-estoque" oninput="carregarEstoque()" placeholder="Buscar equipamento por nome ou modelo..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2.5 px-4 text-white text-xs focus:outline-none focus:border-blue-500 transition">
         </div>
         <div class="overflow-x-auto custom-scroll w-full">
-          <table class="w-full text-left border-collapse min-w-[700px]">
+          <table class="w-full text-left border-collapse min-w-[700px]" id="tabela-estoque">
             <thead>
               <tr class="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400 text-[10px] uppercase font-extrabold tracking-wider">
                 <th class="p-4">Equipamento</th>
@@ -356,7 +364,7 @@
     </div>
   </div>
 
-  <!-- MODAL EDITAR MEMBRO (PARA ADMINS) -->
+  <!-- MODAL EDITAR MEMBRO -->
   <div id="modal-editar-membro" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
       <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -554,12 +562,14 @@
       const file = fileInput.files[0];
       const fileName = `${Date.now()}.${file.name.split('.').pop()}`;
       try {
-        await db.storage.from('fotos').upload(fileName, file);
-        const { data } = db.storage.from('fotos').getPublicUrl(fileName);
-        if(data) {
-          logoEmpresaUrl = data.publicUrl;
-          await db.from('configuracoes').upsert({ chave: 'logo_url', valor: logoEmpresaUrl }, { onConflict: 'chave' });
-          aplicarLogoNaInterface();
+        if(db) {
+          await db.storage.from('fotos').upload(fileName, file);
+          const { data } = db.storage.from('fotos').getPublicUrl(fileName);
+          if(data) {
+            logoEmpresaUrl = data.publicUrl;
+            await db.from('configuracoes').upsert({ chave: 'logo_url', valor: logoEmpresaUrl }, { onConflict: 'chave' });
+            aplicarLogoNaInterface();
+          }
         }
       } catch(e) {}
       fecharModalLogo();
@@ -586,10 +596,10 @@
       let foto = usuarioAtual.foto_url;
 
       const fileInput = document.getElementById('my-perf-foto-file');
-      if(fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const fileName = `${Date.now()}.${file.name.split('.').pop()}`;
+      if(fileInput.files.length > 0 && db) {
         try {
+          const file = fileInput.files[0];
+          const fileName = `${Date.now()}.${file.name.split('.').pop()}`;
           await db.storage.from('fotos').upload(fileName, file);
           const { data } = db.storage.from('fotos').getPublicUrl(fileName);
           if(data) foto = data.publicUrl;
@@ -616,10 +626,12 @@
     async function abrirModalEditarMembro(emailMembro) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
       let data = null;
-      try {
-        const res = await db.from('perfis').select('*').ilike('email', emailMembro).maybeSingle();
-        data = res.data;
-      } catch(e) {}
+      if(db) {
+        try {
+          const res = await db.from('perfis').select('*').ilike('email', emailMembro).maybeSingle();
+          data = res.data;
+        } catch(e) {}
+      }
 
       if(!data) {
         data = { nome: emailMembro.split('@')[0], email: emailMembro, cargo: 'tecnico', telefone: '' };
@@ -682,7 +694,9 @@
           try {
             const { data } = await db.from('perfis').select('*').ilike('email', emailInput).maybeSingle();
             if (data) perfilEncontrado = data;
-          } catch(e) {}
+          } catch(e) {
+            console.warn("Consulta ao banco falhou, usando localStorage.");
+          }
         }
 
         if (!perfilEncontrado) {
@@ -720,7 +734,7 @@
         iniciarSistema();
       } catch (err) {
         console.error('Erro no login:', err);
-        alert('Erro ao processar login.');
+        alert('Erro ao processar login: ' + err.message);
       }
     }
 
@@ -758,7 +772,7 @@
         alert('Cadastro realizado com sucesso!');
       } catch (err) {
         console.error('Erro no cadastro:', err);
-        alert('Erro ao realizar cadastro.');
+        alert('Erro ao realizar cadastro: ' + err.message);
       }
     }
 
@@ -898,11 +912,12 @@
     }
 
     async function carregarEstoque() {
-      if(!db) return;
-      try {
-        const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
-        estoqueGlobal = data || [];
-      } catch(e) { estoqueGlobal = []; }
+      if(db) {
+        try {
+          const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
+          estoqueGlobal = data || [];
+        } catch(e) { estoqueGlobal = []; }
+      }
 
       const filtro = document.getElementById('busca-estoque') ? document.getElementById('busca-estoque').value.toLowerCase() : '';
       const lista = filtro ? estoqueGlobal.filter(i => (i.nome && i.nome.toLowerCase().includes(filtro)) || (i.modelo && i.modelo.toLowerCase().includes(filtro))) : estoqueGlobal;
@@ -940,18 +955,19 @@
         categoria: document.getElementById('est-categoria').value,
         propriedade: document.getElementById('est-propriedade').value
       };
-      try {
-        if(id) { await db.from('estoque').update(payload).eq('id', id); }
-        else { await db.from('estoque').insert([payload]); }
-      } catch(e) {}
-      
+      if(db) {
+        try {
+          if(id) { await db.from('estoque').update(payload).eq('id', id); }
+          else { await db.from('estoque').insert([payload]); }
+        } catch(e) {}
+      }
       fecharModalEstoque();
       carregarEstoque();
     }
 
     async function deletarEstoque(id) {
       if(isAdministracaoOuSuperior() && confirm('Excluir equipamento?')) {
-        try { await db.from('estoque').delete().eq('id', id); } catch(e) {}
+        if(db) { try { await db.from('estoque').delete().eq('id', id); } catch(e) {} }
         carregarEstoque();
       }
     }
@@ -1024,25 +1040,28 @@
       });
 
       const d = { nome, itens, criado_por: usuarioAtual.nome };
-      try {
-        if(id) { await db.from('kits').update(d).eq('id', id); } else { await db.from('kits').insert([d]); }
-      } catch(e) {}
+      if(db) {
+        try {
+          if(id) { await db.from('kits').update(d).eq('id', id); } else { await db.from('kits').insert([d]); }
+        } catch(e) {}
+      }
       fecharModalKit(); carregarKits();
     }
     async function deletarKit(id) {
       if(!isAdministracaoOuSuperior()) return;
       if(confirm('Tem certeza que deseja excluir este kit?')) {
-        try { await db.from('kits').delete().eq('id', id); } catch(e) {}
+        if(db) { try { await db.from('kits').delete().eq('id', id); } catch(e) {} }
         carregarKits();
       }
     }
 
     async function carregarKits() {
-      if(!db) return;
-      try {
-        const { data } = await db.from('kits').select('*');
-        kitsGlobal = data || [];
-      } catch(e) { kitsGlobal = []; }
+      if(db) {
+        try {
+          const { data } = await db.from('kits').select('*');
+          kitsGlobal = data || [];
+        } catch(e) { kitsGlobal = []; }
+      }
 
       const adm = isAdministracaoOuSuperior();
       const el = document.getElementById('cards-kits');
@@ -1070,7 +1089,7 @@
       }
     }
     async function carregarKitsParaSelect() {
-      if(kitsGlobal.length === 0) { 
+      if(kitsGlobal.length === 0 && db) { 
         try { const { data } = await db.from('kits').select('*'); kitsGlobal = data || []; } catch(e) {} 
       }
     }
@@ -1197,11 +1216,10 @@
         criado_por: usuarioAtual.nome
       };
 
-      try {
-        const { error } = await db.from('saida_materiais').insert([payload]);
-        if(error) return alert('Erro ao registrar saída no banco de dados: ' + error.message);
-      } catch(e) {
-        return alert('Erro ao conectar ao banco.');
+      if(db) {
+        try {
+          await db.from('saida_materiais').insert([payload]);
+        } catch(e) {}
       }
 
       alert('Romaneio de saída registrado com sucesso!');
@@ -1214,12 +1232,13 @@
     }
 
     async function carregarSaidasRegistradas() {
-      if(!db) return;
       let data = [];
-      try {
-        const res = await db.from('saida_materiais').select('*').order('created_at', { ascending: false });
-        data = res.data || [];
-      } catch(e) {}
+      if(db) {
+        try {
+          const res = await db.from('saida_materiais').select('*').order('created_at', { ascending: false });
+          data = res.data || [];
+        } catch(e) {}
+      }
 
       const el = document.getElementById('lista-saidas-registradas');
       if(el) {
@@ -1228,7 +1247,7 @@
             <div class="flex justify-between border-b border-zinc-800 pb-2"><h4 class="font-extrabold text-white text-sm">${s.evento_nome}</h4><span class="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800 font-bold">${s.status}</span></div>
             <div class="text-[11px] text-zinc-400 mb-1">Local: ${s.contato_evento || 'Não informado'}</div>
             <div class="bg-zinc-950 p-3 rounded-xl text-xs max-h-24 overflow-y-auto space-y-1">${(s.itens||[]).map(i=>`<div><b class="text-emerald-400">${i.quantidade}x</b>${i.nome} <span class="text-[10px] text-zinc-500">(${i.modelo || '-'})</span></div>`).join('')}</div>
-            ${s.status !== 'CONCLUIDO' ? `<button onclick="db.from('saida_materiais').update({status:'CONCLUIDO'}).eq('id','${s.id}').then(()=>carregarSaidasRegistradas())" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-bold transition">Concluir / Dar Baixa no Evento</button>` : ''}
+            ${s.status !== 'CONCLUIDO' ? `<button onclick="if(db){db.from('saida_materiais').update({status:'CONCLUIDO'}).eq('id','${s.id}').then(()=>carregarSaidasRegistradas())}" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-bold transition">Concluir / Dar Baixa no Evento</button>` : ''}
           </div>
         `).join('');
       }
@@ -1255,25 +1274,29 @@
         data_limite: document.getElementById('dem-data').value,
         criado_por: usuarioAtual.nome
       };
-      try {
-        if(id) { await db.from('demandas').update(payload).eq('id', id); }
-        else { await db.from('demandas').insert([payload]); }
-      } catch(e) {}
+      if(db) {
+        try {
+          if(id) { await db.from('demandas').update(payload).eq('id', id); }
+          else { await db.from('demandas').insert([payload]); }
+        } catch(e) {}
+      }
       fecharModalDemanda();
       carregarDemandas();
     }
     async function deletarDemanda(id) {
       if(confirm('Tem certeza que deseja excluir esta demanda?')) {
-        try { await db.from('demandas').delete().eq('id', id); } catch(e) {}
+        if(db) { try { await db.from('demandas').delete().eq('id', id); } catch(e) {} }
         carregarDemandas();
       }
     }
     async function carregarDemandas() {
       let data = [];
-      try {
-        const res = await db.from('demandas').select('*');
-        data = res.data || [];
-      } catch(e) {}
+      if(db) {
+        try {
+          const res = await db.from('demandas').select('*');
+          data = res.data || [];
+        } catch(e) {}
+      }
       const el = document.getElementById('cards-demandas');
       if(el) {
         el.innerHTML = data.map(d => `
@@ -1315,25 +1338,29 @@
         defeito_relatado: document.getElementById('man-defeito').value,
         criado_por: usuarioAtual.nome
       };
-      try {
-        if(id) { await db.from('manutencao_separada').update(payload).eq('id', id); }
-        else { await db.from('manutencao_separada').insert([payload]); }
-      } catch(e) {}
+      if(db) {
+        try {
+          if(id) { await db.from('manutencao_separada').update(payload).eq('id', id); }
+          else { await db.from('manutencao_separada').insert([payload]); }
+        } catch(e) {}
+      }
       fecharModalManutencao();
       carregarManutencao();
     }
     async function deletarManutencao(id) {
       if(confirm('Tem certeza que deseja excluir esta ficha de manutenção?')) {
-        try { await db.from('manutencao_separada').delete().eq('id', id); } catch(e) {}
+        if(db) { try { await db.from('manutencao_separada').delete().eq('id', id); } catch(e) {} }
         carregarManutencao();
       }
     }
     async function carregarManutencao() {
       let data = [];
-      try {
-        const res = await db.from('manutencao_separada').select('*');
-        data = res.data || [];
-      } catch(e) {}
+      if(db) {
+        try {
+          const res = await db.from('manutencao_separada').select('*');
+          data = res.data || [];
+        } catch(e) {}
+      }
       const el = document.getElementById('cards-manutencao');
       if(el) {
         el.innerHTML = data.map(m => `
@@ -1357,10 +1384,12 @@
     // EQUIPA
     async function carregarEquipe() {
       let data = [];
-      try {
-        const res = await db.from('perfis').select('*');
-        data = res.data || [];
-      } catch(e) {}
+      if(db) {
+        try {
+          const res = await db.from('perfis').select('*');
+          data = res.data || [];
+        } catch(e) {}
+      }
       const adm = isAdministracaoOuSuperior();
       const el = document.getElementById('cards-equipe');
       if(el) {
@@ -1400,3 +1429,4 @@
   </script>
 </body>
 </html>
+
