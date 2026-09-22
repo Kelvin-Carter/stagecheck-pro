@@ -553,13 +553,15 @@
       if(fileInput.files.length === 0) return;
       const file = fileInput.files[0];
       const fileName = `${Date.now()}.${file.name.split('.').pop()}`;
-      await db.storage.from('fotos').upload(fileName, file);
-      const { data } = db.storage.from('fotos').getPublicUrl(fileName);
-      if(data) {
-        logoEmpresaUrl = data.publicUrl;
-        await db.from('configuracoes').upsert({ chave: 'logo_url', valor: logoEmpresaUrl }, { onConflict: 'chave' });
-        aplicarLogoNaInterface();
-      }
+      try {
+        await db.storage.from('fotos').upload(fileName, file);
+        const { data } = db.storage.from('fotos').getPublicUrl(fileName);
+        if(data) {
+          logoEmpresaUrl = data.publicUrl;
+          await db.from('configuracoes').upsert({ chave: 'logo_url', valor: logoEmpresaUrl }, { onConflict: 'chave' });
+          aplicarLogoNaInterface();
+        }
+      } catch(e) {}
       fecharModalLogo();
     }
 
@@ -587,16 +589,18 @@
       if(fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const fileName = `${Date.now()}.${file.name.split('.').pop()}`;
-        await db.storage.from('fotos').upload(fileName, file);
-        const { data } = db.storage.from('fotos').getPublicUrl(fileName);
-        if(data) foto = data.publicUrl;
+        try {
+          await db.storage.from('fotos').upload(fileName, file);
+          const { data } = db.storage.from('fotos').getPublicUrl(fileName);
+          if(data) foto = data.publicUrl;
+        } catch(e) {}
       }
 
       const payload = { nome, email, telefone, data_nascimento, bio, foto_url: foto };
       if(senha) payload.senha = senha;
 
       if(db) {
-        await db.from('perfis').update(payload).eq('email', usuarioAtual.email);
+        try { await db.from('perfis').update(payload).ilike('email', usuarioAtual.email); } catch(e) {}
       }
 
       usuarioAtual = { ...usuarioAtual, ...payload };
@@ -608,13 +612,21 @@
     }
 
     // GESTÃO DE EQUIPA (ADMINS)
-    let membroEditandoId = null;
+    let membroEditandoEmail = null;
     async function abrirModalEditarMembro(emailMembro) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
-      const { data } = await db.from('perfis').select('*').ilike('email', emailMembro).maybeSingle();
-      if(!data) return;
-      membroEditandoId = data.email;
-      document.getElementById('adm-edit-id').value = data.email;
+      let data = null;
+      try {
+        const res = await db.from('perfis').select('*').ilike('email', emailMembro).maybeSingle();
+        data = res.data;
+      } catch(e) {}
+
+      if(!data) {
+        data = { nome: emailMembro.split('@')[0], email: emailMembro, cargo: 'tecnico', telefone: '' };
+      }
+
+      membroEditandoEmail = emailMembro;
+      document.getElementById('adm-edit-id').value = emailMembro;
       document.getElementById('adm-edit-nome').value = data.nome || '';
       document.getElementById('adm-edit-email').value = data.email || '';
       document.getElementById('adm-edit-cargo').value = data.cargo || 'auxiliar_tecnico';
@@ -636,7 +648,7 @@
       if(novaSenha) payload.senha = novaSenha;
 
       if(db) {
-        await db.from('perfis').update(payload).ilike('email', membroEditandoId);
+        try { await db.from('perfis').update(payload).ilike('email', membroEditandoEmail); } catch(e) {}
       }
       fecharModalEditarMembro();
       carregarEquipe();
@@ -645,7 +657,7 @@
     async function deletarMembroEquipe() {
       if(!isAdministracaoOuSuperior()) return;
       if(confirm('Tem certeza que deseja excluir este membro da equipa?')) {
-        if(db) { await db.from('perfis').delete().ilike('email', membroEditandoId); }
+        if(db) { try { await db.from('perfis').delete().ilike('email', membroEditandoEmail); } catch(e) {} }
         fecharModalEditarMembro();
         carregarEquipe();
       }
@@ -659,89 +671,95 @@
     }
 
     async function realizarLogin() {
-      const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
-      const senhaInput = document.getElementById('login-senha').value.trim();
-      if (!emailInput) return alert('Digite o e-mail.');
-
-      let perfilEncontrado = null;
-
       try {
-        if (db) {
-          const { data } = await db.from('perfis').select('*').ilike('email', emailInput).maybeSingle();
-          if (data) perfilEncontrado = data;
-        }
-      } catch (err) {
-        console.warn('Erro ao consultar banco, usando local:', err);
-      }
+        const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
+        const senhaInput = document.getElementById('login-senha').value.trim();
+        if (!emailInput) return alert('Digite o e-mail.');
 
-      if (!perfilEncontrado) {
-        let cargoInicial = 'tecnico';
-        let nomeInicial = emailInput.split('@')[0];
-        nomeInicial = nomeInicial.charAt(0).toUpperCase() + nomeInicial.slice(1);
-
-        if (emailInput === 'kelvyn250@gmail.com') {
-          cargoInicial = 'develop';
-          nomeInicial = 'Kelvyn Pires';
-        }
-
-        perfilEncontrado = {
-          nome: nomeInicial,
-          email: emailInput,
-          senha: senhaInput || '123456',
-          cargo: cargoInicial,
-          pode_criar_saida: cargoInicial !== 'auxiliar_tecnico' && cargoInicial !== 'tecnico',
-          telefone: '',
-          bio: 'Conta ativa no sistema'
-        };
+        let perfilEncontrado = null;
 
         if (db) {
           try {
-            await db.from('perfis').insert([perfilEncontrado]);
+            const { data } = await db.from('perfis').select('*').ilike('email', emailInput).maybeSingle();
+            if (data) perfilEncontrado = data;
           } catch(e) {}
         }
-      }
 
-      if (perfilEncontrado.senha && senhaInput && perfilEncontrado.senha !== senhaInput && emailInput !== 'kelvyn250@gmail.com') {
-        return alert('Senha incorreta.');
-      }
+        if (!perfilEncontrado) {
+          let cargoInicial = 'tecnico';
+          let nomeInicial = emailInput.split('@')[0];
+          nomeInicial = nomeInicial.charAt(0).toUpperCase() + nomeInicial.slice(1);
 
-      usuarioAtual = perfilEncontrado;
-      localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
-      localStorage.setItem('lm_login_time', Date.now().toString());
-      iniciarSistema();
+          if (emailInput === 'kelvyn250@gmail.com') {
+            cargoInicial = 'develop';
+            nomeInicial = 'Kelvyn Pires';
+          }
+
+          perfilEncontrado = {
+            nome: nomeInicial,
+            email: emailInput,
+            senha: senhaInput || '123456',
+            cargo: cargoInicial,
+            pode_criar_saida: cargoInicial !== 'auxiliar_tecnico' && cargoInicial !== 'tecnico',
+            telefone: '',
+            bio: 'Conta ativa no sistema'
+          };
+
+          if (db) {
+            try { await db.from('perfis').insert([perfilEncontrado]); } catch(e) {}
+          }
+        }
+
+        if (perfilEncontrado.senha && senhaInput && perfilEncontrado.senha !== senhaInput && emailInput !== 'kelvyn250@gmail.com') {
+          return alert('Senha incorreta.');
+        }
+
+        usuarioAtual = perfilEncontrado;
+        localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+        localStorage.setItem('lm_login_time', Date.now().toString());
+        iniciarSistema();
+      } catch (err) {
+        console.error('Erro no login:', err);
+        alert('Erro ao processar login.');
+      }
     }
 
     async function realizarCadastro() {
-      const nome = `${document.getElementById('cad-nome').value.trim()} ${document.getElementById('cad-sobrenome').value.trim()}`;
-      const email = document.getElementById('cad-email').value.trim(), senha = document.getElementById('cad-senha').value.trim();
-      const cargo = document.getElementById('cad-cargo').value;
-      if(!email || !senha || !nome) return alert('Preencha nome, e-mail e senha.');
+      try {
+        const nome = `${document.getElementById('cad-nome').value.trim()} ${document.getElementById('cad-sobrenome').value.trim()}`;
+        const email = document.getElementById('cad-email').value.trim().toLowerCase();
+        const senha = document.getElementById('cad-senha').value.trim();
+        const cargo = document.getElementById('cad-cargo').value;
 
-      if(cargo === 'develop' && document.getElementById('cad-senha-mestra').value !== CHAVE_DEVELOP) return alert('Chave Develop incorreta.');
-      if((cargo === 'administracao' || cargo === 'gerencia' || cargo === 'ceo') && document.getElementById('cad-senha-mestra').value !== SENHA_MESTRA_ADM) return alert('Chave ADM incorreta.');
-      
-      const perfil = { 
-        nome, 
-        email, 
-        senha, 
-        telefone: document.getElementById('cad-whatsapp').value, 
-        data_nascimento: document.getElementById('cad-nascimento').value, 
-        bio: document.getElementById('cad-bio').value.trim(), 
-        cargo, 
-        pode_criar_saida: isAdministracaoOuSuperior() 
-      };
-      
-      if(db) {
-        try {
-          await db.from('perfis').insert([perfil]);
-        } catch(e) {}
+        if(!email || !senha || !nome) return alert('Preencha nome, e-mail e senha.');
+
+        if(cargo === 'develop' && document.getElementById('cad-senha-mestra').value !== CHAVE_DEVELOP) return alert('Chave Develop incorreta.');
+        if((cargo === 'administracao' || cargo === 'gerencia' || cargo === 'ceo') && document.getElementById('cad-senha-mestra').value !== SENHA_MESTRA_ADM) return alert('Chave ADM incorreta.');
+        
+        const perfil = { 
+          nome, 
+          email, 
+          senha, 
+          telefone: document.getElementById('cad-whatsapp').value, 
+          data_nascimento: document.getElementById('cad-nascimento').value, 
+          bio: document.getElementById('cad-bio').value.trim(), 
+          cargo, 
+          pode_criar_saida: ['administracao', 'gerencia', 'ceo', 'develop'].includes(cargo)
+        };
+        
+        if(db) {
+          try { await db.from('perfis').upsert([perfil], { onConflict: 'email' }); } catch(e) {}
+        }
+
+        usuarioAtual = perfil;
+        localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+        localStorage.setItem('lm_login_time', Date.now().toString());
+        iniciarSistema();
+        alert('Cadastro realizado com sucesso!');
+      } catch (err) {
+        console.error('Erro no cadastro:', err);
+        alert('Erro ao realizar cadastro.');
       }
-
-      usuarioAtual = perfil;
-      localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
-      localStorage.setItem('lm_login_time', Date.now().toString());
-      iniciarSistema();
-      alert('Cadastro realizado com sucesso!');
     }
 
     function trocarUsuario() { localStorage.clear(); location.reload(); }
@@ -881,8 +899,11 @@
 
     async function carregarEstoque() {
       if(!db) return;
-      const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
-      estoqueGlobal = data || [];
+      try {
+        const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
+        estoqueGlobal = data || [];
+      } catch(e) { estoqueGlobal = []; }
+
       const filtro = document.getElementById('busca-estoque') ? document.getElementById('busca-estoque').value.toLowerCase() : '';
       const lista = filtro ? estoqueGlobal.filter(i => (i.nome && i.nome.toLowerCase().includes(filtro)) || (i.modelo && i.modelo.toLowerCase().includes(filtro))) : estoqueGlobal;
       const adm = isAdministracaoOuSuperior();
@@ -919,8 +940,10 @@
         categoria: document.getElementById('est-categoria').value,
         propriedade: document.getElementById('est-propriedade').value
       };
-      if(id) { await db.from('estoque').update(payload).eq('id', id); }
-      else { await db.from('estoque').insert([payload]); }
+      try {
+        if(id) { await db.from('estoque').update(payload).eq('id', id); }
+        else { await db.from('estoque').insert([payload]); }
+      } catch(e) {}
       
       fecharModalEstoque();
       carregarEstoque();
@@ -928,7 +951,7 @@
 
     async function deletarEstoque(id) {
       if(isAdministracaoOuSuperior() && confirm('Excluir equipamento?')) {
-        await db.from('estoque').delete().eq('id', id);
+        try { await db.from('estoque').delete().eq('id', id); } catch(e) {}
         carregarEstoque();
       }
     }
@@ -1001,21 +1024,26 @@
       });
 
       const d = { nome, itens, criado_por: usuarioAtual.nome };
-      if(id) { await db.from('kits').update(d).eq('id', id); } else { await db.from('kits').insert([d]); }
+      try {
+        if(id) { await db.from('kits').update(d).eq('id', id); } else { await db.from('kits').insert([d]); }
+      } catch(e) {}
       fecharModalKit(); carregarKits();
     }
     async function deletarKit(id) {
       if(!isAdministracaoOuSuperior()) return;
       if(confirm('Tem certeza que deseja excluir este kit?')) {
-        await db.from('kits').delete().eq('id', id);
+        try { await db.from('kits').delete().eq('id', id); } catch(e) {}
         carregarKits();
       }
     }
 
     async function carregarKits() {
       if(!db) return;
-      const { data } = await db.from('kits').select('*');
-      kitsGlobal = data || [];
+      try {
+        const { data } = await db.from('kits').select('*');
+        kitsGlobal = data || [];
+      } catch(e) { kitsGlobal = []; }
+
       const adm = isAdministracaoOuSuperior();
       const el = document.getElementById('cards-kits');
       if(el) {
@@ -1042,7 +1070,9 @@
       }
     }
     async function carregarKitsParaSelect() {
-      if(kitsGlobal.length === 0) { const { data } = await db.from('kits').select('*'); kitsGlobal = data || []; }
+      if(kitsGlobal.length === 0) { 
+        try { const { data } = await db.from('kits').select('*'); kitsGlobal = data || []; } catch(e) {} 
+      }
     }
 
     // EVENTOS / SAÍDAS
@@ -1167,9 +1197,11 @@
         criado_por: usuarioAtual.nome
       };
 
-      const { error } = await db.from('saida_materiais').insert([payload]);
-      if(error) {
-        return alert('Erro ao registrar saída no banco de dados: ' + error.message);
+      try {
+        const { error } = await db.from('saida_materiais').insert([payload]);
+        if(error) return alert('Erro ao registrar saída no banco de dados: ' + error.message);
+      } catch(e) {
+        return alert('Erro ao conectar ao banco.');
       }
 
       alert('Romaneio de saída registrado com sucesso!');
@@ -1183,10 +1215,15 @@
 
     async function carregarSaidasRegistradas() {
       if(!db) return;
-      const { data } = await db.from('saida_materiais').select('*').order('created_at', { ascending: false });
+      let data = [];
+      try {
+        const res = await db.from('saida_materiais').select('*').order('created_at', { ascending: false });
+        data = res.data || [];
+      } catch(e) {}
+
       const el = document.getElementById('lista-saidas-registradas');
       if(el) {
-        el.innerHTML = (data||[]).map(s => `
+        el.innerHTML = data.map(s => `
           <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
             <div class="flex justify-between border-b border-zinc-800 pb-2"><h4 class="font-extrabold text-white text-sm">${s.evento_nome}</h4><span class="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800 font-bold">${s.status}</span></div>
             <div class="text-[11px] text-zinc-400 mb-1">Local: ${s.contato_evento || 'Não informado'}</div>
@@ -1218,22 +1255,28 @@
         data_limite: document.getElementById('dem-data').value,
         criado_por: usuarioAtual.nome
       };
-      if(id) { await db.from('demandas').update(payload).eq('id', id); }
-      else { await db.from('demandas').insert([payload]); }
+      try {
+        if(id) { await db.from('demandas').update(payload).eq('id', id); }
+        else { await db.from('demandas').insert([payload]); }
+      } catch(e) {}
       fecharModalDemanda();
       carregarDemandas();
     }
     async function deletarDemanda(id) {
       if(confirm('Tem certeza que deseja excluir esta demanda?')) {
-        await db.from('demandas').delete().eq('id', id);
+        try { await db.from('demandas').delete().eq('id', id); } catch(e) {}
         carregarDemandas();
       }
     }
     async function carregarDemandas() {
-      const { data } = await db.from('demandas').select('*');
+      let data = [];
+      try {
+        const res = await db.from('demandas').select('*');
+        data = res.data || [];
+      } catch(e) {}
       const el = document.getElementById('cards-demandas');
       if(el) {
-        el.innerHTML = (data||[]).map(d => `
+        el.innerHTML = data.map(d => `
           <div class="bg-gradient-to-br from-zinc-900 to-teal-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex justify-between items-start mb-2">
@@ -1272,22 +1315,28 @@
         defeito_relatado: document.getElementById('man-defeito').value,
         criado_por: usuarioAtual.nome
       };
-      if(id) { await db.from('manutencao_separada').update(payload).eq('id', id); }
-      else { await db.from('manutencao_separada').insert([payload]); }
+      try {
+        if(id) { await db.from('manutencao_separada').update(payload).eq('id', id); }
+        else { await db.from('manutencao_separada').insert([payload]); }
+      } catch(e) {}
       fecharModalManutencao();
       carregarManutencao();
     }
     async function deletarManutencao(id) {
       if(confirm('Tem certeza que deseja excluir esta ficha de manutenção?')) {
-        await db.from('manutencao_separada').delete().eq('id', id);
+        try { await db.from('manutencao_separada').delete().eq('id', id); } catch(e) {}
         carregarManutencao();
       }
     }
     async function carregarManutencao() {
-      const { data } = await db.from('manutencao_separada').select('*');
+      let data = [];
+      try {
+        const res = await db.from('manutencao_separada').select('*');
+        data = res.data || [];
+      } catch(e) {}
       const el = document.getElementById('cards-manutencao');
       if(el) {
-        el.innerHTML = (data||[]).map(m => `
+        el.innerHTML = data.map(m => `
           <div class="bg-gradient-to-br from-zinc-900 to-amber-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2 flex flex-col justify-between">
             <div>
               <div class="flex justify-between items-start mb-2">
@@ -1307,11 +1356,15 @@
 
     // EQUIPA
     async function carregarEquipe() {
-      const { data } = await db.from('perfis').select('*');
+      let data = [];
+      try {
+        const res = await db.from('perfis').select('*');
+        data = res.data || [];
+      } catch(e) {}
       const adm = isAdministracaoOuSuperior();
       const el = document.getElementById('cards-equipe');
       if(el) {
-        el.innerHTML = (data||[]).map(p => {
+        el.innerHTML = data.map(p => {
           const tel = (p.telefone || '').replace(/\D/g, '');
           return `
             <div class="bg-gradient-to-br from-zinc-900 to-blue-950/20 border border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-xl space-y-3">
@@ -1347,4 +1400,3 @@
   </script>
 </body>
 </html>
-
