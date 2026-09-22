@@ -24,48 +24,59 @@
     const SUPABASE_KEY = 'sb_publishable_yNDu8sgD_M04hBcIuxRhDg_FfqKvgwP';
     const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-    // SENHA MESTRA PARA ACESSO DE ADMINISTRADOR (Você pode alterar esta senha aqui)
     const SENHA_MESTRA_ADM = "LEGALMART2026";
-
     let usuarioAtual = JSON.parse(localStorage.getItem('lm_usuario')) || null;
   </script>
 
   <!-- TELA DE LOGIN / CADASTRO DE COLABORADORES -->
-  <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+  <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-8">
       <div class="text-center space-y-1">
         <h1 class="text-2xl font-black text-blue-500">LEGALMART</h1>
-        <p class="text-xs text-gray-400">Acesso para Colaboradores & Equipe</p>
+        <p class="text-xs text-gray-400">Cadastro & Acesso para Colaboradores</p>
       </div>
 
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Seu Nome Completo</label>
-          <input type="text" id="login-nome" placeholder="Ex: Kelvin Carter" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
+          <input type="text" id="login-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail</label>
+          <input type="email" id="login-email" placeholder="nome@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">WhatsApp/Tel</label>
+            <input type="tel" id="login-telefone" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nascimento</label>
+            <input type="date" id="login-nascimento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          </div>
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Cargo / Função</label>
-          <select id="login-cargo" onchange="verificarSelecaoCargo()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+          <select id="login-cargo" onchange="verificarSelecaoCargo()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
             <option value="auxiliar_tecnico">Auxiliar Técnico</option>
             <option value="tecnico">Técnico</option>
             <option value="administrador">Administrador (ADM - Requer Senha)</option>
           </select>
         </div>
 
-        <!-- CAMPO DE SENHA DO ADM (INICIALMENTE OCULTO) -->
         <div id="campo-senha-adm" class="hidden">
           <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Senha de Autorização ADM</label>
-          <input type="password" id="login-senha-adm" placeholder="Digite a chave de administrador" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white focus:outline-none">
+          <input type="password" id="login-senha-adm" placeholder="Digite a chave ADM" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
 
         <button onclick="entrarComo()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition">
-          Entrar no Sistema
+          Entrar / Cadastrar no Sistema
         </button>
       </div>
     </div>
   </div>
 
-  <!-- HEADER DA APLICAÇÃO -->
+  <!-- HEADER -->
   <header class="bg-gray-900 border-b border-blue-600/40 p-4 sticky top-0 z-40 no-print shadow-lg">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center space-x-3">
@@ -89,6 +100,9 @@
         <button onclick="mudarAba('eventos')" id="tab-eventos" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5">
           <i data-lucide="truck" class="w-4 h-4"></i> Romaneio
         </button>
+        <button onclick="mudarAba('equipe')" id="tab-equipe" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="users" class="w-4 h-4"></i> Equipe
+        </button>
         <button onclick="trocarUsuario()" class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-400 hover:bg-gray-900">
           Sair
         </button>
@@ -96,10 +110,10 @@
     </div>
   </header>
 
-  <!-- ÁREA PRINCIPAL -->
+  <!-- PRINCIPAL -->
   <main class="max-w-7xl mx-auto p-4 flex-1 w-full space-y-6">
 
-    <!-- 1. ESTOQUE -->
+    <!-- ESTOQUE -->
     <section id="sec-estoque" class="space-y-6 no-print">
       <div class="flex justify-between items-center">
         <div>
@@ -127,12 +141,12 @@
       </div>
     </section>
 
-    <!-- 2. LIMPEZA -->
+    <!-- LIMPEZA -->
     <section id="sec-limpeza" class="space-y-6 hidden no-print">
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-2xl font-black text-teal-400">Pendências de Limpeza</h2>
-          <p class="text-xs text-gray-400">Higienização e revisão de cabos, baús e cases</p>
+          <p class="text-xs text-gray-400">Higienização e revisão com controle de datas</p>
         </div>
         <button onclick="abrirModalLimpeza()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-2.5 px-5 rounded-xl">
           + Nova Limpeza
@@ -141,21 +155,21 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-limpeza"></div>
     </section>
 
-    <!-- 3. MANUTENÇÃO -->
+    <!-- MANUTENÇÃO -->
     <section id="sec-manutencao" class="space-y-6 hidden no-print">
       <div class="flex justify-between items-center">
         <div>
-          <h2 class="text-2xl font-black text-amber-500">Pendências de Manutenção</h2>
-          <p class="text-xs text-gray-400">Reparos técnicos, falantes, faders e conectores</p>
+          <h2 class="text-2xl font-black text-amber-500">Fichas Técnicas de Manutenção</h2>
+          <p class="text-xs text-gray-400">Controle de reparos, prazos e laudo técnico</p>
         </div>
         <button onclick="abrirModalManutencao()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-5 rounded-xl">
-          + Nova Manutenção
+          + Nova Ficha de Manutenção
         </button>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-manutencao"></div>
     </section>
 
-    <!-- 4. ROMANEIO E SAÍDA -->
+    <!-- ROMANEIO -->
     <section id="sec-eventos" class="space-y-6 hidden">
       <div class="flex justify-between items-center no-print">
         <div>
@@ -199,9 +213,19 @@
       </div>
     </section>
 
+    <!-- EQUIPE / COLABORADORES -->
+    <section id="sec-equipe" class="space-y-6 hidden no-print">
+      <div>
+        <h2 class="text-2xl font-black text-purple-400">Equipe & Colaboradores</h2>
+        <p class="text-xs text-gray-400">Contatos diretos e gerenciamento de perfis</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-equipe"></div>
+    </section>
+
   </main>
 
-  <!-- MODAIS DE CADASTRO -->
+  <!-- MODAIS -->
   <!-- MODAL ESTOQUE (ADM) -->
   <div id="modal-estoque" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
@@ -229,6 +253,10 @@
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
       <h3 class="text-lg font-bold text-white">Nova Pendência de Limpeza</h3>
       <input type="text" id="limp-item" placeholder="Item (Ex: Baú de cabos Speakon)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data Agendada</label>
+        <input type="date" id="limp-data" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+      </div>
       <textarea id="limp-obs" placeholder="Observações..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="3"></textarea>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalLimpeza()" class="px-4 py-2 text-gray-400">Cancelar</button>
@@ -237,51 +265,117 @@
     </div>
   </div>
 
-  <!-- MODAL MANUTENÇÃO -->
-  <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
-      <h3 class="text-lg font-bold text-white">Nova Pendência de Manutenção</h3>
-      <input type="text" id="man-item" placeholder="Item (Ex: Mesa PM5D RH)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-      <textarea id="man-obs" placeholder="Descrição do defeito..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="3"></textarea>
+  <!-- MODAL FICHA TÉCNICA MANUTENÇÃO -->
+  <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-8">
+      <h3 class="text-lg font-bold text-white" id="modal-man-titulo">Nova Ficha de Manutenção</h3>
+      <input type="hidden" id="man-id">
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Equipamento / Item</label>
+        <input type="text" id="man-item" placeholder="Ex: Mesa PM5D RH" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Status da Manutenção</label>
+          <select id="man-status" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+            <option value="PENDENTE">PENDENTE</option>
+            <option value="ATRASADO">ATRASADO</option>
+            <option value="FINALIZADO">FINALIZADO</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data Limite / Prazo</label>
+          <input type="date" id="man-data-limite" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Técnico Responsável</label>
+        <input type="text" id="man-tecnico" placeholder="Nome do técnico responsável" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Defeito Relatado</label>
+        <textarea id="man-defeito" placeholder="Descreva o defeito..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Solução Aplicada / Observações</label>
+        <textarea id="man-solucao" placeholder="Descreva os componentes trocados ou reparo realizado..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
+      </div>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalManutencao()" class="px-4 py-2 text-gray-400">Cancelar</button>
-        <button onclick="salvarManutencao()" class="bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar</button>
+        <button onclick="salvarManutencao()" class="bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Ficha</button>
       </div>
     </div>
   </div>
 
-  <!-- LÓGICA JAVASCRIPT -->
+  <!-- MODAL EDITAR PERFIL (ADM) -->
+  <div id="modal-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
+      <h3 class="text-lg font-bold text-white">Editar Colaborador (ADM)</h3>
+      <input type="hidden" id="edit-perf-id">
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome</label>
+        <input type="text" id="edit-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail</label>
+        <input type="email" id="edit-perf-email" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Telefone / WhatsApp</label>
+          <input type="tel" id="edit-perf-telefone" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Cargo</label>
+          <select id="edit-perf-cargo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+            <option value="auxiliar_tecnico">Auxiliar Técnico</option>
+            <option value="tecnico">Técnico</option>
+            <option value="administrador">Administrador</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalPerfil()" class="px-4 py-2 text-gray-400">Cancelar</button>
+        <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
   <script>
     lucide.createIcons();
     let registrosSaida = {};
 
     function verificarSelecaoCargo() {
       const cargo = document.getElementById('login-cargo').value;
-      const campoSenha = document.getElementById('campo-senha-adm');
-      if (cargo === 'administrador') {
-        campoSenha.classList.remove('hidden');
-      } else {
-        campoSenha.classList.add('hidden');
-      }
+      document.getElementById('campo-senha-adm').classList.toggle('hidden', cargo !== 'administrador');
     }
 
-    function entrarComo() {
+    async function entrarComo() {
       const nome = document.getElementById('login-nome').value.trim();
+      const email = document.getElementById('login-email').value.trim();
+      const telefone = document.getElementById('login-telefone').value.trim();
+      const data_nascimento = document.getElementById('login-nascimento').value;
       let cargo = document.getElementById('login-cargo').value;
 
       if (!nome) { alert('Digite seu nome!'); return; }
 
-      // Validação de segurança para o Administrador
       if (cargo === 'administrador') {
         const senhaInput = document.getElementById('login-senha-adm').value;
         if (senhaInput !== SENHA_MESTRA_ADM) {
-          alert('Senha de Administrador incorreta! Você será acessado como Auxiliar Técnico.');
+          alert('Senha de ADM incorreta! Cargo alterado para Auxiliar Técnico.');
           cargo = 'auxiliar_tecnico';
         }
       }
 
-      usuarioAtual = { nome, cargo };
+      usuarioAtual = { nome, email, telefone, data_nascimento, cargo };
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+
+      // Salva ou atualiza no Supabase
+      if(db) {
+        await db.from('perfis').upsert([{ nome, email, telefone, data_nascimento, cargo }], { onConflict: 'nome' });
+      }
+
       iniciarSistema();
     }
 
@@ -299,7 +393,6 @@
       document.getElementById('tela-login').classList.add('hidden');
       document.getElementById('user-info-bar').innerText = `Colaborador: ${usuarioAtual.nome} (${usuarioAtual.cargo.toUpperCase()})`;
 
-      // Ajusta visibilidade de ADM
       const isAdm = usuarioAtual.cargo === 'administrador';
       document.getElementById('btn-add-estoque').classList.toggle('hidden', !isAdm);
 
@@ -314,14 +407,38 @@
       if(aba === 'limpeza') carregarLimpeza();
       if(aba === 'manutencao') carregarManutencao();
       if(aba === 'eventos') carregarEventoChecklist();
+      if(aba === 'equipe') carregarEquipe();
     }
 
     function abrirModalEstoque() { document.getElementById('modal-estoque').classList.remove('hidden'); }
     function fecharModalEstoque() { document.getElementById('modal-estoque').classList.add('hidden'); }
     function abrirModalLimpeza() { document.getElementById('modal-limpeza').classList.remove('hidden'); }
     function fecharModalLimpeza() { document.getElementById('modal-limpeza').classList.add('hidden'); }
-    function abrirModalManutencao() { document.getElementById('modal-manutencao').classList.remove('hidden'); }
     function fecharModalManutencao() { document.getElementById('modal-manutencao').classList.add('hidden'); }
+    function fecharModalPerfil() { document.getElementById('modal-perfil').classList.add('hidden'); }
+
+    function abrirModalManutencao(dados = null) {
+      document.getElementById('modal-manutencao').classList.remove('hidden');
+      if (dados) {
+        document.getElementById('modal-man-titulo').innerText = "Editar Ficha de Manutenção";
+        document.getElementById('man-id').value = dados.id;
+        document.getElementById('man-item').value = dados.item || '';
+        document.getElementById('man-status').value = dados.status || 'PENDENTE';
+        document.getElementById('man-data-limite').value = dados.data_limite || '';
+        document.getElementById('man-tecnico').value = dados.tecnico_responsavel || '';
+        document.getElementById('man-defeito').value = dados.defeito_relatado || '';
+        document.getElementById('man-solucao').value = dados.solucao_aplicada || '';
+      } else {
+        document.getElementById('modal-man-titulo').innerText = "Nova Ficha de Manutenção";
+        document.getElementById('man-id').value = '';
+        document.getElementById('man-item').value = '';
+        document.getElementById('man-status').value = 'PENDENTE';
+        document.getElementById('man-data-limite').value = '';
+        document.getElementById('man-tecnico').value = '';
+        document.getElementById('man-defeito').value = '';
+        document.getElementById('man-solucao').value = '';
+      }
+    }
 
     function atualizarHeaderPrint() {
       const nome = document.getElementById('ev-nome').value || 'Não Especificado';
@@ -334,7 +451,6 @@
       const container = document.getElementById('lista-estoque');
       if(!db) return;
       const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
-
       const isAdm = usuarioAtual.cargo === 'administrador';
 
       container.innerHTML = (data || []).map(item => `
@@ -356,7 +472,6 @@
       const modelo = document.getElementById('est-modelo').value.trim();
       const quantidade = parseInt(document.getElementById('est-qtd').value) || 1;
       const categoria = document.getElementById('est-categoria').value;
-
       if (!nome) return;
       await db.from('estoque').insert([{ nome, modelo, quantidade, categoria }]);
       fecharModalEstoque();
@@ -375,21 +490,26 @@
       const container = document.getElementById('cards-limpeza');
       if(!db) return;
       const { data } = await db.from('limpeza').select('*').order('created_at', { ascending: false });
+      const isAdm = usuarioAtual.cargo === 'administrador';
 
       container.innerHTML = (data || []).map(l => `
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
           <div class="space-y-2">
             <div class="flex justify-between items-start">
               <h3 class="font-bold text-lg text-white">${l.item}</h3>
-              <span class="text-xs px-2.5 py-1 rounded-full font-bold ${l.status === 'concluido' ? 'bg-green-950 text-green-400' : 'bg-teal-950 text-teal-400'}">
-                ${l.status.toUpperCase()}
+              <span class="text-xs px-2.5 py-1 rounded-full font-bold ${l.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-teal-950 text-teal-400'}">
+                ${l.status || 'PENDENTE'}
               </span>
             </div>
             <p class="text-sm text-gray-400">${l.observacao || 'Sem observações.'}</p>
+            <p class="text-xs text-teal-400 font-semibold">📅 Data Agendada: ${l.data_limpeza || 'Não informada'}</p>
           </div>
           <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
             <span>Cadastrado por: <b class="text-gray-300">${l.criado_por || 'Anônimo'}</b></span>
-            <button onclick="mudarStatusLimpeza('${l.id}', '${l.status}')" class="text-teal-400 font-bold">Status</button>
+            <div class="flex gap-2">
+              <button onclick="mudarStatusLimpeza('${l.id}', '${l.status}')" class="text-teal-400 font-bold">Status</button>
+              ${isAdm ? `<button onclick="deletarLimpeza('${l.id}')" class="text-red-400 font-bold">Excluir</button>` : ''}
+            </div>
           </div>
         </div>
       `).join('');
@@ -397,62 +517,100 @@
 
     async function salvarLimpeza() {
       const item = document.getElementById('limp-item').value.trim();
+      const data_limpeza = document.getElementById('limp-data').value;
       const observacao = document.getElementById('limp-obs').value.trim();
       if(!item) return;
 
-      await db.from('limpeza').insert([{ item, observacao, criado_por: usuarioAtual.nome }]);
+      await db.from('limpeza').insert([{ item, data_limpeza, observacao, criado_por: usuarioAtual.nome }]);
       fecharModalLimpeza();
       carregarLimpeza();
     }
 
     async function mudarStatusLimpeza(id, statusAtual) {
-      const novoStatus = statusAtual === 'pendente' ? 'concluido' : 'pendente';
+      const novoStatus = statusAtual === 'CONCLUIDO' ? 'PENDENTE' : 'CONCLUIDO';
       await db.from('limpeza').update({ status: novoStatus }).eq('id', id);
       carregarLimpeza();
     }
 
-    // MANUTENÇÃO
+    async function deletarLimpeza(id) {
+      if(usuarioAtual.cargo !== 'administrador') return;
+      if(!confirm('Deseja excluir esta pendência de limpeza?')) return;
+      await db.from('limpeza').delete().eq('id', id);
+      carregarLimpeza();
+    }
+
+    // MANUTENÇÃO / FICHA TÉCNICA
     async function carregarManutencao() {
       const container = document.getElementById('cards-manutencao');
       if(!db) return;
       const { data } = await db.from('manutencao_separada').select('*').order('created_at', { ascending: false });
+      const isAdm = usuarioAtual.cargo === 'administrador';
 
-      container.innerHTML = (data || []).map(m => `
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
-          <div class="space-y-2">
-            <div class="flex justify-between items-start">
-              <h3 class="font-bold text-lg text-white">${m.item}</h3>
-              <span class="text-xs px-2.5 py-1 rounded-full font-bold ${m.status === 'concluido' ? 'bg-green-950 text-green-400' : 'bg-amber-950 text-amber-400'}">
-                ${m.status.toUpperCase()}
-              </span>
+      container.innerHTML = (data || []).map(m => {
+        let statusCor = 'bg-amber-950 text-amber-400';
+        if (m.status === 'ATRASADO') statusCor = 'bg-red-950 text-red-400 border border-red-800';
+        if (m.status === 'FINALIZADO') statusCor = 'bg-green-950 text-green-400 border border-green-800';
+
+        return `
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex justify-between items-start">
+                <h3 class="font-bold text-lg text-white">${m.item}</h3>
+                <span class="text-xs px-2.5 py-1 rounded-full font-bold ${statusCor}">
+                  ${m.status || 'PENDENTE'}
+                </span>
+              </div>
+              <p class="text-xs text-gray-400"><b>Técnico:</b> ${m.tecnico_responsavel || 'Não atribuído'}</p>
+              <p class="text-xs text-red-400"><b>Defeito:</b> ${m.defeito_relatado || 'Sem descrição'}</p>
+              ${m.solucao_aplicada ? `<p class="text-xs text-green-400"><b>Solução:</b> ${m.solucao_aplicada}</p>` : ''}
+              <p class="text-xs text-amber-400"><b>Data Limite:</b> ${m.data_limite || 'Sem prazo'}</p>
             </div>
-            <p class="text-sm text-gray-400">${m.observacao || 'Sem observações.'}</p>
+            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
+              <span>Por: <b class="text-gray-300">${m.criado_por || 'Anônimo'}</b></span>
+              <div class="flex gap-2">
+                <button onclick='abrirModalManutencao(${JSON.stringify(m)})' class="text-amber-400 font-bold">Ficha Técnica</button>
+                ${isAdm ? `<button onclick="deletarManutencao('${m.id}')" class="text-red-400 font-bold">Excluir</button>` : ''}
+              </div>
+            </div>
           </div>
-          <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
-            <span>Cadastrado por: <b class="text-gray-300">${m.criado_por || 'Anônimo'}</b></span>
-            <button onclick="mudarStatusManutencao('${m.id}', '${m.status}')" class="text-amber-400 font-bold">Status</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function salvarManutencao() {
+      const id = document.getElementById('man-id').value;
       const item = document.getElementById('man-item').value.trim();
-      const observacao = document.getElementById('man-obs').value.trim();
-      if(!item) return;
+      const status = document.getElementById('man-status').value;
+      const data_limite = document.getElementById('man-data-limite').value;
+      const tecnico_responsavel = document.getElementById('man-tecnico').value.trim();
+      const defeito_relatado = document.getElementById('man-defeito').value.trim();
+      const solucao_aplicada = document.getElementById('man-solucao').value.trim();
 
-      await db.from('manutencao_separada').insert([{ item, observacao, criado_por: usuarioAtual.nome }]);
+      if (!item) return;
+
+      const dados = {
+        item, status, data_limite, tecnico_responsavel, defeito_relatado, solucao_aplicada,
+        criado_por: usuarioAtual.nome
+      };
+
+      if (id) {
+        await db.from('manutencao_separada').update(dados).eq('id', id);
+      } else {
+        await db.from('manutencao_separada').insert([dados]);
+      }
+
       fecharModalManutencao();
       carregarManutencao();
     }
 
-    async function mudarStatusManutencao(id, statusAtual) {
-      const novoStatus = statusAtual === 'pendente' ? 'concluido' : 'pendente';
-      await db.from('manutencao_separada').update({ status: novoStatus }).eq('id', id);
+    async function deletarManutencao(id) {
+      if(usuarioAtual.cargo !== 'administrador') return;
+      if(!confirm('Excluir esta ficha de manutenção?')) return;
+      await db.from('manutencao_separada').delete().eq('id', id);
       carregarManutencao();
     }
 
-    // CHECKLIST DE EVENTO (ROMANEIO)
+    // ROMANEIO
     async function carregarEventoChecklist() {
       const container = document.getElementById('checklist-itens-evento');
       if(!db) return;
@@ -487,6 +645,66 @@
       if(valor <= 0) return;
       registrosSaida[id] = (registrosSaida[id] || 0) + valor;
       carregarEventoChecklist();
+    }
+
+    // EQUIPE E WHATSAPP
+    async function carregarEquipe() {
+      const container = document.getElementById('cards-equipe');
+      if(!db) return;
+      const { data } = await db.from('perfis').select('*').order('nome', { ascending: true });
+      const isAdm = usuarioAtual.cargo === 'administrador';
+
+      container.innerHTML = (data || []).map(p => {
+        const telLimpo = (p.telefone || '').replace(/\D/g, '');
+        const linkWhatsapp = telLimpo ? `https://wa.me/55${telLimpo}` : '#';
+
+        return `
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex justify-between items-start">
+                <h3 class="font-bold text-lg text-white">${p.nome}</h3>
+                <span class="text-xs px-2.5 py-1 rounded-full font-bold uppercase ${p.cargo === 'administrador' ? 'bg-purple-950 text-purple-400' : 'bg-blue-950 text-blue-400'}">
+                  ${p.cargo ? p.cargo.replace('_', ' ') : 'AUXILIAR'}
+                </span>
+              </div>
+              <p class="text-xs text-gray-400">📧 ${p.email || 'Não informado'}</p>
+              <p class="text-xs text-gray-400">📱 ${p.telefone || 'Não informado'}</p>
+              <p class="text-xs text-gray-400">🎂 Nascimento: ${p.data_nascimento || 'Não informada'}</p>
+            </div>
+            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs">
+              ${telLimpo ? `
+                <a href="${linkWhatsapp}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                  💬 WhatsApp
+                </a>
+              ` : '<span class="text-gray-500">Sem WhatsApp</span>'}
+              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Editar (ADM)</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function abrirModalPerfil(p) {
+      document.getElementById('modal-perfil').classList.remove('hidden');
+      document.getElementById('edit-perf-id').value = p.id;
+      document.getElementById('edit-perf-nome').value = p.nome || '';
+      document.getElementById('edit-perf-email').value = p.email || '';
+      document.getElementById('edit-perf-telefone').value = p.telefone || '';
+      document.getElementById('edit-perf-cargo').value = p.cargo || 'auxiliar_tecnico';
+    }
+
+    async function salvarEdicaoPerfil() {
+      const id = document.getElementById('edit-perf-id').value;
+      const nome = document.getElementById('edit-perf-nome').value.trim();
+      const email = document.getElementById('edit-perf-email').value.trim();
+      const telefone = document.getElementById('edit-perf-telefone').value.trim();
+      const cargo = document.getElementById('edit-perf-cargo').value;
+
+      if(!id || !nome) return;
+
+      await db.from('perfis').update({ nome, email, telefone, cargo }).eq('id', id);
+      fecharModalPerfil();
+      carregarEquipe();
     }
 
     // Inicialização
