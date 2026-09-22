@@ -3,28 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StageCheck Pro - Eventos, Manutenção & Estoque</title>
+  <!-- 1. EDITAR NOME NA ABA DO NAVEGADOR -->
+  <title>NOME_DO_SEU_APP - LegalMart </title>
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SDK Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
+    /* REGRAS EXCLUSIVAS PARA IMPRESSÃO / PDF */
     @media print {
       .no-print { display: none !important; }
-      body { background: white !important; color: black !important; }
-      .bg-gray-900, .bg-gray-950 { background: white !important; border: 1px solid #ccc !important; }
-      .text-white, .text-blue-400, .text-amber-500 { color: black !important; }
+      .print-only { display: block !important; }
+      body { background: white !important; color: black !important; font-family: sans-serif; }
+      .print-border { border: 1px solid #111 !important; }
+      .print-table th, .print-table td { border-bottom: 1px solid #ccc !important; padding: 8px !important; color: black !important; }
     }
+    .print-only { display: none; }
   </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen font-sans flex flex-col">
 
   <!-- CONFIGURAÇÃO DO SUPABASE -->
   <script>
-    const SUPABASE_URL = 'https://havsqawfqzwvwppfvugd.supabase.co'; // Cole sua URL do Supabase
-    const SUPABASE_KEY = 'sb_publishable_yNDu8sgD_M04hBcIuxRhDg_FfqKvgwP';            // Cole sua chave Anon Public
+    const SUPABASE_URL = 'https://havsqawfqzwvwppfvugd.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_yNDu8sgD_M04hBcIuxRhDg_FfqKvgwP';
     
     const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
   </script>
@@ -33,10 +39,11 @@
   <header class="bg-gray-900 border-b border-blue-600/40 p-4 sticky top-0 z-50 no-print shadow-lg">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center space-x-3">
-        <div class="bg-blue-600 p-2.5 rounded-xl text-black font-black text-xl">SC</div>
+        <div class="bg-blue-600 p-2.5 rounded-xl text-black font-black text-xl">EV</div>
         <div>
-          <h1 class="text-xl font-black tracking-wider text-blue-500">STAGECHECK <span class="text-white">PRO</span></h1>
-          <p class="text-xs text-gray-400">Sonorização, Luz & Painéis de LED</p>
+          <!-- 2. EDITAR NOME DO APP NO CABEÇALHO -->
+          <h1 class="text-xl font-black tracking-wider text-blue-500">NOME_DO_APP <span class="text-white">EVENTOS</span></h1>
+          <p class="text-xs text-gray-400">Sonorização, Iluminação & Painéis de LED</p>
         </div>
       </div>
       
@@ -45,10 +52,10 @@
           <i data-lucide="box" class="w-4 h-4"></i> Estoque
         </button>
         <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="px-4 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white flex items-center gap-2">
-          <i data-lucide="wrench" class="w-4 h-4"></i> Manutenção & Limpeza
+          <i data-lucide="wrench" class="w-4 h-4"></i> Manutenção
         </button>
         <button onclick="mudarAba('eventos')" id="tab-eventos" class="px-4 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white flex items-center gap-2">
-          <i data-lucide="truck" class="w-4 h-4"></i> Checklist Eventos
+          <i data-lucide="truck" class="w-4 h-4"></i> Romaneio & Saída
         </button>
       </nav>
     </div>
@@ -58,11 +65,11 @@
   <main class="max-w-7xl mx-auto p-4 flex-1 w-full space-y-6">
 
     <!-- SEÇÃO ESTOQUE -->
-    <section id="sec-estoque" class="space-y-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
+    <section id="sec-estoque" class="space-y-6 no-print">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 class="text-2xl font-black text-blue-400">Controle de Estoque</h2>
-          <p class="text-xs text-gray-400">Cadastre seus equipamentos, modelos e quantidades</p>
+          <h2 class="text-2xl font-black text-blue-400">Controle de Estoque Geral</h2>
+          <p class="text-xs text-gray-400">Equipamentos disponíveis na empresa</p>
         </div>
         <button onclick="abrirModalEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 shadow-lg">
           <i data-lucide="plus" class="w-5 h-5"></i> Novo Equipamento
@@ -77,12 +84,12 @@
                 <th class="p-4">Equipamento</th>
                 <th class="p-4">Modelo</th>
                 <th class="p-4">Categoria</th>
-                <th class="p-4">Quantidade</th>
-                <th class="p-4 text-right no-print">Ações</th>
+                <th class="p-4">Qtde Total</th>
+                <th class="p-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody id="lista-estoque" class="divide-y divide-gray-800/60 text-sm">
-              <tr><td colspan="5" class="p-6 text-center text-gray-500">Carregando dados do Supabase...</td></tr>
+              <tr><td colspan="5" class="p-6 text-center text-gray-500">Carregando dados...</td></tr>
             </tbody>
           </table>
         </div>
@@ -90,49 +97,68 @@
     </section>
 
     <!-- SEÇÃO MANUTENÇÃO -->
-    <section id="sec-manutencao" class="space-y-6 hidden">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
+    <section id="sec-manutencao" class="space-y-6 hidden no-print">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 class="text-2xl font-black text-amber-500">Manutenção, Limpeza & Testes</h2>
-          <p class="text-xs text-gray-400">Controle de reparos pendentes da empresa</p>
+          <h2 class="text-2xl font-black text-amber-500">Manutenção & Reparos</h2>
+          <p class="text-xs text-gray-400">Equipamentos danificados ou em teste</p>
         </div>
         <button onclick="abrirModalManutencao()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 shadow-lg">
           <i data-lucide="plus" class="w-5 h-5"></i> Nova Pendência
         </button>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-manutencao">
-        <!-- Cards inseridos via JS -->
-      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-manutencao"></div>
     </section>
 
-    <!-- SEÇÃO EVENTOS -->
+    <!-- SEÇÃO ROMANEIO DE SAÍDA / IMPRESSÃO -->
     <section id="sec-eventos" class="space-y-6 hidden">
       <div class="flex justify-between items-center no-print">
         <div>
-          <h2 class="text-2xl font-black text-green-400">Checklist de Saída e Entrada</h2>
-          <p class="text-xs text-gray-400">Romaneio para transporte de equipamentos em eventos</p>
+          <h2 class="text-2xl font-black text-green-400">Saída e Controle de Evento</h2>
+          <p class="text-xs text-gray-400">Marque as quantidades que saíram do galpão</p>
         </div>
-        <button onclick="window.print()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-xl flex items-center gap-2">
-          <i data-lucide="printer" class="w-5 h-5"></i> Imprimir / PDF
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 shadow-lg">
+          <i data-lucide="printer" class="w-5 h-5"></i> Imprimir Romaneio
         </button>
       </div>
 
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- CABEÇALHO PARA IMPRESSÃO -->
+      <div class="print-only mb-6 border-b-2 border-black pb-4">
+        <h1 class="text-2xl font-bold uppercase text-black" id="print-titulo-app">ROMANEIO DE CARGA E EQUIPAMENTOS</h1>
+        <p class="text-sm font-semibold text-black" id="print-info-evento">Evento: Não Especificado | Data: --/--/----</p>
+      </div>
+
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6 print:border-0 print:p-0">
+        <!-- FORMULÁRIO DE INFOS DO EVENTO -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome do Evento</label>
-            <input type="text" id="ev-nome" placeholder="Ex: Festival de Som no Centro" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome do Evento / Cliente</label>
+            <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Ex: Show de Verão - Palco Principal" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data</label>
-            <input type="date" id="ev-data" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data do Evento</label>
+            <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
           </div>
         </div>
 
-        <div class="border-t border-gray-800 pt-4">
-          <h3 class="text-lg font-bold text-blue-400 mb-3">Conferência de Carga</h3>
-          <div id="checklist-itens-evento" class="space-y-2"></div>
+        <!-- LISTA DE EQUIPAMENTOS PARA SAÍDA -->
+        <div class="border-t border-gray-800 pt-4 print:border-0 print:pt-0">
+          <h3 class="text-lg font-bold text-blue-400 mb-3 no-print">Itens Cadastrados para Carga</h3>
+          
+          <table class="w-full text-left print-table">
+            <thead>
+              <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-xs uppercase print:bg-white print:text-black">
+                <th class="p-3">Equipamento</th>
+                <th class="p-3">Modelo / Categoria</th>
+                <th class="p-3 text-center no-print">Saída (Qtde)</th>
+                <th class="p-3 text-center">Qtde no Evento</th>
+                <th class="p-3 text-center no-print">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="checklist-itens-evento" class="divide-y divide-gray-800/60 text-sm">
+              <!-- Itens gerados via JS -->
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -140,7 +166,7 @@
   </main>
 
   <!-- MODAL ESTOQUE -->
-  <div id="modal-estoque" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
+  <div id="modal-estoque" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-gray-800 pb-3">
         <h3 class="text-lg font-bold text-white">Cadastrar Equipamento</h3>
@@ -180,7 +206,7 @@
   </div>
 
   <!-- MODAL MANUTENÇÃO -->
-  <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
+  <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-gray-800 pb-3">
         <h3 class="text-lg font-bold text-white">Adicionar Manutenção</h3>
@@ -207,6 +233,9 @@
   <script>
     lucide.createIcons();
 
+    // Controle de Equipamentos em Eventos (Armazenamento Temporário de Saídas)
+    let registrosSaida = {};
+
     function mudarAba(aba) {
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(`sec-${aba}`).classList.remove('hidden');
@@ -225,6 +254,12 @@
     function fecharModalEstoque() { document.getElementById('modal-estoque').classList.add('hidden'); }
     function abrirModalManutencao() { document.getElementById('modal-manutencao').classList.remove('hidden'); }
     function fecharModalManutencao() { document.getElementById('modal-manutencao').classList.add('hidden'); }
+
+    function atualizarHeaderPrint() {
+      const nome = document.getElementById('ev-nome').value || 'Não Especificado';
+      const data = document.getElementById('ev-data').value || '--/--/----';
+      document.getElementById('print-info-evento').innerText = `Evento: ${nome} | Data: ${data}`;
+    }
 
     // CARREGAR ESTOQUE
     async function carregarEstoque() {
@@ -346,6 +381,7 @@
       carregarManutencao();
     }
 
+    // CARREGAR CHECKLIST DE SAÍDA / IMPRESSÃO
     async function carregarEventoChecklist() {
       const container = document.getElementById('checklist-itens-evento');
       if(!db) return;
@@ -353,26 +389,40 @@
       const { data } = await db.from('estoque').select('*');
 
       if(!data || data.length === 0) {
-        container.innerHTML = `<p class="text-gray-500 text-sm">Cadastre itens no Estoque para gerar o checklist de saída.</p>`;
+        container.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Cadastre equipamentos no Estoque para gerar o romaneio.</td></tr>`;
         return;
       }
 
-      container.innerHTML = data.map(i => `
-        <div class="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 rounded-xl">
-          <div>
-            <p class="font-bold text-white text-sm">${i.nome} <span class="text-xs text-gray-400 font-normal">(${i.modelo || 'S/M'})</span></p>
-            <p class="text-xs text-blue-400">Estoque total: ${i.quantidade}</p>
-          </div>
-          <div class="flex gap-4">
-            <label class="flex items-center gap-1.5 text-xs text-gray-300 cursor-pointer">
-              <input type="checkbox" class="w-4 h-4 rounded bg-gray-900 border-gray-700 text-blue-600"> Saída
-            </label>
-            <label class="flex items-center gap-1.5 text-xs text-gray-300 cursor-pointer">
-              <input type="checkbox" class="w-4 h-4 rounded bg-gray-900 border-gray-700 text-green-600"> Retorno
-            </label>
-          </div>
-        </div>
-      `).join('');
+      container.innerHTML = data.map(i => {
+        const qtdeNoEvento = registrosSaida[i.id] || 0;
+        return `
+          <tr class="border-b border-gray-800/60 print:border-gray-300">
+            <td class="p-3 font-bold text-white print:text-black">${i.nome}</td>
+            <td class="p-3 text-gray-400 print:text-black font-mono text-xs">${i.modelo || '-'} (${i.categoria})</td>
+            <td class="p-3 text-center no-print">
+              <input type="number" id="qtd-saida-${i.id}" value="1" min="1" max="${i.quantidade}" class="w-16 bg-gray-950 border border-gray-800 rounded-lg p-1.5 text-center text-white text-xs">
+            </td>
+            <td class="p-3 text-center font-bold font-mono text-lg ${qtdeNoEvento > 0 ? 'text-amber-400 print:text-black' : 'text-gray-500 print:text-black'}">
+              ${qtdeNoEvento}
+            </td>
+            <td class="p-3 text-center no-print">
+              <button onclick="registrarSaidaItem('${i.id}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+                Registrar Saída
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function registrarSaidaItem(id) {
+      const input = document.getElementById(`qtd-saida-${id}`);
+      const valor = parseInt(input.value) || 0;
+      
+      if(valor <= 0) return;
+
+      registrosSaida[id] = (registrosSaida[id] || 0) + valor;
+      carregarEventoChecklist();
     }
 
     // Inicialização
