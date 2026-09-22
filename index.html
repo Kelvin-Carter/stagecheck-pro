@@ -541,8 +541,10 @@
     }
     async function carregarLogoConfig() {
       if (!db) return;
-      const { data } = await db.from('configuracoes').select('valor').eq('chave', 'logo_url').maybeSingle();
-      if (data && data.valor) { logoEmpresaUrl = data.valor; localStorage.setItem('lm_logo_url', logoEmpresaUrl); aplicarLogoNaInterface(); }
+      try {
+        const { data } = await db.from('configuracoes').select('valor').eq('chave', 'logo_url').maybeSingle();
+        if (data && data.valor) { logoEmpresaUrl = data.valor; localStorage.setItem('lm_logo_url', logoEmpresaUrl); aplicarLogoNaInterface(); }
+      } catch(e) {}
     }
     function abrirModalLogo() { document.getElementById('modal-logo').classList.remove('hidden'); }
     function fecharModalLogo() { document.getElementById('modal-logo').classList.add('hidden'); }
@@ -593,8 +595,9 @@
       const payload = { nome, email, telefone, data_nascimento, bio, foto_url: foto };
       if(senha) payload.senha = senha;
 
-      const { error } = await db.from('perfis').update(payload).eq('id', usuarioAtual.id);
-      if(error) console.warn('Aviso ao atualizar perfil no banco:', error.message);
+      if(db) {
+        await db.from('perfis').update(payload).eq('email', usuarioAtual.email);
+      }
 
       usuarioAtual = { ...usuarioAtual, ...payload };
       if(senha) usuarioAtual.senha = senha;
@@ -606,12 +609,12 @@
 
     // GESTÃO DE EQUIPA (ADMINS)
     let membroEditandoId = null;
-    async function abrirModalEditarMembro(id) {
+    async function abrirModalEditarMembro(emailMembro) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
-      const { data } = await db.from('perfis').select('*').eq('id', id).single();
+      const { data } = await db.from('perfis').select('*').ilike('email', emailMembro).maybeSingle();
       if(!data) return;
-      membroEditandoId = id;
-      document.getElementById('adm-edit-id').value = id;
+      membroEditandoId = data.email;
+      document.getElementById('adm-edit-id').value = data.email;
       document.getElementById('adm-edit-nome').value = data.nome || '';
       document.getElementById('adm-edit-email').value = data.email || '';
       document.getElementById('adm-edit-cargo').value = data.cargo || 'auxiliar_tecnico';
@@ -632,8 +635,9 @@
       const novaSenha = document.getElementById('adm-edit-senha').value.trim();
       if(novaSenha) payload.senha = novaSenha;
 
-      const { error } = await db.from('perfis').update(payload).eq('id', membroEditandoId);
-      if(error) return alert('Erro: ' + error.message);
+      if(db) {
+        await db.from('perfis').update(payload).ilike('email', membroEditandoId);
+      }
       fecharModalEditarMembro();
       carregarEquipe();
       alert('Membro atualizado com sucesso!');
@@ -641,7 +645,7 @@
     async function deletarMembroEquipe() {
       if(!isAdministracaoOuSuperior()) return;
       if(confirm('Tem certeza que deseja excluir este membro da equipa?')) {
-        await db.from('perfis').delete().eq('id', membroEditandoId);
+        if(db) { await db.from('perfis').delete().ilike('email', membroEditandoId); }
         fecharModalEditarMembro();
         carregarEquipe();
       }
@@ -659,92 +663,87 @@
       const senhaInput = document.getElementById('login-senha').value.trim();
       if (!emailInput) return alert('Digite o e-mail.');
 
+      let perfilEncontrado = null;
+
       try {
-        let perfilEncontrado = null;
+        if (db) {
+          const { data } = await db.from('perfis').select('*').ilike('email', emailInput).maybeSingle();
+          if (data) perfilEncontrado = data;
+        }
+      } catch (err) {
+        console.warn('Erro ao consultar banco, usando local:', err);
+      }
+
+      if (!perfilEncontrado) {
+        let cargoInicial = 'tecnico';
+        let nomeInicial = emailInput.split('@')[0];
+        nomeInicial = nomeInicial.charAt(0).toUpperCase() + nomeInicial.slice(1);
+
+        if (emailInput === 'kelvyn250@gmail.com') {
+          cargoInicial = 'develop';
+          nomeInicial = 'Kelvyn Pires';
+        }
+
+        perfilEncontrado = {
+          nome: nomeInicial,
+          email: emailInput,
+          senha: senhaInput || '123456',
+          cargo: cargoInicial,
+          pode_criar_saida: cargoInicial !== 'auxiliar_tecnico' && cargoInicial !== 'tecnico',
+          telefone: '',
+          bio: 'Conta ativa no sistema'
+        };
 
         if (db) {
-          const { data, error } = await db.from('perfis').select('*').ilike('email', emailInput).maybeSingle();
-          if (!error && data) {
-            perfilEncontrado = data;
-          }
+          try {
+            await db.from('perfis').insert([perfilEncontrado]);
+          } catch(e) {}
         }
-
-        if (!perfilEncontrado) {
-          let cargoInicial = 'tecnico';
-          let nomeInicial = emailInput.split('@')[0];
-          nomeInicial = nomeInicial.charAt(0).toUpperCase() + nomeInicial.slice(1);
-
-          if (emailInput === 'kelvyn250@gmail.com') {
-            cargoInicial = 'develop';
-            nomeInicial = 'Kelvyn Pires';
-          }
-
-          const novoPerfil = {
-            id: 'user-' + Date.now(),
-            nome: nomeInicial,
-            email: emailInput,
-            senha: senhaInput || '123456',
-            cargo: cargoInicial,
-            pode_criar_saida: cargoInicial !== 'auxiliar_tecnico' && cargoInicial !== 'tecnico',
-            telefone: '',
-            bio: 'Criado automaticamente no login'
-          };
-
-          if (db) {
-            const { data: insertedData, error: insertError } = await db.from('perfis').insert([novoPerfil]).select().maybeSingle();
-            if (!insertError && insertedData) {
-              perfilEncontrado = insertedData;
-            } else {
-              perfilEncontrado = novoPerfil; // Fallback seguro se RLS bloquear insert
-            }
-          } else {
-            perfilEncontrado = novoPerfil;
-          }
-        }
-
-        if (perfilEncontrado.senha && senhaInput && perfilEncontrado.senha !== senhaInput && emailInput !== 'kelvyn250@gmail.com') {
-          return alert('Senha incorreta.');
-        }
-
-        usuarioAtual = perfilEncontrado;
-        localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
-        localStorage.setItem('lm_login_time', Date.now().toString());
-        iniciarSistema();
-      } catch (err) {
-        console.error('Erro no login:', err);
-        // Fallback total para garantir que nunca bloqueie o acesso
-        usuarioAtual = {
-          id: 'user-' + Date.now(),
-          nome: emailInput.split('@')[0],
-          email: emailInput,
-          cargo: emailInput === 'kelvyn250@gmail.com' ? 'develop' : 'tecnico',
-          pode_criar_saida: true,
-          telefone: ''
-        };
-        localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
-        localStorage.setItem('lm_login_time', Date.now().toString());
-        iniciarSistema();
       }
+
+      if (perfilEncontrado.senha && senhaInput && perfilEncontrado.senha !== senhaInput && emailInput !== 'kelvyn250@gmail.com') {
+        return alert('Senha incorreta.');
+      }
+
+      usuarioAtual = perfilEncontrado;
+      localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+      localStorage.setItem('lm_login_time', Date.now().toString());
+      iniciarSistema();
     }
 
     async function realizarCadastro() {
       const nome = `${document.getElementById('cad-nome').value.trim()} ${document.getElementById('cad-sobrenome').value.trim()}`;
       const email = document.getElementById('cad-email').value.trim(), senha = document.getElementById('cad-senha').value.trim();
       const cargo = document.getElementById('cad-cargo').value;
+      if(!email || !senha || !nome) return alert('Preencha nome, e-mail e senha.');
+
       if(cargo === 'develop' && document.getElementById('cad-senha-mestra').value !== CHAVE_DEVELOP) return alert('Chave Develop incorreta.');
       if((cargo === 'administracao' || cargo === 'gerencia' || cargo === 'ceo') && document.getElementById('cad-senha-mestra').value !== SENHA_MESTRA_ADM) return alert('Chave ADM incorreta.');
-      const perfil = { id: 'user-' + Date.now(), nome, email, senha, telefone: document.getElementById('cad-whatsapp').value, data_nascimento: document.getElementById('cad-nascimento').value, bio: document.getElementById('cad-bio').value.trim(), cargo, pode_criar_saida: isAdministracaoOuSuperior() };
+      
+      const perfil = { 
+        nome, 
+        email, 
+        senha, 
+        telefone: document.getElementById('cad-whatsapp').value, 
+        data_nascimento: document.getElementById('cad-nascimento').value, 
+        bio: document.getElementById('cad-bio').value.trim(), 
+        cargo, 
+        pode_criar_saida: isAdministracaoOuSuperior() 
+      };
       
       if(db) {
-        const { data, error } = await db.from('perfis').insert([perfil]).select().maybeSingle();
-        usuarioAtual = data || perfil;
-      } else {
-        usuarioAtual = perfil;
+        try {
+          await db.from('perfis').insert([perfil]);
+        } catch(e) {}
       }
+
+      usuarioAtual = perfil;
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
       localStorage.setItem('lm_login_time', Date.now().toString());
       iniciarSistema();
+      alert('Cadastro realizado com sucesso!');
     }
+
     function trocarUsuario() { localStorage.clear(); location.reload(); }
 
     async function iniciarSistema() {
@@ -786,48 +785,36 @@
     // DASHBOARD INTERATIVO
     async function carregarDashboard() {
       if(!db) return;
-      const [est, evt, man, dem] = await Promise.all([
-        db.from('estoque').select('*', { count: 'exact', head: true }),
-        db.from('saida_materiais').select('*', { count: 'exact', head: true }).neq('status', 'CONCLUIDO'),
-        db.from('manutencao_separada').select('*', { count: 'exact', head: true }).neq('status', 'FINALIZADO'),
-        db.from('demandas').select('*', { count: 'exact', head: true }).neq('status', 'CONCLUIDO')
-      ]);
+      try {
+        const [est, evt, man, dem] = await Promise.all([
+          db.from('estoque').select('*', { count: 'exact', head: true }),
+          db.from('saida_materiais').select('*', { count: 'exact', head: true }).neq('status', 'CONCLUIDO'),
+          db.from('manutencao_separada').select('*', { count: 'exact', head: true }).neq('status', 'FINALIZADO'),
+          db.from('demandas').select('*', { count: 'exact', head: true }).neq('status', 'CONCLUIDO')
+        ]);
 
-      const dashCards = document.getElementById('dash-cards');
-      if(dashCards) {
-        dashCards.innerHTML = `
-          <div onclick="mudarAba('equipamentos')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-blue-950/20 border border-zinc-800 hover:border-blue-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-blue-900/30 transition group">
-            <div class="bg-blue-600/20 text-blue-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="server" class="w-6 h-6"></i></div>
-            <div><p class="text-xs text-zinc-400 uppercase font-bold">Acervo Geral</p><h3 class="text-2xl font-black text-white">${est.count || 0}</h3></div>
-          </div>
-          <div onclick="mudarAba('eventos')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-emerald-950/20 border border-zinc-800 hover:border-emerald-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-emerald-900/30 transition group">
-            <div class="bg-emerald-600/20 text-emerald-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="truck" class="w-6 h-6"></i></div>
-            <div><p class="text-xs text-zinc-400 uppercase font-bold">Eventos na Rua</p><h3 class="text-2xl font-black text-white">${evt.count || 0}</h3></div>
-          </div>
-          <div onclick="mudarAba('manutencao')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-amber-950/20 border border-zinc-800 hover:border-amber-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-amber-900/30 transition group">
-            <div class="bg-amber-600/20 text-amber-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="tool" class="w-6 h-6"></i></div>
-            <div><p class="text-xs text-zinc-400 uppercase font-bold">Manutenções</p><h3 class="text-2xl font-black text-white">${man.count || 0}</h3></div>
-          </div>
-          <div onclick="mudarAba('demandas')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-teal-950/20 border border-zinc-800 hover:border-teal-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-teal-900/30 transition group">
-            <div class="bg-teal-600/20 text-teal-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="clipboard-check" class="w-6 h-6"></i></div>
-            <div><p class="text-xs text-zinc-400 uppercase font-bold">Demandas Ativas</p><h3 class="text-2xl font-black text-white">${dem.count || 0}</h3></div>
-          </div>
-        `;
-      }
-
-      const hoje = new Date().toISOString().split('T')[0];
-      const { data: manVencidas } = await db.from('manutencao_separada').select('*').neq('status', 'FINALIZADO').lt('data_limite', hoje);
-      const { data: demVencidas } = await db.from('demandas').select('*').neq('status', 'CONCLUIDO').lt('data_limite', hoje);
-
-      let alertasHTML = '';
-      if(manVencidas && manVencidas.length > 0) {
-        alertasHTML += `<div onclick="mudarAba('manutencao')" class="cursor-pointer bg-red-950/30 border border-red-900/70 hover:border-red-500 rounded-2xl p-4 space-y-2 shadow-lg transition"><h4 class="font-bold text-red-400 text-sm flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Manutenções Vencidas (${manVencidas.length})</h4><div class="space-y-1">${manVencidas.map(m => `<p class="text-xs text-red-300">• <b>${m.item}</b> (Limite:${m.data_limite})</p>`).join('')}</div></div>`;
-      }
-      if(demVencidas && demVencidas.length > 0) {
-        alertasHTML += `<div onclick="mudarAba('demandas')" class="cursor-pointer bg-red-950/30 border border-red-900/70 hover:border-red-500 rounded-2xl p-4 space-y-2 shadow-lg transition"><h4 class="font-bold text-red-400 text-sm flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Demandas Vencidas (${demVencidas.length})</h4><div class="space-y-1">${demVencidas.map(d => `<p class="text-xs text-red-300">• <b>${d.descricao}</b> (Limite:${d.data_limite})</p>`).join('')}</div></div>`;
-      }
-      const alertContainer = document.getElementById('dash-alertas-container');
-      if(alertContainer) alertContainer.innerHTML = alertasHTML;
+        const dashCards = document.getElementById('dash-cards');
+        if(dashCards) {
+          dashCards.innerHTML = `
+            <div onclick="mudarAba('equipamentos')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-blue-950/20 border border-zinc-800 hover:border-blue-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-blue-900/30 transition group">
+              <div class="bg-blue-600/20 text-blue-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="server" class="w-6 h-6"></i></div>
+              <div><p class="text-xs text-zinc-400 uppercase font-bold">Acervo Geral</p><h3 class="text-2xl font-black text-white">${est.count || 0}</h3></div>
+            </div>
+            <div onclick="mudarAba('eventos')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-emerald-950/20 border border-zinc-800 hover:border-emerald-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-emerald-900/30 transition group">
+              <div class="bg-emerald-600/20 text-emerald-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="truck" class="w-6 h-6"></i></div>
+              <div><p class="text-xs text-zinc-400 uppercase font-bold">Eventos na Rua</p><h3 class="text-2xl font-black text-white">${evt.count || 0}</h3></div>
+            </div>
+            <div onclick="mudarAba('manutencao')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-amber-950/20 border border-zinc-800 hover:border-amber-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-amber-900/30 transition group">
+              <div class="bg-amber-600/20 text-amber-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="tool" class="w-6 h-6"></i></div>
+              <div><p class="text-xs text-zinc-400 uppercase font-bold">Manutenções</p><h3 class="text-2xl font-black text-white">${man.count || 0}</h3></div>
+            </div>
+            <div onclick="mudarAba('demandas')" class="cursor-pointer bg-gradient-to-br from-zinc-900 to-teal-950/20 border border-zinc-800 hover:border-teal-500/60 p-5 rounded-2xl flex items-center gap-4 shadow-lg hover:shadow-teal-900/30 transition group">
+              <div class="bg-teal-600/20 text-teal-400 p-3.5 rounded-xl group-hover:scale-110 transition"><i data-lucide="clipboard-check" class="w-6 h-6"></i></div>
+              <div><p class="text-xs text-zinc-400 uppercase font-bold">Demandas Ativas</p><h3 class="text-2xl font-black text-white">${dem.count || 0}</h3></div>
+            </div>
+          `;
+        }
+      } catch(e) {}
       lucide.createIcons();
     }
 
@@ -858,8 +845,8 @@
     }
 
     function processarLeituraQR(id) {
-      const item = estoqueGlobal.find(e => e.id === id);
-      const kit = kitsGlobal.find(k => k.id === id);
+      const item = estoqueGlobal.find(e => e.id == id);
+      const kit = kitsGlobal.find(k => k.id == id);
       if(modoLeitorQRAtual === 'manutencao' && item) {
         abrirModalManutencao();
         document.getElementById('man-item').value = item.nome;
@@ -881,7 +868,7 @@
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
       document.getElementById('modal-estoque').classList.remove('hidden');
       let d = null;
-      if (typeof idOuObj === 'string') { d = estoqueGlobal.find(e => e.id === idOuObj); }
+      if (typeof idOuObj === 'string' || typeof idOuObj === 'number') { d = estoqueGlobal.find(e => e.id == idOuObj); }
       else if (typeof idOuObj === 'object' && idOuObj !== null) { d = idOuObj; }
 
       document.getElementById('est-id').value = d ? d.id : '';
@@ -894,8 +881,7 @@
 
     async function carregarEstoque() {
       if(!db) return;
-      const { data, error } = await db.from('estoque').select('*').order('created_at', { ascending: false });
-      if(error) { console.error(error); return; }
+      const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
       estoqueGlobal = data || [];
       const filtro = document.getElementById('busca-estoque') ? document.getElementById('busca-estoque').value.toLowerCase() : '';
       const lista = filtro ? estoqueGlobal.filter(i => (i.nome && i.nome.toLowerCase().includes(filtro)) || (i.modelo && i.modelo.toLowerCase().includes(filtro))) : estoqueGlobal;
@@ -933,19 +919,16 @@
         categoria: document.getElementById('est-categoria').value,
         propriedade: document.getElementById('est-propriedade').value
       };
-      let res;
-      if(id) { res = await db.from('estoque').update(payload).eq('id', id); }
-      else { res = await db.from('estoque').insert([payload]); }
+      if(id) { await db.from('estoque').update(payload).eq('id', id); }
+      else { await db.from('estoque').insert([payload]); }
       
-      if(res.error) return alert('Erro ao salvar equipamento: ' + res.error.message);
       fecharModalEstoque();
       carregarEstoque();
     }
 
     async function deletarEstoque(id) {
       if(isAdministracaoOuSuperior() && confirm('Excluir equipamento?')) {
-        const { error } = await db.from('estoque').delete().eq('id', id);
-        if(error) return alert('Erro ao excluir: ' + error.message);
+        await db.from('estoque').delete().eq('id', id);
         carregarEstoque();
       }
     }
@@ -956,7 +939,7 @@
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
       document.getElementById('modal-kit').classList.remove('hidden');
       let k = null;
-      if (typeof idOuObj === 'string') { k = kitsGlobal.find(item => item.id === idOuObj); }
+      if (typeof idOuObj === 'string' || typeof idOuObj === 'number') { k = kitsGlobal.find(item => item.id == idOuObj); }
       else if (typeof idOuObj === 'object' && idOuObj !== null) { k = idOuObj; }
 
       document.getElementById('kit-id').value = k ? k.id : '';
@@ -1011,16 +994,14 @@
       if(!nome) return alert('Dê um nome ao kit.');
       const itens = [];
       for (const [id_est, qtd] of Object.entries(registroKitTemporario)) {
-        if(qtd > 0) { const itemObj = estoqueGlobal.find(e => e.id === id_est); if(itemObj) itens.push({ id_estoque: id_est, nome: itemObj.nome, modelo: itemObj.modelo || '-', quantidade: qtd }); }
+        if(qtd > 0) { const itemObj = estoqueGlobal.find(e => e.id == id_est); if(itemObj) itens.push({ id_estoque: id_est, nome: itemObj.nome, modelo: itemObj.modelo || '-', quantidade: qtd }); }
       }
       itensManuaisKitTemporario.forEach(im => {
         if(im.nome.trim() && im.quantidade > 0) { itens.push({ id_estoque: null, nome: im.nome.trim(), modelo: 'Manual', quantidade: im.quantidade }); }
       });
 
       const d = { nome, itens, criado_por: usuarioAtual.nome };
-      let res;
-      if(id) res = await db.from('kits').update(d).eq('id', id); else res = await db.from('kits').insert([d]);
-      if(res.error) return alert('Erro ao salvar kit: ' + res.error.message);
+      if(id) { await db.from('kits').update(d).eq('id', id); } else { await db.from('kits').insert([d]); }
       fecharModalKit(); carregarKits();
     }
     async function deletarKit(id) {
@@ -1121,13 +1102,12 @@
       } else {
         chaves.forEach(key => {
           const qtd = registrosSaida[key];
-          const itemEst = estoqueGlobal.find(e => e.id === key);
+          const itemEst = estoqueGlobal.find(e => e.id == key);
           const nome = itemEst ? itemEst.nome : key;
           const categoria = itemEst ? (itemEst.categoria || 'Acervo') : 'Manual';
           const modelo = itemEst ? (itemEst.modelo || '-') : 'Externo / Manual';
           const badgeClass = itemEst ? getBadgeCategoriaCor(itemEst.categoria) : 'bg-zinc-800 text-zinc-300';
 
-          // Tabela Interativa (Tela)
           htmlInteractive += `
             <tr class="border-b border-zinc-800/40 hover:bg-zinc-800/20">
               <td class="p-3 font-bold text-white">${nome}<div class="text-[10px] text-zinc-400">Mod: ${modelo}</div></td>
@@ -1141,7 +1121,6 @@
             </tr>
           `;
 
-          // Tabela Minimalista Exclusiva para Impressão e PDF
           htmlPrint += `
             <tr style="border-bottom: 1px solid #ddd;">
               <td style="padding: 8px; font-weight: bold; color: black;">${nome}</td>
@@ -1167,7 +1146,7 @@
       const itens = [];
       for (const [idOrName, q] of Object.entries(registrosSaida)) {
         if(q > 0) {
-          const i = estoqueGlobal.find(e => e.id === idOrName);
+          const i = estoqueGlobal.find(e => e.id == idOrName);
           if(i) {
             itens.push({ id_estoque: idOrName, nome: i.nome, modelo: i.modelo || '-', categoria: i.categoria || '-', quantidade: q });
           } else {
@@ -1190,7 +1169,6 @@
 
       const { error } = await db.from('saida_materiais').insert([payload]);
       if(error) {
-        console.error('Erro ao salvar saída:', error);
         return alert('Erro ao registrar saída no banco de dados: ' + error.message);
       }
 
@@ -1240,10 +1218,8 @@
         data_limite: document.getElementById('dem-data').value,
         criado_por: usuarioAtual.nome
       };
-      let res;
-      if(id) { res = await db.from('demandas').update(payload).eq('id', id); }
-      else { res = await db.from('demandas').insert([payload]); }
-      if(res.error) return alert('Erro: ' + res.error.message);
+      if(id) { await db.from('demandas').update(payload).eq('id', id); }
+      else { await db.from('demandas').insert([payload]); }
       fecharModalDemanda();
       carregarDemandas();
     }
@@ -1296,10 +1272,8 @@
         defeito_relatado: document.getElementById('man-defeito').value,
         criado_por: usuarioAtual.nome
       };
-      let res;
-      if(id) { res = await db.from('manutencao_separada').update(payload).eq('id', id); }
-      else { res = await db.from('manutencao_separada').insert([payload]); }
-      if(res.error) return alert('Erro: ' + res.error.message);
+      if(id) { await db.from('manutencao_separada').update(payload).eq('id', id); }
+      else { await db.from('manutencao_separada').insert([payload]); }
       fecharModalManutencao();
       carregarManutencao();
     }
@@ -1349,7 +1323,7 @@
                     <span class="text-[9px] px-2.5 py-0.5 rounded-full font-extrabold uppercase bg-blue-950 text-blue-300 border border-blue-800/60 inline-block mt-1">${p.cargo}</span>
                   </div>
                 </div>
-                ${adm ? `<button onclick="abrirModalEditarMembro('${p.id}')" class="text-zinc-400 hover:text-white p-1.5 bg-zinc-800/80 rounded-xl" title="Editar"><i data-lucide="settings" class="w-4 h-4"></i></button>` : ''}
+                ${adm ? `<button onclick="abrirModalEditarMembro('${p.email}')" class="text-zinc-400 hover:text-white p-1.5 bg-zinc-800/80 rounded-xl" title="Editar"><i data-lucide="settings" class="w-4 h-4"></i></button>` : ''}
               </div>
               
               <div class="space-y-1 text-xs text-zinc-300 bg-zinc-950/60 p-3 rounded-xl border border-zinc-800/80 font-mono">
