@@ -26,53 +26,98 @@
 
     const SENHA_MESTRA_ADM = "LEGALMART2026";
     let usuarioAtual = JSON.parse(localStorage.getItem('lm_usuario')) || null;
+    let loginTimestamp = localStorage.getItem('lm_login_time') || null;
+    let logoEmpresaUrl = localStorage.getItem('lm_logo_url') || '';
+
+    // VALIDAÇÃO DE EXPIRAÇÃO DE SESSÃO EM 24 HORAS (24 * 60 * 60 * 1000 ms)
+    const UM_DIA_MS = 24 * 60 * 60 * 1000;
+    if (loginTimestamp && (Date.now() - parseInt(loginTimestamp)) > UM_DIA_MS) {
+      localStorage.removeItem('lm_usuario');
+      localStorage.removeItem('lm_login_time');
+      usuarioAtual = null;
+    }
   </script>
 
-  <!-- TELA DE LOGIN / CADASTRO DE COLABORADORES -->
+  <!-- TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
   <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-8">
-      <div class="text-center space-y-1">
-        <h1 class="text-2xl font-black text-blue-500">LEGALMART</h1>
-        <p class="text-xs text-gray-400">Cadastro & Acesso para Colaboradores</p>
+      
+      <div class="text-center space-y-2 flex flex-col items-center">
+        <div id="box-logo-login" class="h-16 flex items-center justify-center">
+          <h1 class="text-3xl font-black text-blue-500 tracking-wider">LEGALMART</h1>
+        </div>
+        <p class="text-xs text-gray-400" id="auth-subtitulo">Acesse sua conta para continuar</p>
       </div>
 
-      <div class="space-y-3">
+      <!-- FORMULÁRIO DE LOGIN -->
+      <div id="form-login-box" class="space-y-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
-          <input type="text" id="login-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail (Login)</label>
+          <input type="email" id="login-email" placeholder="seuemail@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail</label>
-          <input type="email" id="login-email" placeholder="nome@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Senha</label>
+          <input type="password" id="login-senha" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <button onclick="realizarLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition">
+          Entrar no Sistema
+        </button>
+        <div class="flex justify-between items-center text-xs pt-2">
+          <button onclick="mostrarTelaCadastro()" class="text-blue-400 hover:underline font-bold">Criar Cadastro</button>
+          <button onclick="esqueciSenha()" class="text-gray-400 hover:underline">Esqueci minha senha</button>
+        </div>
+      </div>
+
+      <!-- FORMULÁRIO DE CADASTRO -->
+      <div id="form-cadastro-box" class="space-y-3 hidden">
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
+          <input type="text" id="cad-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">URL da Foto de Perfil (Opcional)</label>
+          <input type="url" id="cad-foto" placeholder="https://link-da-sua-foto.jpg" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail (Login Único)</label>
+          <input type="email" id="cad-email" placeholder="nome@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Senha</label>
+          <input type="password" id="cad-senha" placeholder="Digite sua senha" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">WhatsApp/Tel</label>
-            <input type="tel" id="login-telefone" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+            <input type="tel" id="cad-telefone" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nascimento</label>
-            <input type="date" id="login-nascimento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+            <input type="date" id="cad-nascimento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
           </div>
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Cargo / Função</label>
-          <select id="login-cargo" onchange="verificarSelecaoCargo()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <select id="cad-cargo" onchange="verificarSelecaoCargoCadastro()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
             <option value="auxiliar_tecnico">Auxiliar Técnico</option>
             <option value="tecnico">Técnico</option>
             <option value="administrador">Administrador (ADM - Requer Senha)</option>
           </select>
         </div>
 
-        <div id="campo-senha-adm" class="hidden">
+        <div id="campo-senha-adm-cad" class="hidden">
           <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Senha de Autorização ADM</label>
-          <input type="password" id="login-senha-adm" placeholder="Digite a chave ADM" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <input type="password" id="cad-senha-adm" placeholder="Digite a chave ADM" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
 
-        <button onclick="entrarComo()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition">
-          Entrar / Cadastrar no Sistema
+        <button onclick="realizarCadastro()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg transition">
+          Finalizar Cadastro
         </button>
+        <div class="text-center pt-2">
+          <button onclick="mostrarTelaLogin()" class="text-gray-400 text-xs hover:underline">Já possui conta? Faça Login</button>
+        </div>
       </div>
+
     </div>
   </div>
 
@@ -80,30 +125,39 @@
   <header class="bg-gray-900 border-b border-blue-600/40 p-4 sticky top-0 z-40 no-print shadow-lg">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center space-x-3">
-        <div class="bg-blue-600 p-2.5 rounded-xl text-black font-black text-xl">LM</div>
+        <div id="header-logo-container" class="flex items-center">
+          <div class="bg-blue-600 p-2.5 rounded-xl text-black font-black text-xl">LM</div>
+        </div>
         <div>
-          <h1 class="text-xl font-black tracking-wider text-blue-500">LEGALMART</h1>
-          <p class="text-xs text-gray-400" id="user-info-bar">Carregando usuário...</p>
+          <h1 class="text-xl font-black tracking-wider text-blue-500" id="header-app-title">LEGALMART</h1>
+          <div class="flex items-center gap-2 mt-0.5">
+            <img id="header-user-avatar" src="" class="w-5 h-5 rounded-full object-cover hidden border border-blue-500">
+            <p class="text-xs text-gray-400 cursor-pointer hover:text-white" onclick="abrirModalMeuPerfil()" id="user-info-bar">Carregando usuário...</p>
+          </div>
         </div>
       </div>
       
-      <nav class="flex flex-wrap gap-1 bg-gray-950 p-1.5 rounded-xl border border-gray-800">
-        <button onclick="mudarAba('estoque')" id="tab-estoque" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white flex items-center gap-1.5">
+      <!-- MENU DE NAVEGAÇÃO -->
+      <nav class="flex flex-wrap gap-1.5 bg-gray-950 p-1.5 rounded-xl border border-gray-800">
+        <button onclick="mudarAba('estoque')" id="tab-estoque" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
           <i data-lucide="box" class="w-4 h-4"></i> Estoque
         </button>
-        <button onclick="mudarAba('limpeza')" id="tab-limpeza" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5">
+        <button onclick="mudarAba('limpeza')" id="tab-limpeza" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-4 h-4"></i> Limpeza
         </button>
-        <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5">
+        <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
           <i data-lucide="wrench" class="w-4 h-4"></i> Manutenção
         </button>
-        <button onclick="mudarAba('eventos')" id="tab-eventos" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5">
+        <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
           <i data-lucide="truck" class="w-4 h-4"></i> Romaneio
         </button>
-        <button onclick="mudarAba('equipe')" id="tab-equipe" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5">
+        <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
           <i data-lucide="users" class="w-4 h-4"></i> Equipe
         </button>
-        <button onclick="trocarUsuario()" class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-400 hover:bg-gray-900">
+        <button onclick="abrirModalMeuPerfil()" class="px-3 py-2 rounded-lg text-xs font-bold text-blue-400 hover:bg-gray-900 transition flex items-center gap-1">
+          <i data-lucide="user" class="w-4 h-4"></i> Meu Perfil
+        </button>
+        <button onclick="trocarUsuario()" class="px-3 py-2 rounded-lg text-xs font-bold text-red-400 hover:bg-gray-900 transition">
           Sair
         </button>
       </nav>
@@ -182,7 +236,10 @@
       </div>
 
       <div class="print-only mb-6 border-b-2 border-black pb-4">
-        <h1 class="text-2xl font-bold uppercase text-black">LEGALMART - ROMANEIO DE CARGA</h1>
+        <div class="flex items-center gap-4 mb-2">
+          <img id="print-logo-img" src="" class="h-12 hidden">
+          <h1 class="text-2xl font-bold uppercase text-black">LEGALMART - ROMANEIO DE CARGA</h1>
+        </div>
         <p class="text-sm font-semibold text-black" id="print-info-evento">Evento: Não Especificado | Data: --/--/----</p>
       </div>
 
@@ -213,11 +270,16 @@
       </div>
     </section>
 
-    <!-- EQUIPE / COLABORADORES -->
+    <!-- EQUIPE & CONFIGURAÇÕES -->
     <section id="sec-equipe" class="space-y-6 hidden no-print">
-      <div>
-        <h2 class="text-2xl font-black text-purple-400">Equipe & Colaboradores</h2>
-        <p class="text-xs text-gray-400">Contatos diretos e gerenciamento de perfis</p>
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-2xl font-black text-purple-400">Equipe & Configurações da Empresa</h2>
+          <p class="text-xs text-gray-400">Contatos diretos e logotipo oficial</p>
+        </div>
+        <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">
+          🖼️ Definir Logo da Empresa (ADM)
+        </button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-equipe"></div>
@@ -226,7 +288,44 @@
   </main>
 
   <!-- MODAIS -->
-  <!-- MODAL ESTOQUE (ADM) -->
+  <div id="modal-meu-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+      <h3 class="text-lg font-bold text-blue-400">Meu Perfil & Acesso</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Seu Nome</label>
+          <input type="text" id="my-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Link/URL da sua Foto de Perfil</label>
+          <input type="url" id="my-perf-foto" placeholder="https://link-da-sua-foto.jpg" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Sua Nova Senha</label>
+          <input type="password" id="my-perf-senha" placeholder="Digite para alterar sua senha" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalMeuPerfil()" class="px-4 py-2 text-gray-400 text-sm">Cancelar</button>
+        <button onclick="salvarMeuPerfil()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-logo" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+      <h3 class="text-lg font-bold text-purple-400">Logo Oficial da Empresa</h3>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">URL / Link da Imagem da Logo (PNG / JPG)</label>
+        <input type="url" id="input-logo-url" placeholder="https://link-da-logo-legalmart.png" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+      </div>
+      <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
+        <button onclick="fecharModalLogo()" class="px-4 py-2 text-gray-400 text-sm">Cancelar</button>
+        <button onclick="salvarLogoEmpresa()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm">Atualizar Logo</button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-estoque" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
       <h3 class="text-lg font-bold text-white">Cadastrar Equipamento</h3>
@@ -248,7 +347,6 @@
     </div>
   </div>
 
-  <!-- MODAL LIMPEZA -->
   <div id="modal-limpeza" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
       <h3 class="text-lg font-bold text-white">Nova Pendência de Limpeza</h3>
@@ -265,7 +363,6 @@
     </div>
   </div>
 
-  <!-- MODAL FICHA TÉCNICA MANUTENÇÃO -->
   <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print overflow-y-auto">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-8">
       <h3 class="text-lg font-bold text-white" id="modal-man-titulo">Nova Ficha de Manutenção</h3>
@@ -298,7 +395,7 @@
       </div>
       <div>
         <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Solução Aplicada / Observações</label>
-        <textarea id="man-solucao" placeholder="Descreva os componentes trocados ou reparo realizado..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
+        <textarea id="man-solucao" placeholder="Descreva os componentes trocados..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
       </div>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalManutencao()" class="px-4 py-2 text-gray-400">Cancelar</button>
@@ -307,27 +404,32 @@
     </div>
   </div>
 
-  <!-- MODAL EDITAR PERFIL (ADM) -->
   <div id="modal-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
-      <h3 class="text-lg font-bold text-white">Editar Colaborador (ADM)</h3>
+      <h3 class="text-lg font-bold text-purple-400">Redefinir Perfil e Acesso (ADM)</h3>
       <input type="hidden" id="edit-perf-id">
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome</label>
-        <input type="text" id="edit-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail</label>
-        <input type="email" id="edit-perf-email" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
+        <input type="text" id="edit-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Telefone / WhatsApp</label>
-          <input type="tel" id="edit-perf-telefone" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail (Login)</label>
+          <input type="email" id="edit-perf-email" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Nova Senha</label>
+          <input type="text" id="edit-perf-senha" placeholder="Digite nova senha" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">WhatsApp / Telefone</label>
+          <input type="tel" id="edit-perf-telefone" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Cargo</label>
-          <select id="edit-perf-cargo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
+          <select id="edit-perf-cargo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
             <option value="auxiliar_tecnico">Auxiliar Técnico</option>
             <option value="tecnico">Técnico</option>
             <option value="administrador">Administrador</option>
@@ -336,7 +438,7 @@
       </div>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalPerfil()" class="px-4 py-2 text-gray-400">Cancelar</button>
-        <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Alterações</button>
+        <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Alterações</button>
       </div>
     </div>
   </div>
@@ -346,62 +448,208 @@
     lucide.createIcons();
     let registrosSaida = {};
 
-    function verificarSelecaoCargo() {
-      const cargo = document.getElementById('login-cargo').value;
-      document.getElementById('campo-senha-adm').classList.toggle('hidden', cargo !== 'administrador');
+    function aplicarLogoNaInterface() {
+      if (logoEmpresaUrl) {
+        document.getElementById('box-logo-login').innerHTML = `<img src="${logoEmpresaUrl}" class="max-h-16 object-contain">`;
+        document.getElementById('header-logo-container').innerHTML = `<img src="${logoEmpresaUrl}" class="h-9 object-contain">`;
+        document.getElementById('print-logo-img').src = logoEmpresaUrl;
+        document.getElementById('print-logo-img').classList.remove('hidden');
+      }
     }
 
-    async function entrarComo() {
-      const nome = document.getElementById('login-nome').value.trim();
-      const email = document.getElementById('login-email').value.trim();
-      const telefone = document.getElementById('login-telefone').value.trim();
-      const data_nascimento = document.getElementById('login-nascimento').value;
-      let cargo = document.getElementById('login-cargo').value;
+    async function carregarLogoConfig() {
+      if (!db) return;
+      const { data } = await db.from('configuracoes').select('valor').eq('chave', 'logo_url').maybeSingle();
+      if (data && data.valor) {
+        logoEmpresaUrl = data.valor;
+        localStorage.setItem('lm_logo_url', logoEmpresaUrl);
+        aplicarLogoNaInterface();
+      }
+    }
 
-      if (!nome) { alert('Digite seu nome!'); return; }
+    function abrirModalLogo() {
+      document.getElementById('modal-logo').classList.remove('hidden');
+      document.getElementById('input-logo-url').value = logoEmpresaUrl;
+    }
+    function fecharModalLogo() { document.getElementById('modal-logo').classList.add('hidden'); }
+
+    async function salvarLogoEmpresa() {
+      const url = document.getElementById('input-logo-url').value.trim();
+      logoEmpresaUrl = url;
+      localStorage.setItem('lm_logo_url', logoEmpresaUrl);
+      if (db) {
+        await db.from('configuracoes').upsert({ chave: 'logo_url', valor: url }, { onConflict: 'chave' });
+      }
+      aplicarLogoNaInterface();
+      fecharModalLogo();
+    }
+
+    function abrirModalMeuPerfil() {
+      if (!usuarioAtual) return;
+      document.getElementById('modal-meu-perfil').classList.remove('hidden');
+      document.getElementById('my-perf-nome').value = usuarioAtual.nome || '';
+      document.getElementById('my-perf-foto').value = usuarioAtual.foto_url || '';
+      document.getElementById('my-perf-senha').value = '';
+    }
+    function fecharModalMeuPerfil() { document.getElementById('modal-meu-perfil').classList.add('hidden'); }
+
+    async function salvarMeuPerfil() {
+      const nome = document.getElementById('my-perf-nome').value.trim();
+      const foto_url = document.getElementById('my-perf-foto').value.trim();
+      const senha = document.getElementById('my-perf-senha').value.trim();
+
+      if (!nome) return;
+
+      usuarioAtual.nome = nome;
+      usuarioAtual.foto_url = foto_url;
+      if (senha) usuarioAtual.senha = senha;
+
+      localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+
+      if (db && usuarioAtual.id) {
+        const dados = { nome, foto_url };
+        if (senha) dados.senha = senha;
+        await db.from('perfis').update(dados).eq('id', usuarioAtual.id);
+      }
+
+      fecharModalMeuPerfil();
+      iniciarSistema();
+    }
+
+    function mostrarTelaCadastro() {
+      document.getElementById('form-login-box').classList.add('hidden');
+      document.getElementById('form-cadastro-box').classList.remove('hidden');
+      document.getElementById('auth-subtitulo').innerText = "Crie sua conta para começar";
+    }
+
+    function mostrarTelaLogin() {
+      document.getElementById('form-cadastro-box').classList.add('hidden');
+      document.getElementById('form-login-box').classList.remove('hidden');
+      document.getElementById('auth-subtitulo').innerText = "Acesse sua conta para continuar";
+    }
+
+    function verificarSelecaoCargoCadastro() {
+      const cargo = document.getElementById('cad-cargo').value;
+      document.getElementById('campo-senha-adm-cad').classList.toggle('hidden', cargo !== 'administrador');
+    }
+
+    function esqueciSenha() {
+      alert('Por motivos de segurança, solicite a redefinição da sua senha diretamente a um Administrador da LEGALMART.');
+    }
+
+    async function realizarLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const senha = document.getElementById('login-senha').value.trim();
+
+      if (!email || !senha) { alert('Informe o E-mail e a Senha!'); return; }
+
+      if (!db) return;
+      const { data, error } = await db.from('perfis').select('*').eq('email', email).single();
+
+      if (error || !data) {
+        alert('Usuário não encontrado. Verifique o e-mail ou crie um cadastro.');
+        return;
+      }
+
+      if (data.senha && data.senha !== senha) {
+        alert('Senha incorreta! Verifique ou solicite redefinição a um Administrador.');
+        return;
+      }
+
+      usuarioAtual = data;
+      localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+      localStorage.setItem('lm_login_time', Date.now().toString());
+      iniciarSistema();
+    }
+
+    async function realizarCadastro() {
+      const nome = document.getElementById('cad-nome').value.trim();
+      const foto_url = document.getElementById('cad-foto').value.trim();
+      const email = document.getElementById('cad-email').value.trim();
+      const senha = document.getElementById('cad-senha').value.trim();
+      const telefone = document.getElementById('cad-telefone').value.trim();
+      const data_nascimento = document.getElementById('cad-nascimento').value;
+      let cargo = document.getElementById('cad-cargo').value;
+
+      if (!nome || !email || !senha) {
+        alert('Preencha os campos obrigatórios: Nome, E-mail e Senha!');
+        return;
+      }
 
       if (cargo === 'administrador') {
-        const senhaInput = document.getElementById('login-senha-adm').value;
+        const senhaInput = document.getElementById('cad-senha-adm').value;
         if (senhaInput !== SENHA_MESTRA_ADM) {
           alert('Senha de ADM incorreta! Cargo alterado para Auxiliar Técnico.');
           cargo = 'auxiliar_tecnico';
         }
       }
 
-      usuarioAtual = { nome, email, telefone, data_nascimento, cargo };
-      localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+      if (!db) return;
 
-      // Salva ou atualiza no Supabase
-      if(db) {
-        await db.from('perfis').upsert([{ nome, email, telefone, data_nascimento, cargo }], { onConflict: 'nome' });
+      const { data: existe } = await db.from('perfis').select('id').eq('email', email).maybeSingle();
+      if (existe) {
+        alert('Este e-mail já está cadastrado no sistema!');
+        return;
       }
 
+      const novoPerfil = { nome, foto_url, email, senha, telefone, data_nascimento, cargo };
+      const { data, error } = await db.from('perfis').insert([novoPerfil]).select().single();
+
+      if (error) {
+        alert('Erro ao realizar cadastro: ' + error.message);
+        return;
+      }
+
+      usuarioAtual = data || novoPerfil;
+      localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
+      localStorage.setItem('lm_login_time', Date.now().toString());
+      alert('Cadastro realizado com sucesso!');
       iniciarSistema();
     }
 
     function trocarUsuario() {
       localStorage.removeItem('lm_usuario');
+      localStorage.removeItem('lm_login_time');
       location.reload();
     }
 
     function iniciarSistema() {
+      aplicarLogoNaInterface();
+      carregarLogoConfig();
+
       if (!usuarioAtual) {
         document.getElementById('tela-login').classList.remove('hidden');
         return;
       }
 
       document.getElementById('tela-login').classList.add('hidden');
-      document.getElementById('user-info-bar').innerText = `Colaborador: ${usuarioAtual.nome} (${usuarioAtual.cargo.toUpperCase()})`;
+      document.getElementById('user-info-bar').innerText = `${usuarioAtual.nome} (${usuarioAtual.cargo ? usuarioAtual.cargo.toUpperCase() : 'AUXILIAR'})`;
+
+      if (usuarioAtual.foto_url) {
+        const avatarImg = document.getElementById('header-user-avatar');
+        avatarImg.src = usuarioAtual.foto_url;
+        avatarImg.classList.remove('hidden');
+      }
 
       const isAdm = usuarioAtual.cargo === 'administrador';
       document.getElementById('btn-add-estoque').classList.toggle('hidden', !isAdm);
+      document.getElementById('btn-config-logo').classList.toggle('hidden', !isAdm);
 
-      carregarEstoque();
+      mudarAba('estoque');
     }
 
     function mudarAba(aba) {
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(`sec-${aba}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.className = "nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5";
+      });
+
+      const tabAtiva = document.getElementById(`tab-${aba}`);
+      if (tabAtiva) {
+        tabAtiva.className = "nav-btn px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-md transition flex items-center gap-1.5";
+      }
 
       if(aba === 'estoque') carregarEstoque();
       if(aba === 'limpeza') carregarLimpeza();
@@ -661,11 +909,14 @@
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
             <div class="space-y-2">
-              <div class="flex justify-between items-start">
-                <h3 class="font-bold text-lg text-white">${p.nome}</h3>
-                <span class="text-xs px-2.5 py-1 rounded-full font-bold uppercase ${p.cargo === 'administrador' ? 'bg-purple-950 text-purple-400' : 'bg-blue-950 text-blue-400'}">
-                  ${p.cargo ? p.cargo.replace('_', ' ') : 'AUXILIAR'}
-                </span>
+              <div class="flex items-center gap-3">
+                ${p.foto_url ? `<img src="${p.foto_url}" class="w-10 h-10 rounded-full object-cover border border-purple-500">` : '<div class="w-10 h-10 rounded-full bg-purple-900/60 border border-purple-500 flex items-center justify-center font-bold text-purple-300">👤</div>'}
+                <div>
+                  <h3 class="font-bold text-base text-white">${p.nome}</h3>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${p.cargo === 'administrador' ? 'bg-purple-950 text-purple-400' : 'bg-blue-950 text-blue-400'}">
+                    ${p.cargo ? p.cargo.replace('_', ' ') : 'AUXILIAR'}
+                  </span>
+                </div>
               </div>
               <p class="text-xs text-gray-400">📧 ${p.email || 'Não informado'}</p>
               <p class="text-xs text-gray-400">📱 ${p.telefone || 'Não informado'}</p>
@@ -677,7 +928,7 @@
                   💬 WhatsApp
                 </a>
               ` : '<span class="text-gray-500">Sem WhatsApp</span>'}
-              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Editar (ADM)</button>` : ''}
+              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Redefinir Perfil (ADM)</button>` : ''}
             </div>
           </div>
         `;
@@ -689,6 +940,7 @@
       document.getElementById('edit-perf-id').value = p.id;
       document.getElementById('edit-perf-nome').value = p.nome || '';
       document.getElementById('edit-perf-email').value = p.email || '';
+      document.getElementById('edit-perf-senha').value = p.senha || '';
       document.getElementById('edit-perf-telefone').value = p.telefone || '';
       document.getElementById('edit-perf-cargo').value = p.cargo || 'auxiliar_tecnico';
     }
@@ -697,17 +949,20 @@
       const id = document.getElementById('edit-perf-id').value;
       const nome = document.getElementById('edit-perf-nome').value.trim();
       const email = document.getElementById('edit-perf-email').value.trim();
+      const senha = document.getElementById('edit-perf-senha').value.trim();
       const telefone = document.getElementById('edit-perf-telefone').value.trim();
       const cargo = document.getElementById('edit-perf-cargo').value;
 
-      if(!id || !nome) return;
+      if(!id || !nome || !email) return;
 
-      await db.from('perfis').update({ nome, email, telefone, cargo }).eq('id', id);
+      const dados = { nome, email, telefone, cargo };
+      if (senha) dados.senha = senha;
+
+      await db.from('perfis').update(dados).eq('id', id);
       fecharModalPerfil();
       carregarEquipe();
     }
 
-    // Inicialização
     iniciarSistema();
   </script>
 </body>
