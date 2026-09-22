@@ -204,13 +204,20 @@
       <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 no-print border-b border-zinc-800 pb-4">
         <div>
           <h2 class="text-xl font-extrabold text-white">Gestão de Eventos (Saídas)</h2>
-          <p class="text-xs text-zinc-400 mt-1">Escaneie QR Codes ou adicione manualmente os itens ao romaneio.</p>
+          <p class="text-xs text-zinc-400 mt-1">Escaneie QR Codes, selecione da lista ou digite o nome do item manualmente.</p>
         </div>
         <div class="flex gap-2">
           <button onclick="abrirModalLeitorQRParaSaida()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 shadow transition"><i data-lucide="scan" class="w-4 h-4"></i> Ler QR Code</button>
           <button onclick="window.print()" class="bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 px-4 rounded-xl text-xs font-semibold transition">Imprimir</button>
           <button onclick="gerarPDFSaida()" class="bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 px-4 rounded-xl text-xs font-semibold transition">PDF</button>
         </div>
+      </div>
+
+      <!-- ADICIONAR ITEM DIGITANDO -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 no-print flex flex-col sm:flex-row gap-3 items-center">
+        <input type="text" id="input-item-manual-saida" placeholder="Digitar nome de item extra..." class="flex-1 w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+        <input type="number" id="input-qtd-manual-saida" value="1" min="1" class="w-20 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs text-center">
+        <button onclick="adicionarItemManualSaida()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl text-xs shadow">Adicionar Item Manual</button>
       </div>
 
       <div id="area-pdf-saida">
@@ -254,7 +261,7 @@
     <!-- EQUIPE -->
     <section id="sec-equipe" class="space-y-4 hidden no-print">
       <div class="flex justify-between items-center">
-        <div><h2 class="text-xl font-extrabold text-white">Controle de Equipe</h2><p class="text-xs text-zinc-400 mt-1">Acessos, perfis, WhatsApp e promoções de cargos.</p></div>
+        <div><h2 class="text-xl font-extrabold text-white">Controle de Equipe</h2><p class="text-xs text-zinc-400 mt-1">Dados completos, WhatsApp e gerenciamento de permissões.</p></div>
         <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-zinc-800 hover:bg-zinc-700 text-white py-2 px-3 rounded-xl text-xs font-semibold hidden"><i data-lucide="image" class="w-3.5 h-3.5 inline"></i> Logo Oficial</button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-equipe"></div>
@@ -289,7 +296,7 @@
     </div>
   </div>
 
-  <!-- MODAL MEU PERFIL (AUTONOMIA DO USUÁRIO) -->
+  <!-- MODAL MEU PERFIL -->
   <div id="modal-meu-perfil" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
       <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -406,7 +413,7 @@
     </div>
   </div>
 
-  <!-- MODAL KIT (COM SUPORTE A ITENS MANUAIS) -->
+  <!-- MODAL KIT -->
   <div id="modal-kit" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print overflow-y-auto">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-2xl space-y-4 my-auto shadow-2xl">
       <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -760,7 +767,7 @@
       } else if(modoLeitorQRAtual === 'saida') {
         if(item) { registrosSaida[item.id] = (registrosSaida[item.id]||0)+1; renderizarTabelaSaida(); alert(`Adicionado: ${item.nome}`); }
         else if(kit) {
-          if(kit.itens) kit.itens.forEach(i => registrosSaida[i.id_estoque] = (registrosSaida[i.id_estoque]||0)+i.quantidade);
+          if(kit.itens) kit.itens.forEach(i => registrosSaida[i.id_estoque || i.nome] = (registrosSaida[i.id_estoque || i.nome]||0)+i.quantidade);
           renderizarTabelaSaida(); alert(`Kit inserido: ${kit.nome}`);
         }
       } else { alert('Item não encontrado.'); }
@@ -811,7 +818,7 @@
     }
     async function deletarEstoque(id) { if(isAdministracaoOuSuperior() && confirm('Excluir equipamento?')) { await db.from('estoque').delete().eq('id', id); carregarEstoque(); } }
 
-    // KITS (COM ITENS MANUAIS + ESTOQUE)
+    // KITS (COM ADICIONAR E EXCLUIR)
     function fecharModalKit() { document.getElementById('modal-kit').classList.add('hidden'); }
     function abrirModalKit(k = null) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
@@ -874,6 +881,13 @@
       if(id) await db.from('kits').update(d).eq('id', id); else await db.from('kits').insert([d]);
       fecharModalKit(); carregarKits();
     }
+    async function deletarKit(id) {
+      if(!isAdministracaoOuSuperior()) return;
+      if(confirm('Tem certeza que deseja excluir este kit?')) {
+        await db.from('kits').delete().eq('id', id);
+        carregarKits();
+      }
+    }
 
     async function carregarKits() {
       if(!db) return;
@@ -892,8 +906,11 @@
             </ul>
           </div>
           <div class="flex justify-between items-center pt-3 border-t border-zinc-800">
-            <button onclick="abrirModalEtiquetaQR('${k.id}', '${k.nome}')" class="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold border border-zinc-700 shadow transition">Etiqueta Kit</button>
-            ${adm ? `<button onclick='abrirModalKit(${JSON.stringify(k)})' class="text-purple-400 hover:text-purple-300 text-xs font-bold">Editar</button>` : ''}
+            <button onclick="abrirModalEtiquetaQR('${k.id}', '${k.nome}')" class="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold border border-zinc-700 shadow transition">Etiqueta</button>
+            <div class="flex gap-2">
+              ${adm ? `<button onclick='abrirModalKit(${JSON.stringify(k)})' class="text-purple-400 hover:text-purple-300 text-xs font-bold">Editar</button>` : ''}
+              ${adm ? `<button onclick="deletarKit('${k.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold">Excluir</button>` : ''}
+            </div>
           </div>
         </div>
       `).join('');
@@ -902,12 +919,22 @@
       if(kitsGlobal.length === 0) { const { data } = await db.from('kits').select('*'); kitsGlobal = data || []; }
     }
 
-    // EVENTOS / SAÍDAS
+    // EVENTOS / SAÍDAS (COM DIGITAÇÃO DE NOME DE ITEM)
     function atualizarHeaderPrint() { document.getElementById('print-info-evento').innerText = `Evento: ${document.getElementById('ev-nome').value||'--'} | Cliente: ${document.getElementById('ev-contato').value||'--'} | Data: ${document.getElementById('ev-data').value||'--'}`; }
     function gerarPDFSaida() { html2pdf().set({ margin: 0.3, filename: `Saida.pdf`, jsPDF: { unit: 'in', format: 'letter' } }).from(document.getElementById('area-pdf-saida')).save(); }
     
+    function adicionarItemManualSaida() {
+      const nome = document.getElementById('input-item-manual-saida').value.trim();
+      const qtd = parseInt(document.getElementById('input-qtd-manual-saida').value) || 1;
+      if(!nome) return alert('Digite o nome do item.');
+      registrosSaida[nome] = (registrosSaida[nome] || 0) + qtd;
+      document.getElementById('input-item-manual-saida').value = '';
+      document.getElementById('input-qtd-manual-saida').value = '1';
+      renderizarTabelaSaida();
+    }
+
     function renderizarTabelaSaida() {
-      document.getElementById('checklist-itens-evento').innerHTML = estoqueGlobal.map(i => {
+      let html = estoqueGlobal.map(i => {
         const q = registrosSaida[i.id] || 0;
         return `
           <tr class="border-b border-zinc-800/40 hover:bg-zinc-800/20">
@@ -915,18 +942,46 @@
             <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-[9px] font-bold ${getBadgeCategoriaCor(i.categoria)}">${i.categoria}</span></td>
             <td class="p-3 text-center font-black text-base font-mono ${q>0?'text-emerald-400':'text-zinc-600'}">${q}</td>
             <td class="p-3 text-center no-print">
+              <button onclick="registrosSaida['${i.id}'] = Math.max(0, (registrosSaida['${i.id}']||0)-1); renderizarTabelaSaida();" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2.5 py-1 rounded-xl text-xs font-bold shadow mr-1">-</button>
               <button onclick="registrosSaida['${i.id}'] = (registrosSaida['${i.id}']||0)+1; renderizarTabelaSaida();" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded-xl text-xs font-bold shadow">+1</button>
             </td>
           </tr>
         `;
       }).join('');
+
+      for(const [key, q] of Object.entries(registrosSaida)) {
+        if(!estoqueGlobal.some(e => e.id === key) && q > 0) {
+          html += `
+            <tr class="border-b border-zinc-800/40 hover:bg-zinc-800/20 bg-blue-950/20">
+              <td class="p-3 font-bold text-white">${key} <span class="text-[9px] text-amber-400 font-mono">(Digitado)</span></td>
+              <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-[9px] font-bold bg-zinc-800 text-zinc-300">Manual</span></td>
+              <td class="p-3 text-center font-black text-base font-mono text-emerald-400">${q}</td>
+              <td class="p-3 text-center no-print">
+                <button onclick="registrosSaida['${key}'] = Math.max(0, (registrosSaida['${key}']||0)-1); renderizarTabelaSaida();" class="bg-zinc-800 text-zinc-300 px-2.5 py-1 rounded text-xs font-bold shadow mr-1">-</button>
+                <button onclick="registrosSaida['${key}'] = (registrosSaida['${key}']||0)+1; renderizarTabelaSaida();" class="bg-zinc-800 text-zinc-300 px-3 py-1 rounded text-xs font-bold shadow">+1</button>
+              </td>
+            </tr>
+          `;
+        }
+      }
+      document.getElementById('checklist-itens-evento').innerHTML = html;
     }
+
     async function salvarSaidaMaterialBD() {
       if(!temPermissaoSaida()) return;
       const evt = document.getElementById('ev-nome').value.trim();
       if(!evt) return alert('Nome do evento obrigatório.');
       const itens = [];
-      for (const [id, q] of Object.entries(registrosSaida)) { if(q>0) { const i = estoqueGlobal.find(e=>e.id===id); if(i) itens.push({ id_estoque: id, nome: i.nome, quantidade: q }); } }
+      for (const [idOrName, q] of Object.entries(registrosSaida)) {
+        if(q > 0) {
+          const i = estoqueGlobal.find(e => e.id === idOrName);
+          if(i) {
+            itens.push({ id_estoque: idOrName, nome: i.nome, quantidade: q });
+          } else {
+            itens.push({ id_estoque: null, nome: idOrName, quantidade: q });
+          }
+        }
+      }
       if(!itens.length) return alert('Nenhum item selecionado.');
       await db.from('saida_materiais').insert([{ evento_nome: evt, contato_evento: document.getElementById('ev-contato').value, telefone_evento: document.getElementById('ev-telefone').value, data_evento: document.getElementById('ev-data').value, responsavel: document.getElementById('ev-responsavel').value, itens, criado_por: usuarioAtual.nome }]);
       alert('Romaneio de saída registrado com sucesso!'); registrosSaida = {}; renderizarTabelaSaida(); carregarSaidasRegistradas();
@@ -943,37 +998,68 @@
       `).join('');
     }
 
-    // DEMANDAS E MANUTENÇÃO
+    // DEMANDAS (COM ADICIONAR E EXCLUIR)
     function fecharModalDemanda() { document.getElementById('modal-demanda').classList.add('hidden'); }
     function abrirModalDemanda() { document.getElementById('modal-demanda').classList.remove('hidden'); }
     async function salvarDemanda() {
       await db.from('demandas').insert([{ descricao: document.getElementById('dem-descricao').value, status: document.getElementById('dem-status').value, data_limite: document.getElementById('dem-data').value, criado_por: usuarioAtual.nome }]);
       fecharModalDemanda(); carregarDemandas();
     }
+    async function deletarDemanda(id) {
+      if(confirm('Tem certeza que deseja excluir esta demanda?')) {
+        await db.from('demandas').delete().eq('id', id);
+        carregarDemandas();
+      }
+    }
     async function carregarDemandas() {
       const { data } = await db.from('demandas').select('*');
-      document.getElementById('cards-demandas').innerHTML = (data||[]).map(d => `<div class="bg-gradient-to-br from-zinc-900 to-teal-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2"><span class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full bg-teal-900/40 text-teal-300 border border-teal-800">${d.status}</span><p class="text-xs text-white mt-1">${d.descricao}</p><div class="text-[10px] text-zinc-500 font-mono">Prazo: ${d.data_limite || 'Sem prazo'}</div></div>`).join('');
+      document.getElementById('cards-demandas').innerHTML = (data||[]).map(d => `
+        <div class="bg-gradient-to-br from-zinc-900 to-teal-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full bg-teal-900/40 text-teal-300 border border-teal-800">${d.status}</span>
+            <button onclick="deletarDemanda('${d.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold">✕ Excluir</button>
+          </div>
+          <p class="text-xs text-white mt-1">${d.descricao}</p>
+          <div class="text-[10px] text-zinc-500 font-mono">Prazo: ${d.data_limite || 'Sem prazo'}</div>
+        </div>
+      `).join('');
     }
 
+    // MANUTENÇÃO (COM ADICIONAR E EXCLUIR)
     function fecharModalManutencao() { document.getElementById('modal-manutencao').classList.add('hidden'); }
     function abrirModalManutencao() { document.getElementById('modal-manutencao').classList.remove('hidden'); }
     async function salvarManutencao() {
       await db.from('manutencao_separada').insert([{ item: document.getElementById('man-item').value, status: document.getElementById('man-status').value, data_limite: document.getElementById('man-data-limite').value, defeito_relatado: document.getElementById('man-defeito').value, criado_por: usuarioAtual.nome }]);
       fecharModalManutencao(); carregarManutencao();
     }
+    async function deletarManutencao(id) {
+      if(confirm('Tem certeza que deseja excluir esta ficha de manutenção?')) {
+        await db.from('manutencao_separada').delete().eq('id', id);
+        carregarManutencao();
+      }
+    }
     async function carregarManutencao() {
       const { data } = await db.from('manutencao_separada').select('*');
-      document.getElementById('cards-manutencao').innerHTML = (data||[]).map(m => `<div class="bg-gradient-to-br from-zinc-900 to-amber-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2"><h4 class="font-bold text-white text-sm">${m.item}</h4><p class="text-xs text-amber-300/90">${m.defeito_relatado}</p><div class="text-[10px] text-zinc-500 font-mono">Limite: ${m.data_limite || 'Sem prazo'}</div></div>`).join('');
+      document.getElementById('cards-manutencao').innerHTML = (data||[]).map(m => `
+        <div class="bg-gradient-to-br from-zinc-900 to-amber-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2">
+          <div class="flex justify-between items-start">
+            <h4 class="font-bold text-white text-sm">${m.item}</h4>
+            <button onclick="deletarManutencao('${m.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold">✕ Excluir</button>
+          </div>
+          <p class="text-xs text-amber-300/90">${m.defeito_relatado}</p>
+          <div class="text-[10px] text-zinc-500 font-mono">Limite: ${m.data_limite || 'Sem prazo'}</div>
+        </div>
+      `).join('');
     }
 
-    // EQUIPE COM WHATSAPP E PERMISSÃO DE EDIÇÃO PARA ADMINS
+    // EQUIPE (DADOS COMPLETOS: FOTO, NOME, FONE, NASCIMENTO, EMAIL, BIO + EDITAR ADMIN)
     async function carregarEquipe() {
       const { data } = await db.from('perfis').select('*');
       const adm = isAdministracaoOuSuperior();
       document.getElementById('cards-equipe').innerHTML = (data||[]).map(p => {
         const tel = (p.telefone || '').replace(/\D/g, '');
         return `
-          <div class="bg-gradient-to-br from-zinc-900 to-blue-950/20 border border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-xl">
+          <div class="bg-gradient-to-br from-zinc-900 to-blue-950/20 border border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-xl space-y-3">
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
                 ${p.foto_url ? `<img src="${p.foto_url}" class="w-14 h-14 rounded-2xl object-cover border border-blue-500/40 shadow">` : `<div class="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center font-bold text-zinc-400 text-lg">👤</div>`}
@@ -982,12 +1068,18 @@
                   <span class="text-[9px] px-2.5 py-0.5 rounded-full font-extrabold uppercase bg-blue-950 text-blue-300 border border-blue-800/60 inline-block mt-1">${p.cargo}</span>
                 </div>
               </div>
-              ${adm ? `<button onclick="abrirModalEditarMembro('${p.id}')" class="text-zinc-400 hover:text-white p-1.5 bg-zinc-800/80 rounded-xl"><i data-lucide="settings" class="w-4 h-4"></i></button>` : ''}
+              ${adm ? `<button onclick="abrirModalEditarMembro('${p.id}')" class="text-zinc-400 hover:text-white p-1.5 bg-zinc-800/80 rounded-xl" title="Editar"><i data-lucide="settings" class="w-4 h-4"></i></button>` : ''}
             </div>
-            ${p.bio ? `<p class="text-[11px] text-zinc-400 italic mt-3 bg-zinc-950/50 p-2.5 rounded-xl border border-zinc-800/80">"${p.bio}"</p>` : ''}
-            <div class="pt-4 mt-4 border-t border-zinc-800 flex justify-between items-center text-xs">
-              <span class="text-zinc-400 font-mono">📱 ${p.telefone || 'Sem fone'}</span>
-              ${tel ? `<a href="https://wa.me/55${tel}" target="_blank" class="bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-400 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow">WhatsApp</a>` : ''}
+            
+            <div class="space-y-1 text-xs text-zinc-300 bg-zinc-950/60 p-3 rounded-xl border border-zinc-800/80 font-mono">
+              <div>📧 E-mail: <span class="text-zinc-400">${p.email || 'Não informado'}</span></div>
+              <div>📱 Telefone: <span class="text-zinc-400">${p.telefone || 'Não informado'}</span></div>
+              <div>🎂 Nascimento: <span class="text-zinc-400">${p.data_nascimento || 'Não informado'}</span></div>
+              ${p.bio ? `<div class="pt-1 text-[11px] italic text-zinc-400 font-sans">Bio: "${p.bio}"</div>` : ''}
+            </div>
+
+            <div class="pt-2 flex justify-end items-center">
+              ${tel ? `<a href="https://wa.me/55${tel}" target="_blank" class="bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-400 font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow text-xs">WhatsApp</a>` : ''}
             </div>
           </div>
         `;
@@ -999,4 +1091,3 @@
   </script>
 </body>
 </html>
-
