@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     @media print {
       .no-print { display: none !important; }
@@ -29,7 +30,7 @@
     let loginTimestamp = localStorage.getItem('lm_login_time') || null;
     let logoEmpresaUrl = localStorage.getItem('lm_logo_url') || '';
 
-    // VALIDAÇÃO DE EXPIRAÇÃO DE SESSÃO EM 24 HORAS (24 * 60 * 60 * 1000 ms)
+    // Expiração da sessão em 24 Horas
     const UM_DIA_MS = 24 * 60 * 60 * 1000;
     if (loginTimestamp && (Date.now() - parseInt(loginTimestamp)) > UM_DIA_MS) {
       localStorage.removeItem('lm_usuario');
@@ -38,7 +39,7 @@
     }
   </script>
 
-  <!-- TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
+  <!-- TELA DE AUTENTICAÇÃO -->
   <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-8">
       
@@ -75,8 +76,8 @@
           <input type="text" id="cad-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">URL da Foto de Perfil (Opcional)</label>
-          <input type="url" id="cad-foto" placeholder="https://link-da-sua-foto.jpg" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto de Perfil (Câmera / Arquivo)</label>
+          <input type="file" id="cad-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase mb-1">E-mail (Login Único)</label>
@@ -131,7 +132,7 @@
         <div>
           <h1 class="text-xl font-black tracking-wider text-blue-500" id="header-app-title">LEGALMART</h1>
           <div class="flex items-center gap-2 mt-0.5">
-            <img id="header-user-avatar" src="" class="w-5 h-5 rounded-full object-cover hidden border border-blue-500">
+            <img id="header-user-avatar" src="" class="w-6 h-6 rounded-full object-cover hidden border border-blue-500">
             <p class="text-xs text-gray-400 cursor-pointer hover:text-white" onclick="abrirModalMeuPerfil()" id="user-info-bar">Carregando usuário...</p>
           </div>
         </div>
@@ -149,7 +150,7 @@
           <i data-lucide="wrench" class="w-4 h-4"></i> Manutenção
         </button>
         <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
-          <i data-lucide="truck" class="w-4 h-4"></i> Romaneio
+          <i data-lucide="truck" class="w-4 h-4"></i> Saída de Material
         </button>
         <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5">
           <i data-lucide="users" class="w-4 h-4"></i> Equipe
@@ -183,6 +184,7 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-xs uppercase">
+              <th class="p-4">Foto</th>
               <th class="p-4">Equipamento</th>
               <th class="p-4">Modelo</th>
               <th class="p-4">Categoria</th>
@@ -223,50 +225,80 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-manutencao"></div>
     </section>
 
-    <!-- ROMANEIO -->
+    <!-- SAÍDA DE MATERIAL -->
     <section id="sec-eventos" class="space-y-6 hidden">
-      <div class="flex justify-between items-center no-print">
+      <div class="flex justify-between items-center no-print flex-wrap gap-3">
         <div>
-          <h2 class="text-2xl font-black text-green-400">Romaneio de Saída & Carga</h2>
-          <p class="text-xs text-gray-400">Relatório e conferência para transporte</p>
+          <h2 class="text-2xl font-black text-green-400">Saída de Material para Evento</h2>
+          <p class="text-xs text-gray-400">Controle de saídas, responsável, impressão e download em PDF</p>
         </div>
-        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-xl">
-          Imprimir Romaneio
-        </button>
+        <div class="flex gap-2">
+          <button onclick="window.print()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg border border-gray-700">
+            <i data-lucide="printer" class="w-4 h-4"></i> Imprimir
+          </button>
+          <button onclick="gerarPDFSaida()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg">
+            <i data-lucide="file-text" class="w-4 h-4"></i> Baixar PDF
+          </button>
+          <button id="btn-finalizar-saida" onclick="salvarSaidaMaterialBD()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg hidden">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> Registrar Saída
+          </button>
+        </div>
       </div>
 
-      <div class="print-only mb-6 border-b-2 border-black pb-4">
-        <div class="flex items-center gap-4 mb-2">
-          <img id="print-logo-img" src="" class="h-12 hidden">
-          <h1 class="text-2xl font-bold uppercase text-black">LEGALMART - ROMANEIO DE CARGA</h1>
+      <!-- ÁREA IMPRESSÃO / PDF -->
+      <div id="area-pdf-saida">
+        <div class="print-only mb-6 border-b-2 border-black pb-4">
+          <div class="flex items-center gap-4 mb-2">
+            <img id="print-logo-img" src="" class="h-12 hidden">
+            <h1 class="text-2xl font-bold uppercase text-black">LEGALMART - TERMO DE SAÍDA DE MATERIAL</h1>
+          </div>
+          <p class="text-sm font-semibold text-black" id="print-info-evento">Evento: Não Especificado | Data: --/--/---- | Contato: -- | Tel: -- | Responsável: Não Informado</p>
         </div>
-        <p class="text-sm font-semibold text-black" id="print-info-evento">Evento: Não Especificado | Data: --/--/----</p>
+
+        <!-- FORMULÁRIO DE SAÍDA -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6 print:border-0 print:p-0">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 no-print">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome do Evento</label>
+              <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Ex: Show de Verão" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Contato do Evento</label>
+              <input type="text" id="ev-contato" oninput="atualizarHeaderPrint()" placeholder="Nome do Produtor" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Telefone Contato</label>
+              <input type="tel" id="ev-telefone" oninput="atualizarHeaderPrint()" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data Evento</label>
+              <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Resp. pelo Material</label>
+              <input type="text" id="ev-responsavel" oninput="atualizarHeaderPrint()" placeholder="Técnico/Auxiliar" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-xs focus:outline-none">
+            </div>
+          </div>
+
+          <table class="w-full text-left print-table">
+            <thead>
+              <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-xs uppercase print:bg-white print:text-black">
+                <th class="p-3">Equipamento</th>
+                <th class="p-3">Modelo / Categoria</th>
+                <th class="p-3 text-center no-print area-permissao-saida hidden">Saída (Qtde)</th>
+                <th class="p-3 text-center">Qtde p/ Evento</th>
+                <th class="p-3 text-center no-print area-permissao-saida hidden">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="checklist-itens-evento" class="divide-y divide-gray-800/60 text-sm"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6 print:border-0 print:p-0">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Evento / Cliente</label>
-            <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Ex: Show de Verão" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data</label>
-            <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
-          </div>
-        </div>
-
-        <table class="w-full text-left print-table">
-          <thead>
-            <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-xs uppercase print:bg-white print:text-black">
-              <th class="p-3">Equipamento</th>
-              <th class="p-3">Modelo / Categoria</th>
-              <th class="p-3 text-center no-print adm-only">Saída (Qtde)</th>
-              <th class="p-3 text-center">Qtde no Evento</th>
-              <th class="p-3 text-center no-print adm-only">Ação</th>
-            </tr>
-          </thead>
-          <tbody id="checklist-itens-evento" class="divide-y divide-gray-800/60 text-sm"></tbody>
-        </table>
+      <!-- LISTA DE SAÍDAS ATIVAS E CONFERÊNCIA DE RETORNO -->
+      <div class="no-print space-y-4 pt-4 border-t border-gray-800">
+        <h3 class="text-xl font-bold text-amber-400">Eventos Cadastrados (Histórico & Baixas)</h3>
+        <div id="lista-saidas-registradas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </section>
 
@@ -275,7 +307,7 @@
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 class="text-2xl font-black text-purple-400">Equipe & Configurações da Empresa</h2>
-          <p class="text-xs text-gray-400">Contatos diretos e logotipo oficial</p>
+          <p class="text-xs text-gray-400">Gerenciar acessos, permissões de saída e contatos</p>
         </div>
         <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">
           🖼️ Definir Logo da Empresa (ADM)
@@ -297,8 +329,8 @@
           <input type="text" id="my-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Link/URL da sua Foto de Perfil</label>
-          <input type="url" id="my-perf-foto" placeholder="https://link-da-sua-foto.jpg" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Enviar Foto (Câmera / Celular / PC)</label>
+          <input type="file" id="my-perf-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
         </div>
         <div>
           <label class="block text-xs font-bold text-amber-500 uppercase mb-1">Sua Nova Senha</label>
@@ -316,8 +348,8 @@
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
       <h3 class="text-lg font-bold text-purple-400">Logo Oficial da Empresa</h3>
       <div>
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">URL / Link da Imagem da Logo (PNG / JPG)</label>
-        <input type="url" id="input-logo-url" placeholder="https://link-da-logo-legalmart.png" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Upload da Logo (Celular / PC)</label>
+        <input type="file" id="input-logo-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
       </div>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalLogo()" class="px-4 py-2 text-gray-400 text-sm">Cancelar</button>
@@ -340,6 +372,10 @@
         <option value="Painel de LED">Painel de LED</option>
         <option value="Cabos & AC">Cabos & AC</option>
       </select>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto do Equipamento (Câmera / Galeria)</label>
+        <input type="file" id="est-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+      </div>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalEstoque()" class="px-4 py-2 text-gray-400">Cancelar</button>
         <button onclick="salvarEstoque()" class="bg-blue-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar</button>
@@ -355,7 +391,11 @@
         <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Data Agendada</label>
         <input type="date" id="limp-data" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none">
       </div>
-      <textarea id="limp-obs" placeholder="Observações..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="3"></textarea>
+      <textarea id="limp-obs" placeholder="Observações..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto do Estado/Sujeira (Câmera / Galeria)</label>
+        <input type="file" id="limp-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+      </div>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalLimpeza()" class="px-4 py-2 text-gray-400">Cancelar</button>
         <button onclick="salvarLimpeza()" class="bg-teal-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar</button>
@@ -397,6 +437,10 @@
         <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Solução Aplicada / Observações</label>
         <textarea id="man-solucao" placeholder="Descreva os componentes trocados..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none" rows="2"></textarea>
       </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto do Defeito / Equipamento (Câmera / Galeria)</label>
+        <input type="file" id="man-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300">
+      </div>
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalManutencao()" class="px-4 py-2 text-gray-400">Cancelar</button>
         <button onclick="salvarManutencao()" class="bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Ficha</button>
@@ -406,7 +450,7 @@
 
   <div id="modal-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg space-y-4">
-      <h3 class="text-lg font-bold text-purple-400">Redefinir Perfil e Acesso (ADM)</h3>
+      <h3 class="text-lg font-bold text-purple-400">Redefinir Perfil e Permissões (ADM)</h3>
       <input type="hidden" id="edit-perf-id">
       <div>
         <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
@@ -436,6 +480,16 @@
           </select>
         </div>
       </div>
+
+      <!-- CAIXA DE PERMISSÃO DE SAÍDA DE MATERIAL -->
+      <div class="bg-gray-950 p-3.5 rounded-xl border border-gray-800 flex items-center gap-3">
+        <input type="checkbox" id="edit-perf-pode-saida" class="w-5 h-5 accent-green-600 rounded">
+        <div>
+          <label for="edit-perf-pode-saida" class="text-xs font-bold text-white cursor-pointer">Permitir criar e adicionar Saídas de Material</label>
+          <p class="text-[10px] text-gray-400">Marque se este colaborador pode selecionar equipamentos e lançar saídas.</p>
+        </div>
+      </div>
+
       <div class="flex justify-end gap-3 border-t border-gray-800 pt-4">
         <button onclick="fecharModalPerfil()" class="px-4 py-2 text-gray-400">Cancelar</button>
         <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl">Salvar Alterações</button>
@@ -447,6 +501,32 @@
   <script>
     lucide.createIcons();
     let registrosSaida = {};
+
+    function temPermissaoSaida() {
+      if (!usuarioAtual) return false;
+      return usuarioAtual.cargo === 'administrador' || usuarioAtual.pode_criar_saida === true;
+    }
+
+    async function fazerUploadImagem(inputElementId) {
+      const fileInput = document.getElementById(inputElementId);
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
+
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      if (!db) return null;
+
+      const { data, error } = await db.storage.from('fotos').upload(fileName, file);
+      if (error) {
+        console.error('Erro no upload:', error.message);
+        alert('Erro ao enviar imagem: ' + error.message);
+        return null;
+      }
+
+      const { data: publicUrlData } = db.storage.from('fotos').getPublicUrl(fileName);
+      return publicUrlData ? publicUrlData.publicUrl : null;
+    }
 
     function aplicarLogoNaInterface() {
       if (logoEmpresaUrl) {
@@ -467,18 +547,16 @@
       }
     }
 
-    function abrirModalLogo() {
-      document.getElementById('modal-logo').classList.remove('hidden');
-      document.getElementById('input-logo-url').value = logoEmpresaUrl;
-    }
+    function abrirModalLogo() { document.getElementById('modal-logo').classList.remove('hidden'); }
     function fecharModalLogo() { document.getElementById('modal-logo').classList.add('hidden'); }
 
     async function salvarLogoEmpresa() {
-      const url = document.getElementById('input-logo-url').value.trim();
-      logoEmpresaUrl = url;
+      const urlUpload = await fazerUploadImagem('input-logo-file');
+      if (urlUpload) logoEmpresaUrl = urlUpload;
+
       localStorage.setItem('lm_logo_url', logoEmpresaUrl);
-      if (db) {
-        await db.from('configuracoes').upsert({ chave: 'logo_url', valor: url }, { onConflict: 'chave' });
+      if (db && logoEmpresaUrl) {
+        await db.from('configuracoes').upsert({ chave: 'logo_url', valor: logoEmpresaUrl }, { onConflict: 'chave' });
       }
       aplicarLogoNaInterface();
       fecharModalLogo();
@@ -488,26 +566,26 @@
       if (!usuarioAtual) return;
       document.getElementById('modal-meu-perfil').classList.remove('hidden');
       document.getElementById('my-perf-nome').value = usuarioAtual.nome || '';
-      document.getElementById('my-perf-foto').value = usuarioAtual.foto_url || '';
       document.getElementById('my-perf-senha').value = '';
     }
     function fecharModalMeuPerfil() { document.getElementById('modal-meu-perfil').classList.add('hidden'); }
 
     async function salvarMeuPerfil() {
       const nome = document.getElementById('my-perf-nome').value.trim();
-      const foto_url = document.getElementById('my-perf-foto').value.trim();
       const senha = document.getElementById('my-perf-senha').value.trim();
+      const novaFotoUrl = await fazerUploadImagem('my-perf-foto-file');
 
       if (!nome) return;
 
       usuarioAtual.nome = nome;
-      usuarioAtual.foto_url = foto_url;
+      if (novaFotoUrl) usuarioAtual.foto_url = novaFotoUrl;
       if (senha) usuarioAtual.senha = senha;
 
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
 
       if (db && usuarioAtual.id) {
-        const dados = { nome, foto_url };
+        const dados = { nome };
+        if (novaFotoUrl) dados.foto_url = novaFotoUrl;
         if (senha) dados.senha = senha;
         await db.from('perfis').update(dados).eq('id', usuarioAtual.id);
       }
@@ -564,7 +642,6 @@
 
     async function realizarCadastro() {
       const nome = document.getElementById('cad-nome').value.trim();
-      const foto_url = document.getElementById('cad-foto').value.trim();
       const email = document.getElementById('cad-email').value.trim();
       const senha = document.getElementById('cad-senha').value.trim();
       const telefone = document.getElementById('cad-telefone').value.trim();
@@ -592,7 +669,8 @@
         return;
       }
 
-      const novoPerfil = { nome, foto_url, email, senha, telefone, data_nascimento, cargo };
+      const foto_url = await fazerUploadImagem('cad-foto-file');
+      const novoPerfil = { nome, foto_url, email, senha, telefone, data_nascimento, cargo, pode_criar_saida: cargo === 'administrador' };
       const { data, error } = await db.from('perfis').insert([novoPerfil]).select().single();
 
       if (error) {
@@ -654,7 +732,7 @@
       if(aba === 'estoque') carregarEstoque();
       if(aba === 'limpeza') carregarLimpeza();
       if(aba === 'manutencao') carregarManutencao();
-      if(aba === 'eventos') carregarEventoChecklist();
+      if(aba === 'eventos') { carregarEventoChecklist(); carregarSaidasRegistradas(); }
       if(aba === 'equipe') carregarEquipe();
     }
 
@@ -690,11 +768,28 @@
 
     function atualizarHeaderPrint() {
       const nome = document.getElementById('ev-nome').value || 'Não Especificado';
+      const contato = document.getElementById('ev-contato').value || '--';
+      const tel = document.getElementById('ev-telefone').value || '--';
       const data = document.getElementById('ev-data').value || '--/--/----';
-      document.getElementById('print-info-evento').innerText = `Evento: ${nome} | Data: ${data}`;
+      const resp = document.getElementById('ev-responsavel').value || 'Não Informado';
+
+      document.getElementById('print-info-evento').innerText = `Evento: ${nome} | Contato: ${contato} | Tel: ${tel} | Data: ${data} | Responsável: ${resp}`;
     }
 
-    // ESTOQUE
+    function gerarPDFSaida() {
+      const element = document.getElementById('area-pdf-saida');
+      const nomeEvento = document.getElementById('ev-nome').value || 'Evento';
+      const opt = {
+        margin:       0.3,
+        filename:     `Saida_Material_${nomeEvento}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+
+    // ESTOQUE COM FOTOS
     async function carregarEstoque() {
       const container = document.getElementById('lista-estoque');
       if(!db) return;
@@ -703,6 +798,9 @@
 
       container.innerHTML = (data || []).map(item => `
         <tr class="hover:bg-gray-950/50 transition border-b border-gray-800/40">
+          <td class="p-4">
+            ${item.foto_url ? `<img src="${item.foto_url}" class="w-10 h-10 rounded-lg object-cover border border-gray-700">` : '<div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-xs text-gray-500">📦</div>'}
+          </td>
           <td class="p-4 font-bold text-white">${item.nome}</td>
           <td class="p-4 text-gray-400 font-mono">${item.modelo || '-'}</td>
           <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-950 text-blue-400 border border-blue-800/60">${item.categoria}</span></td>
@@ -720,8 +818,10 @@
       const modelo = document.getElementById('est-modelo').value.trim();
       const quantidade = parseInt(document.getElementById('est-qtd').value) || 1;
       const categoria = document.getElementById('est-categoria').value;
+      const foto_url = await fazerUploadImagem('est-foto-file');
+
       if (!nome) return;
-      await db.from('estoque').insert([{ nome, modelo, quantidade, categoria }]);
+      await db.from('estoque').insert([{ nome, modelo, quantidade, categoria, foto_url }]);
       fecharModalEstoque();
       carregarEstoque();
     }
@@ -733,7 +833,7 @@
       carregarEstoque();
     }
 
-    // LIMPEZA
+    // LIMPEZA COM FOTOS
     async function carregarLimpeza() {
       const container = document.getElementById('cards-limpeza');
       if(!db) return;
@@ -743,6 +843,7 @@
       container.innerHTML = (data || []).map(l => `
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
           <div class="space-y-2">
+            ${l.foto_url ? `<img src="${l.foto_url}" class="w-full h-36 rounded-xl object-cover border border-teal-800/50 mb-2">` : ''}
             <div class="flex justify-between items-start">
               <h3 class="font-bold text-lg text-white">${l.item}</h3>
               <span class="text-xs px-2.5 py-1 rounded-full font-bold ${l.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-teal-950 text-teal-400'}">
@@ -767,9 +868,11 @@
       const item = document.getElementById('limp-item').value.trim();
       const data_limpeza = document.getElementById('limp-data').value;
       const observacao = document.getElementById('limp-obs').value.trim();
+      const foto_url = await fazerUploadImagem('limp-foto-file');
+
       if(!item) return;
 
-      await db.from('limpeza').insert([{ item, data_limpeza, observacao, criado_por: usuarioAtual.nome }]);
+      await db.from('limpeza').insert([{ item, data_limpeza, observacao, foto_url, criado_por: usuarioAtual.nome }]);
       fecharModalLimpeza();
       carregarLimpeza();
     }
@@ -787,7 +890,7 @@
       carregarLimpeza();
     }
 
-    // MANUTENÇÃO / FICHA TÉCNICA
+    // MANUTENÇÃO COM FOTOS
     async function carregarManutencao() {
       const container = document.getElementById('cards-manutencao');
       if(!db) return;
@@ -802,6 +905,7 @@
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
             <div class="space-y-2">
+              ${m.foto_url ? `<img src="${m.foto_url}" class="w-full h-36 rounded-xl object-cover border border-amber-800/50 mb-2">` : ''}
               <div class="flex justify-between items-start">
                 <h3 class="font-bold text-lg text-white">${m.item}</h3>
                 <span class="text-xs px-2.5 py-1 rounded-full font-bold ${statusCor}">
@@ -833,6 +937,7 @@
       const tecnico_responsavel = document.getElementById('man-tecnico').value.trim();
       const defeito_relatado = document.getElementById('man-defeito').value.trim();
       const solucao_aplicada = document.getElementById('man-solucao').value.trim();
+      const novaFotoUrl = await fazerUploadImagem('man-foto-file');
 
       if (!item) return;
 
@@ -840,6 +945,8 @@
         item, status, data_limite, tecnico_responsavel, defeito_relatado, solucao_aplicada,
         criado_por: usuarioAtual.nome
       };
+
+      if (novaFotoUrl) dados.foto_url = novaFotoUrl;
 
       if (id) {
         await db.from('manutencao_separada').update(dados).eq('id', id);
@@ -858,28 +965,37 @@
       carregarManutencao();
     }
 
-    // ROMANEIO
+    // SAÍDA DE MATERIAL & PERMISSÕES
+    let estoqueGlobal = [];
+
     async function carregarEventoChecklist() {
       const container = document.getElementById('checklist-itens-evento');
       if(!db) return;
       const { data } = await db.from('estoque').select('*');
-      const isAdm = usuarioAtual.cargo === 'administrador';
+      estoqueGlobal = data || [];
 
-      container.innerHTML = (data || []).map(i => {
+      const podeCriar = temPermissaoSaida();
+      document.getElementById('btn-finalizar-saida').classList.toggle('hidden', !podeCriar);
+
+      document.querySelectorAll('.area-permissao-saida').forEach(el => {
+        el.classList.toggle('hidden', !podeCriar);
+      });
+
+      container.innerHTML = estoqueGlobal.map(i => {
         const qtdeNoEvento = registrosSaida[i.id] || 0;
         return `
           <tr class="border-b border-gray-800/60 print:border-gray-300">
             <td class="p-3 font-bold text-white print:text-black">${i.nome}</td>
             <td class="p-3 text-gray-400 print:text-black font-mono text-xs">${i.modelo || '-'} (${i.categoria})</td>
-            <td class="p-3 text-center no-print ${isAdm ? '' : 'hidden'}">
+            <td class="p-3 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
               <input type="number" id="qtd-saida-${i.id}" value="1" min="1" max="${i.quantidade}" class="w-16 bg-gray-950 border border-gray-800 rounded-lg p-1.5 text-center text-white text-xs">
             </td>
             <td class="p-3 text-center font-bold font-mono text-lg ${qtdeNoEvento > 0 ? 'text-amber-400 print:text-black' : 'text-gray-500 print:text-black'}">
               ${qtdeNoEvento}
             </td>
-            <td class="p-3 text-center no-print ${isAdm ? '' : 'hidden'}">
+            <td class="p-3 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
               <button onclick="registrarSaidaItem('${i.id}')" class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">
-                Saída
+                + Selecionar
               </button>
             </td>
           </tr>
@@ -888,11 +1004,117 @@
     }
 
     function registrarSaidaItem(id) {
+      if (!temPermissaoSaida()) {
+        alert('Você não tem permissão para lançar saídas de material.');
+        return;
+      }
       const input = document.getElementById(`qtd-saida-${id}`);
       const valor = parseInt(input.value) || 0;
       if(valor <= 0) return;
       registrosSaida[id] = (registrosSaida[id] || 0) + valor;
       carregarEventoChecklist();
+    }
+
+    async function salvarSaidaMaterialBD() {
+      if (!temPermissaoSaida()) {
+        alert('Você não tem permissão para lançar saídas de material.');
+        return;
+      }
+
+      const evento_nome = document.getElementById('ev-nome').value.trim();
+      const contato_evento = document.getElementById('ev-contato').value.trim();
+      const telefone_evento = document.getElementById('ev-telefone').value.trim();
+      const data_evento = document.getElementById('ev-data').value;
+      const responsavel = document.getElementById('ev-responsavel').value.trim();
+
+      if (!evento_nome || !responsavel) {
+        alert('Informe o Nome do Evento e o Responsável pelo Material!');
+        return;
+      }
+
+      const itensSaida = [];
+      for (const [id, qtd] of Object.entries(registrosSaida)) {
+        if (qtd > 0) {
+          const item = estoqueGlobal.find(e => e.id === id);
+          if (item) {
+            itensSaida.push({ id_estoque: id, nome: item.nome, quantidade: qtd });
+          }
+        }
+      }
+
+      if (itensSaida.length === 0) {
+        alert('Selecione pelo menos 1 equipamento para registrar a saída!');
+        return;
+      }
+
+      if (!db) return;
+
+      const { error } = await db.from('saida_materiais').insert([{
+        evento_nome, contato_evento, telefone_evento, data_evento, responsavel, itens: itensSaida, criado_por: usuarioAtual.nome
+      }]);
+
+      if (error) {
+        alert('Erro ao registrar saída: ' + error.message);
+        return;
+      }
+
+      alert('Saída de material registrada com sucesso!');
+      registrosSaida = {};
+      document.getElementById('ev-nome').value = '';
+      document.getElementById('ev-contato').value = '';
+      document.getElementById('ev-telefone').value = '';
+      document.getElementById('ev-responsavel').value = '';
+      carregarEventoChecklist();
+      carregarSaidasRegistradas();
+    }
+
+    async function carregarSaidasRegistradas() {
+      const container = document.getElementById('lista-saidas-registradas');
+      if(!db) return;
+      const { data } = await db.from('saida_materiais').select('*').order('created_at', { ascending: false });
+
+      if (!data || data.length === 0) {
+        container.innerHTML = `<p class="text-xs text-gray-500 italic">Nenhum evento registrado no momento.</p>`;
+        return;
+      }
+
+      const podeCriar = temPermissaoSaida();
+
+      container.innerHTML = data.map(s => `
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-bold text-white text-base">${s.evento_nome}</h4>
+              <p class="text-xs text-amber-400 font-semibold">👤 Resp. Material: ${s.responsavel || 'Não informado'}</p>
+              <p class="text-xs text-gray-400">📞 Contato: ${s.contato_evento || '-'} (${s.telefone_evento || '-'})</p>
+              <p class="text-xs text-gray-400">📅 Data: ${s.data_evento || 'Sem data'}</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full font-bold ${s.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-amber-950 text-amber-400'}">
+              ${s.status === 'CONCLUIDO' ? 'DEVOLVIDO / BAIXADO' : 'EM EVENTO'}
+            </span>
+          </div>
+
+          <div class="bg-gray-950 p-3 rounded-xl space-y-1 text-xs">
+            <p class="font-bold text-gray-400 uppercase mb-1">Lista de Materiais Lançados:</p>
+            ${(s.itens || []).map(i => `<p class="text-gray-300">• <b>${i.quantidade}x</b>${i.nome}</p>`).join('')}
+          </div>
+
+          ${(s.status !== 'CONCLUIDO' && podeCriar) ? `
+            <button onclick="darBaixaMaterialGalpao('${s.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 rounded-xl text-xs flex justify-center items-center gap-1">
+              ✅ Conferir e Dar Baixa de Retorno no Galpão
+            </button>
+          ` : (s.status === 'CONCLUIDO' ? '<p class="text-center text-xs text-green-400 font-bold">✓ Todos os itens conferidos e devolvidos</p>' : '')}
+        </div>
+      `).join('');
+    }
+
+    async function darBaixaMaterialGalpao(id) {
+      if (!confirm('Confirmar retorno de todos os materiais deste evento para o galpão?')) return;
+      if (!db) return;
+
+      await db.from('saida_materiais').update({ status: 'CONCLUIDO' }).eq('id', id);
+      alert('Baixa concluída! Materiais retornados com sucesso.');
+      carregarSaidasRegistradas();
     }
 
     // EQUIPE E WHATSAPP
@@ -920,7 +1142,9 @@
               </div>
               <p class="text-xs text-gray-400">📧 ${p.email || 'Não informado'}</p>
               <p class="text-xs text-gray-400">📱 ${p.telefone || 'Não informado'}</p>
-              <p class="text-xs text-gray-400">🎂 Nascimento: ${p.data_nascimento || 'Não informada'}</p>
+              <p class="text-xs font-semibold ${p.pode_criar_saida ? 'text-green-400' : 'text-gray-500'}">
+                ${p.pode_criar_saida ? '✓ Pode criar Saídas' : '✗ Apenas visualiza Saídas'}
+              </p>
             </div>
             <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs">
               ${telLimpo ? `
@@ -928,7 +1152,7 @@
                   💬 WhatsApp
                 </a>
               ` : '<span class="text-gray-500">Sem WhatsApp</span>'}
-              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Redefinir Perfil (ADM)</button>` : ''}
+              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Editar Acessos (ADM)</button>` : ''}
             </div>
           </div>
         `;
@@ -943,6 +1167,7 @@
       document.getElementById('edit-perf-senha').value = p.senha || '';
       document.getElementById('edit-perf-telefone').value = p.telefone || '';
       document.getElementById('edit-perf-cargo').value = p.cargo || 'auxiliar_tecnico';
+      document.getElementById('edit-perf-pode-saida').checked = p.pode_criar_saida || false;
     }
 
     async function salvarEdicaoPerfil() {
@@ -952,10 +1177,11 @@
       const senha = document.getElementById('edit-perf-senha').value.trim();
       const telefone = document.getElementById('edit-perf-telefone').value.trim();
       const cargo = document.getElementById('edit-perf-cargo').value;
+      const pode_criar_saida = document.getElementById('edit-perf-pode-saida').checked;
 
       if(!id || !nome || !email) return;
 
-      const dados = { nome, email, telefone, cargo };
+      const dados = { nome, email, telefone, cargo, pode_criar_saida };
       if (senha) dados.senha = senha;
 
       await db.from('perfis').update(dados).eq('id', id);
