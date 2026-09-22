@@ -33,7 +33,7 @@
     const SUPABASE_URL = 'https://havsqawfqzwvwppfvugd.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_yNDu8sgD_M04hBcIuxRhDg_FfqKvgwP';
     
-    // As chaves de segurança exigidas no cadastro para cargos altos
+    // Chaves de Segurança
     const SENHA_MESTRA_ADM = "LEGALMART2026";
     const CHAVE_DEVELOP = "KELVIN2026";
 
@@ -45,8 +45,6 @@
     let usuarioAtual = JSON.parse(localStorage.getItem('lm_usuario')) || null;
     let estoqueGlobal = [], kitsGlobal = [], demandasGlobal = [], manutencaoGlobal = [], saidasGlobal = [], equipeGlobal = [];
     let registrosSaida = {};
-    let html5QrCode = null;
-    let modoLeitorQRAtual = null;
   </script>
 
   <!-- LOGIN / CADASTRO -->
@@ -57,7 +55,6 @@
         <p class="text-xs text-blue-400/80 uppercase tracking-widest font-bold">Acesso à Equipa</p>
       </div>
 
-      <!-- Formulário de Login -->
       <div id="form-login-box" class="space-y-4">
         <div>
           <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">E-mail</label>
@@ -73,7 +70,6 @@
         </div>
       </div>
 
-      <!-- Formulário de Cadastro com Validação de Cargo -->
       <div id="form-cadastro-box" class="space-y-3 hidden max-h-[75vh] overflow-y-auto custom-scroll pr-1">
         <div class="grid grid-cols-2 gap-2">
           <input type="text" id="cad-nome" placeholder="Nome" class="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
@@ -93,9 +89,7 @@
           <option value="develop">Develop</option>
         </select>
 
-        <!-- Campo Oculto (Aparece apenas para cargos de Admin/Develop) -->
         <input type="password" id="cad-senha-mestra" placeholder="Chave de Autorização Administrativa" class="w-full bg-zinc-950 border border-blue-800 rounded-xl p-2.5 text-white text-xs hidden shadow-[0_0_10px_rgba(37,99,235,0.2)]">
-
         <button onclick="realizarCadastro()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2.5 rounded-xl text-xs mt-2 shadow-md">Registar Conta</button>
         <button onclick="mostrarTelaLogin()" class="w-full text-zinc-400 text-xs text-center pt-2">Voltar ao Login</button>
       </div>
@@ -160,13 +154,17 @@
 
     <!-- DEMANDAS -->
     <section id="sec-demandas" class="space-y-4 hidden no-print">
-      <div class="flex justify-between items-center"><h2 class="text-xl font-extrabold text-white">Demandas</h2><button onclick="abrirModalDemanda()" class="bg-teal-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs">Nova Demanda</button></div>
+      <div class="flex justify-between items-center"><h2 class="text-xl font-extrabold text-white">Demandas</h2>
+        <button id="btn-add-demanda" onclick="abrirModalDemanda()" class="bg-teal-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">Nova Demanda</button>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="cards-demandas"></div>
     </section>
 
     <!-- MANUTENÇÃO -->
     <section id="sec-manutencao" class="space-y-4 hidden no-print">
-      <div class="flex justify-between items-center"><h2 class="text-xl font-extrabold text-white">Manutenção</h2><button onclick="abrirModalManutencao()" class="bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs">Nova Ficha</button></div>
+      <div class="flex justify-between items-center"><h2 class="text-xl font-extrabold text-white">Manutenção</h2>
+        <button id="btn-add-manutencao" onclick="abrirModalManutencao()" class="bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">Nova Ficha</button>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="cards-manutencao"></div>
     </section>
 
@@ -177,21 +175,24 @@
         <button onclick="gerarPDFSaida()" class="bg-zinc-800 text-white py-2 px-4 rounded-xl text-xs font-semibold">Salvar PDF</button>
       </div>
       
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 no-print flex gap-3 items-center">
-        <input type="text" id="input-item-saida" list="dl-estoque" placeholder="Nome do equipamento..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-        <datalist id="dl-estoque"></datalist>
-        <input type="number" id="input-qtd-saida" value="1" min="1" class="w-20 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs text-center">
-        <button onclick="adicionarItemSaida()" class="bg-blue-600 text-white font-bold px-5 py-3 rounded-xl text-xs">Adicionar</button>
-      </div>
-
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4 no-print shadow-xl">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Nome do Evento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-          <input type="text" id="ev-local" oninput="atualizarHeaderPrint()" placeholder="Local do Evento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      <!-- ESCONDIDO PARA TÉCNICOS -->
+      <div id="area-add-saida" class="hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 no-print flex gap-3 items-center mb-4">
+          <input type="text" id="input-item-saida" list="dl-estoque" placeholder="Nome do equipamento..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+          <datalist id="dl-estoque"></datalist>
+          <input type="number" id="input-qtd-saida" value="1" min="1" class="w-20 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs text-center">
+          <button onclick="adicionarItemSaida()" class="bg-blue-600 text-white font-bold px-5 py-3 rounded-xl text-xs">Adicionar</button>
         </div>
-        <div class="overflow-x-auto"><table class="w-full text-left"><tbody id="checklist-itens-evento" class="text-xs"></tbody></table></div>
-        <div class="flex justify-end pt-2">
-          <button id="btn-registrar-saida" onclick="salvarSaidaMaterialBD()" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl text-xs shadow-lg hidden">Registrar Saída</button>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4 no-print shadow-xl">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Nome do Evento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+            <input type="text" id="ev-local" oninput="atualizarHeaderPrint()" placeholder="Local do Evento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+          </div>
+          <div class="overflow-x-auto"><table class="w-full text-left"><tbody id="checklist-itens-evento" class="text-xs"></tbody></table></div>
+          <div class="flex justify-end pt-2">
+            <button onclick="salvarSaidaMaterialBD()" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl text-xs shadow-lg">Registrar Saída de Evento</button>
+          </div>
         </div>
       </div>
 
@@ -217,11 +218,11 @@
     </section>
   </main>
 
-  <!-- MODAIS BÁSICOS (ESTOQUE, KIT, DEMANDA, MANUTENÇÃO) -->
+  <!-- MODAIS BÁSICOS -->
   <div id="modal-estoque" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4">
       <h3 class="text-base font-bold text-white">Novo Equipamento</h3>
-      <input type="text" id="est-nome" placeholder="Nome" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      <input type="text" id="est-nome" placeholder="Nome do Equipamento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       <input type="number" id="est-qtd" value="1" min="1" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       <div class="flex justify-end gap-2"><button onclick="document.getElementById('modal-estoque').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button><button onclick="salvarEstoque()" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar</button></div>
     </div>
@@ -246,28 +247,38 @@
   <div id="modal-manutencao" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4">
       <h3 class="text-base font-bold text-amber-400">Nova Manutenção</h3>
-      <input type="text" id="man-item" placeholder="Equipamento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-      <textarea id="man-defeito" placeholder="Defeito..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs" rows="2"></textarea>
+      <input type="text" id="man-item" placeholder="Equipamento com defeito" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      <textarea id="man-defeito" placeholder="Relate o defeito detalhadamente..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs" rows="2"></textarea>
       <div class="flex justify-end gap-2"><button onclick="document.getElementById('modal-manutencao').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button><button onclick="salvarManutencao()" class="bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar</button></div>
     </div>
   </div>
 
-  <!-- SCRIPT LÓGICO -->
+  <!-- SCRIPT LÓGICO E DE SEGURANÇA -->
   <script>
     lucide.createIcons();
 
-    // UTILITÁRIO: VERIFICA PERMISSÕES
+    // ==========================================
+    // SISTEMA DE SEGURANÇA (RBAC - ROLE BASED ACCESS)
+    // ==========================================
     function isAdministracaoOuSuperior() {
       if (!usuarioAtual) return false;
       const c = usuarioAtual.cargo;
-      return c === 'develop' || c === 'ceo' || c === 'gerencia' || c === 'administracao';
+      // APENAS ESTES CARGOS TÊM ACESSO TOTAL (CRIAR, EXCLUIR, EDITAR)
+      return ['develop', 'ceo', 'gerencia', 'administracao'].includes(c);
+    }
+
+    function checkPermissaoOuAlerta() {
+      if(!isAdministracaoOuSuperior()) {
+        alert("Acesso Restrito: Apenas Administração, Gerência, CEO ou Develop podem realizar esta ação.");
+        return false;
+      }
+      return true;
     }
 
     // ALTERNA TELAS LOGIN/CADASTRO
     function mostrarTelaCadastro() { document.getElementById('form-login-box').classList.add('hidden'); document.getElementById('form-cadastro-box').classList.remove('hidden'); }
     function mostrarTelaLogin() { document.getElementById('form-cadastro-box').classList.add('hidden'); document.getElementById('form-login-box').classList.remove('hidden'); }
 
-    // EXIBE OU ESCONDE A SENHA MESTRA COM BASE NO CARGO SELECIONADO
     function verificarSelecaoCargoCadastro() {
       const cargo = document.getElementById('cad-cargo').value;
       const inputChave = document.getElementById('cad-senha-mestra');
@@ -275,11 +286,7 @@
         inputChave.classList.add('hidden');
       } else {
         inputChave.classList.remove('hidden');
-        if (cargo === 'develop') {
-          inputChave.placeholder = "Chave de Develop Autorizada";
-        } else {
-          inputChave.placeholder = "Senha Mestra (Administração)";
-        }
+        inputChave.placeholder = (cargo === 'develop') ? "Chave de Develop Autorizada" : "Senha Mestra (Administração/Gerência)";
       }
     }
 
@@ -287,17 +294,13 @@
       const email = document.getElementById('login-email').value.trim().toLowerCase();
       const senha = document.getElementById('login-senha').value.trim();
       if(!email || !senha) return alert('Preencha e-mail e senha.');
-
       try {
         const { data, error } = await db.from('perfis').select('*').eq('email', email).single();
         if(error || !data || data.senha !== senha) return alert('Utilizador não encontrado ou senha incorreta.');
-
         usuarioAtual = data;
         localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
         iniciarSistema();
-      } catch (err) {
-        alert('Erro de conexão ao tentar logar.');
-      }
+      } catch (err) { alert('Erro de conexão ao tentar logar.'); }
     }
 
     async function realizarCadastro() {
@@ -309,30 +312,17 @@
       const senhaMestraInserida = document.getElementById('cad-senha-mestra').value.trim();
 
       if(!email || !senha || !nome) return alert('Preencha Nome, E-mail e Senha.');
-
-      // Validação de Segurança para Cargos Altos
-      if (cargo === 'develop' && senhaMestraInserida !== CHAVE_DEVELOP) {
-        return alert('Chave de Developer inválida. Acesso negado.');
-      }
-      if (['administracao', 'gerencia', 'ceo'].includes(cargo) && senhaMestraInserida !== SENHA_MESTRA_ADM) {
-        return alert('Senha Mestra de Administração inválida. Acesso negado.');
-      }
+      if (cargo === 'develop' && senhaMestraInserida !== CHAVE_DEVELOP) return alert('Chave de Developer inválida. Acesso negado.');
+      if (['administracao', 'gerencia', 'ceo'].includes(cargo) && senhaMestraInserida !== SENHA_MESTRA_ADM) return alert('Senha Mestra de Administração inválida. Acesso negado.');
 
       try {
         const { data, error } = await db.from('perfis').insert([{ nome, email, senha, telefone, cargo }]).select().single();
-        
-        if (error) {
-          console.error(error);
-          return alert('Erro ao registar na base de dados. O email já pode estar em uso.');
-        }
-
+        if (error) return alert('Erro ao registar na base de dados. O email já pode estar em uso.');
         usuarioAtual = data;
         localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
         iniciarSistema();
         alert(`Conta criada com sucesso! Acesso concedido como ${cargo.toUpperCase()}.`);
-      } catch (err) {
-        alert('Falha na comunicação com o servidor.');
-      }
+      } catch (err) { alert('Falha na comunicação com o servidor.'); }
     }
 
     function trocarUsuario() {
@@ -343,35 +333,28 @@
     async function carregarDadosGlobais() {
       try {
         const [est, kit, dem, man, sai, eq] = await Promise.all([
-          db.from('estoque').select('*'),
-          db.from('kits').select('*'),
-          db.from('demandas').select('*'),
-          db.from('manutencao_separada').select('*'),
-          db.from('saida_materiais').select('*'),
-          db.from('perfis').select('*')
+          db.from('estoque').select('*'), db.from('kits').select('*'),
+          db.from('demandas').select('*'), db.from('manutencao_separada').select('*'),
+          db.from('saida_materiais').select('*'), db.from('perfis').select('*')
         ]);
-        estoqueGlobal = est.data || [];
-        kitsGlobal = kit.data || [];
-        demandasGlobal = dem.data || [];
-        manutencaoGlobal = man.data || [];
-        saidasGlobal = sai.data || [];
-        equipeGlobal = eq.data || [];
+        estoqueGlobal = est.data || []; kitsGlobal = kit.data || [];
+        demandasGlobal = dem.data || []; manutencaoGlobal = man.data || [];
+        saidasGlobal = sai.data || []; equipeGlobal = eq.data || [];
       } catch(e) { console.error("Erro na carga de dados", e); }
     }
 
     async function iniciarSistema() {
-      if (!usuarioAtual) {
-        document.getElementById('tela-login').classList.remove('hidden');
-        return;
-      }
+      if (!usuarioAtual) { document.getElementById('tela-login').classList.remove('hidden'); return; }
       document.getElementById('tela-login').classList.add('hidden');
       document.getElementById('header-user-info').innerText = `${usuarioAtual.nome} • ${(usuarioAtual.cargo||'').toUpperCase()}`;
       
-      // Controle de Permissões Visuais
+      // APLICAÇÃO DO RBAC NA INTERFACE (ESCONDE BOTÕES PARA TÉCNICOS)
       const adm = isAdministracaoOuSuperior();
       document.getElementById('btn-add-estoque').classList.toggle('hidden', !adm);
       document.getElementById('btn-add-kit').classList.toggle('hidden', !adm);
-      document.getElementById('btn-registrar-saida').classList.toggle('hidden', !adm); // Só adm registra saída
+      document.getElementById('btn-add-demanda').classList.toggle('hidden', !adm);
+      document.getElementById('btn-add-manutencao').classList.toggle('hidden', !adm);
+      document.getElementById('area-add-saida').classList.toggle('hidden', !adm);
 
       await carregarDadosGlobais();
       mudarAba('dashboard');
@@ -404,53 +387,92 @@
       lucide.createIcons();
     }
 
-    // CRUD BÁSICO
+    // ==========================================
+    // FUNÇÕES DE AÇÃO SEGURAS (RBAC ATIVO)
+    // ==========================================
+
+    function abrirModalEstoque() { if(checkPermissaoOuAlerta()) document.getElementById('modal-estoque').classList.remove('hidden'); }
     async function salvarEstoque() {
+      if(!checkPermissaoOuAlerta()) return;
       const nome = document.getElementById('est-nome').value.trim();
       if(!nome) return;
       await db.from('estoque').insert([{ nome, quantidade: parseInt(document.getElementById('est-qtd').value)||1 }]);
       document.getElementById('modal-estoque').classList.add('hidden');
       await carregarDadosGlobais(); carregarEstoque();
     }
+    async function apagarEstoque(id) {
+      if(!checkPermissaoOuAlerta()) return;
+      if(confirm('Tem certeza que deseja apagar este equipamento?')) {
+        await db.from('estoque').delete().eq('id', id);
+        await carregarDadosGlobais(); carregarEstoque();
+      }
+    }
     function carregarEstoque() {
       const adm = isAdministracaoOuSuperior();
-      document.getElementById('lista-estoque').innerHTML = estoqueGlobal.map(i => `<tr class="border-b border-zinc-800"><td class="p-4 font-bold text-white">${i.nome}</td><td class="p-4 text-center font-bold text-blue-400">${i.quantidade} un</td>${adm?`<td class="p-4 text-right"><button onclick="db.from('estoque').delete().eq('id','${i.id}').then(()=>{carregarDadosGlobais().then(()=>carregarEstoque())})" class="text-red-400 text-xs font-bold">Remover</button></td>`:''}</tr>`).join('');
+      document.getElementById('lista-estoque').innerHTML = estoqueGlobal.map(i => `<tr class="border-b border-zinc-800"><td class="p-4 font-bold text-white">${i.nome}</td><td class="p-4 text-center font-bold text-blue-400">${i.quantidade} un</td>${adm?`<td class="p-4 text-right"><button onclick="apagarEstoque('${i.id}')" class="text-red-400 text-xs font-bold hover:underline">Excluir</button></td>`:''}</tr>`).join('');
     }
 
+    function abrirModalKit() { if(checkPermissaoOuAlerta()) document.getElementById('modal-kit').classList.remove('hidden'); }
     async function salvarKit() {
+      if(!checkPermissaoOuAlerta()) return;
       const nome = document.getElementById('kit-nome').value.trim();
       if(!nome) return;
       await db.from('kits').insert([{ nome, criado_por: usuarioAtual.nome }]);
       document.getElementById('modal-kit').classList.add('hidden');
       await carregarDadosGlobais(); carregarKits();
     }
+    async function apagarKit(id) {
+      if(!checkPermissaoOuAlerta()) return;
+      if(confirm('Tem certeza que deseja apagar este Kit?')) {
+        await db.from('kits').delete().eq('id', id);
+        await carregarDadosGlobais(); carregarKits();
+      }
+    }
     function carregarKits() {
       const adm = isAdministracaoOuSuperior();
-      document.getElementById('cards-kits').innerHTML = kitsGlobal.map(k => `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl"><h4 class="font-bold text-white">${k.nome}</h4>${adm?`<button onclick="db.from('kits').delete().eq('id','${k.id}').then(()=>{carregarDadosGlobais().then(()=>carregarKits())})" class="text-red-400 text-xs mt-2">Remover</button>`:''}</div>`).join('');
+      document.getElementById('cards-kits').innerHTML = kitsGlobal.map(k => `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl"><h4 class="font-bold text-white">${k.nome}</h4>${adm?`<button onclick="apagarKit('${k.id}')" class="text-red-400 text-xs mt-2 font-bold hover:underline">Remover</button>`:''}</div>`).join('');
     }
 
+    function abrirModalDemanda() { if(checkPermissaoOuAlerta()) document.getElementById('modal-demanda').classList.remove('hidden'); }
     async function salvarDemanda() {
+      if(!checkPermissaoOuAlerta()) return;
       const descricao = document.getElementById('dem-descricao').value.trim();
       if(!descricao) return;
       await db.from('demandas').insert([{ descricao, criado_por: usuarioAtual.nome }]);
       document.getElementById('modal-demanda').classList.add('hidden');
       await carregarDadosGlobais(); carregarDemandas();
     }
+    async function apagarDemanda(id) {
+      if(!checkPermissaoOuAlerta()) return;
+      if(confirm('Finalizar/Remover esta Demanda?')) {
+        await db.from('demandas').delete().eq('id', id);
+        await carregarDadosGlobais(); carregarDemandas();
+      }
+    }
     function carregarDemandas() {
       const adm = isAdministracaoOuSuperior();
-      document.getElementById('cards-demandas').innerHTML = demandasGlobal.map(d => `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl"><p class="text-xs text-white">${d.descricao}</p>${adm?`<button onclick="db.from('demandas').delete().eq('id','${d.id}').then(()=>{carregarDadosGlobais().then(()=>carregarDemandas())})" class="text-red-400 text-xs mt-2 font-bold">Concluir/Remover</button>`:''}</div>`).join('');
+      document.getElementById('cards-demandas').innerHTML = demandasGlobal.map(d => `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl"><p class="text-xs text-white">${d.descricao}</p>${adm?`<button onclick="apagarDemanda('${d.id}')" class="text-red-400 text-xs mt-2 font-bold hover:underline">Concluir / Remover</button>`:''}</div>`).join('');
     }
 
+    function abrirModalManutencao() { if(checkPermissaoOuAlerta()) document.getElementById('modal-manutencao').classList.remove('hidden'); }
     async function salvarManutencao() {
+      if(!checkPermissaoOuAlerta()) return;
       const item = document.getElementById('man-item').value.trim();
       if(!item) return;
       await db.from('manutencao_separada').insert([{ item, defeito_relatado: document.getElementById('man-defeito').value, criado_por: usuarioAtual.nome }]);
       document.getElementById('modal-manutencao').classList.add('hidden');
       await carregarDadosGlobais(); carregarManutencao();
     }
+    async function apagarManutencao(id) {
+      if(!checkPermissaoOuAlerta()) return;
+      if(confirm('Finalizar e fechar esta ficha de Manutenção?')) {
+        await db.from('manutencao_separada').delete().eq('id', id);
+        await carregarDadosGlobais(); carregarManutencao();
+      }
+    }
     function carregarManutencao() {
       const adm = isAdministracaoOuSuperior();
-      document.getElementById('cards-manutencao').innerHTML = manutencaoGlobal.map(m => `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl"><h4 class="font-bold text-white">${m.item}</h4><p class="text-xs text-amber-300 mt-1">${m.defeito_relatado}</p>${adm?`<button onclick="db.from('manutencao_separada').delete().eq('id','${m.id}').then(()=>{carregarDadosGlobais().then(()=>carregarManutencao())})" class="text-red-400 text-xs mt-2 font-bold">Finalizar</button>`:''}</div>`).join('');
+      document.getElementById('cards-manutencao').innerHTML = manutencaoGlobal.map(m => `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl"><h4 class="font-bold text-white">${m.item}</h4><p class="text-xs text-amber-300 mt-1">${m.defeito_relatado}</p>${adm?`<button onclick="apagarManutencao('${m.id}')" class="text-red-400 text-xs mt-2 font-bold hover:underline">Finalizar</button>`:''}</div>`).join('');
     }
 
     // EVENTOS / SAÍDAS
@@ -462,6 +484,7 @@
     function gerarPDFSaida() { html2pdf().from(document.getElementById('area-pdf-saida')).save(); }
     
     function adicionarItemSaida() {
+      if(!checkPermissaoOuAlerta()) return;
       const nome = document.getElementById('input-item-saida').value.trim();
       const qtd = parseInt(document.getElementById('input-qtd-saida').value) || 1;
       if(!nome) return;
@@ -469,16 +492,22 @@
       renderizarTabelaSaida();
       document.getElementById('input-item-saida').value = '';
     }
+    function removerItemSaida(k) {
+      if(!checkPermissaoOuAlerta()) return;
+      delete registrosSaida[k];
+      renderizarTabelaSaida();
+    }
     function renderizarTabelaSaida() {
       let htmlInteractive = '', htmlPrint = '';
       Object.keys(registrosSaida).forEach(k => {
-        htmlInteractive += `<tr class="border-b border-zinc-800/60"><td class="p-3 text-white font-bold">${k}</td><td class="p-3 text-center text-emerald-400 font-bold">${registrosSaida[k]} un</td><td class="p-3 text-right"><button onclick="delete registrosSaida['${k}'];renderizarTabelaSaida();" class="text-red-400 text-xs font-bold">Tirar</button></td></tr>`;
+        htmlInteractive += `<tr class="border-b border-zinc-800/60"><td class="p-3 text-white font-bold">${k}</td><td class="p-3 text-center text-emerald-400 font-bold">${registrosSaida[k]} un</td><td class="p-3 text-right"><button onclick="removerItemSaida('${k}')" class="text-red-400 text-xs font-bold hover:underline">Tirar</button></td></tr>`;
         htmlPrint += `<tr style="border-bottom:1px solid #ddd;"><td style="padding:8px;">${k}</td><td style="padding:8px;text-align:center;font-weight:bold;">${registrosSaida[k]}</td></tr>`;
       });
       document.getElementById('checklist-itens-evento').innerHTML = htmlInteractive || '<tr><td colspan="3" class="p-4 text-center text-zinc-500">Nenhum equipamento adicionado.</td></tr>';
       document.getElementById('print-tabela-corpo').innerHTML = htmlPrint || '<tr><td colspan="2" style="padding:12px;text-align:center;">Nenhum item.</td></tr>';
     }
     async function salvarSaidaMaterialBD() {
+      if(!checkPermissaoOuAlerta()) return;
       const evt = document.getElementById('ev-nome').value.trim();
       const local = document.getElementById('ev-local').value.trim();
       if(!evt) return alert('Insira o nome do evento.');
@@ -493,6 +522,13 @@
       await carregarDadosGlobais(); carregarSaidasRegistradas();
       alert('Evento e Romaneio registados com sucesso!');
     }
+    async function finalizarEvento(id) {
+      if(!checkPermissaoOuAlerta()) return;
+      if(confirm('Finalizar e dar baixa neste Evento?')) {
+        await db.from('saida_materiais').update({status:'CONCLUIDO'}).eq('id', id);
+        await carregarDadosGlobais(); carregarSaidasRegistradas();
+      }
+    }
     function carregarSaidasRegistradas() {
       const adm = isAdministracaoOuSuperior();
       document.getElementById('lista-saidas-registradas').innerHTML = saidasGlobal.map(s => `
@@ -503,12 +539,19 @@
           </div>
           <p class="text-xs text-zinc-400 mb-2">Local: ${s.contato_evento || '--'}</p>
           <div class="bg-zinc-950 p-3 rounded-lg text-xs text-zinc-300 max-h-24 overflow-y-auto">${(s.itens||[]).map(i=>`<div><span class="text-emerald-400 font-bold">${i.quantidade}x</span>${i.nome}</div>`).join('')}</div>
-          ${adm && s.status !== 'CONCLUIDO' ? `<button onclick="db.from('saida_materiais').update({status:'CONCLUIDO'}).eq('id','${s.id}').then(()=>{carregarDadosGlobais().then(()=>carregarSaidasRegistradas())})" class="w-full mt-3 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-bold transition">Finalizar / Concluir Evento</button>` : ''}
+          ${adm && s.status !== 'CONCLUIDO' ? `<button onclick="finalizarEvento('${s.id}')" class="w-full mt-3 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-bold transition">Finalizar / Concluir Evento</button>` : ''}
         </div>
       `).join('');
     }
 
     // EQUIPA
+    async function apagarMembro(id) {
+      if(!checkPermissaoOuAlerta()) return;
+      if(confirm('Tem certeza absoluta que deseja EXCLUIR este membro da equipa?')) {
+        await db.from('perfis').delete().eq('id', id);
+        await carregarDadosGlobais(); carregarEquipe();
+      }
+    }
     function carregarEquipe() {
       const adm = isAdministracaoOuSuperior();
       document.getElementById('cards-equipe').innerHTML = equipeGlobal.map(p => `
@@ -521,15 +564,13 @@
             <div>${p.email}</div>
             <div>${p.telefone || 'S/ Tel'}</div>
           </div>
-          ${adm ? `<button onclick="if(confirm('Excluir Membro?')) db.from('perfis').delete().eq('id','${p.id}').then(()=>{carregarDadosGlobais().then(()=>carregarEquipe())})" class="text-red-400 text-xs font-bold mt-4 text-right hover:underline">Excluir Membro</button>` : ''}
+          ${adm ? `<button onclick="apagarMembro('${p.id}')" class="text-red-400 text-xs font-bold mt-4 text-right hover:underline">Excluir Membro</button>` : ''}
         </div>
       `).join('');
     }
 
-    // Ao carregar a página, se já houver utilizador guardado, entra direto
+    // Inicialização
     if (usuarioAtual) iniciarSistema();
-
   </script>
 </body>
 </html>
-
