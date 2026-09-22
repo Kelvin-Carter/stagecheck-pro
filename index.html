@@ -204,7 +204,7 @@
       <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 no-print border-b border-zinc-800 pb-4">
         <div>
           <h2 class="text-xl font-extrabold text-white">Gestão de Eventos (Saídas)</h2>
-          <p class="text-xs text-zinc-400 mt-1">Escaneie QR Codes, selecione da lista ou digite o nome do item manualmente.</p>
+          <p class="text-xs text-zinc-400 mt-1">Escreva para puxar do acervo ou digite a quantidade desejada.</p>
         </div>
         <div class="flex gap-2">
           <button onclick="abrirModalLeitorQRParaSaida()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 shadow transition"><i data-lucide="scan" class="w-4 h-4"></i> Ler QR Code</button>
@@ -213,34 +213,36 @@
         </div>
       </div>
 
-      <!-- ADICIONAR ITEM DIGITANDO -->
+      <!-- ADICIONAR ITEM PULL ACERVO -->
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 no-print flex flex-col sm:flex-row gap-3 items-center">
-        <input type="text" id="input-item-manual-saida" placeholder="Digitar nome de item extra..." class="flex-1 w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-        <input type="number" id="input-qtd-manual-saida" value="1" min="1" class="w-20 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs text-center">
-        <button onclick="adicionarItemManualSaida()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl text-xs shadow">Adicionar Item Manual</button>
+        <input type="text" id="input-item-saida" list="dl-estoque" placeholder="Escreva ou selecione o item do acervo..." class="flex-1 w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+        <datalist id="dl-estoque"></datalist>
+        <input type="number" id="input-qtd-saida" value="1" min="1" class="w-24 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs text-center">
+        <button onclick="adicionarItemSaida()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl text-xs shadow">Adicionar ao Evento</button>
       </div>
 
       <div id="area-pdf-saida">
-        <div class="print-only mb-6 border-b-2 border-black pb-4">
-          <img id="print-logo-img" src="" class="h-10 hidden mb-2">
-          <h1 class="text-xl font-bold uppercase text-black">LEGALMART - ROMANEIO DE SAÍDA</h1>
-          <p class="text-xs font-semibold text-black" id="print-info-evento">Evento: --</p>
+        <!-- CABEÇALHO SIMPLIFICADO: LOGO, NOME DO EVENTO E LOCAL -->
+        <div class="print-only mb-6 border-b-2 border-black pb-4 space-y-3">
+          <img id="print-logo-img" src="" class="h-12 hidden object-contain">
+          <div>
+            <h1 class="text-xl font-black uppercase text-black" id="print-header-nome-evento">EVENTO: --</h1>
+            <p class="text-xs font-bold text-black" id="print-header-local-evento">LOCAL: --</p>
+          </div>
         </div>
+
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 space-y-5 shadow-xl">
-          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 no-print">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 no-print">
             <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Nome do Evento" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-            <input type="text" id="ev-contato" oninput="atualizarHeaderPrint()" placeholder="Cliente" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-            <input type="tel" id="ev-telefone" oninput="atualizarHeaderPrint()" placeholder="Telefone" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-            <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-            <input type="text" id="ev-responsavel" oninput="atualizarHeaderPrint()" placeholder="Téc. Resp" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+            <input type="text" id="ev-local" oninput="atualizarHeaderPrint()" placeholder="Local do Evento" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
           </div>
           <div class="overflow-x-auto custom-scroll w-full border border-zinc-800 rounded-xl">
             <table class="w-full text-left print-table min-w-[600px]">
               <thead>
                 <tr class="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400 text-[10px] uppercase font-bold">
-                  <th class="p-3">Equipamento</th>
-                  <th class="p-3">Categoria</th>
-                  <th class="p-3 text-center">No Evento</th>
+                  <th class="p-3">Equipamento / Item</th>
+                  <th class="p-3">Categoria / Origem</th>
+                  <th class="p-3 text-center">Quantidade</th>
                   <th class="p-3 text-center no-print">Ação</th>
                 </tr>
               </thead>
@@ -519,8 +521,9 @@
       if (logoEmpresaUrl) {
         document.getElementById('box-logo-login').innerHTML = `<img src="${logoEmpresaUrl}" class="max-h-16 object-contain">`;
         document.getElementById('header-logo-container').innerHTML = `<img src="${logoEmpresaUrl}" class="h-8 object-contain rounded">`;
-        document.getElementById('print-logo-img').src = logoEmpresaUrl;
-        document.getElementById('print-logo-img').classList.remove('hidden');
+        const printLogo = document.getElementById('print-logo-img');
+        printLogo.src = logoEmpresaUrl;
+        printLogo.classList.remove('hidden');
       }
     }
     async function carregarLogoConfig() {
@@ -684,7 +687,7 @@
       if(aba === 'kits') carregarKits();
       if(aba === 'demandas') carregarDemandas();
       if(aba === 'manutencao') carregarManutencao();
-      if(aba === 'eventos') { carregarEstoque().then(() => { carregarKitsParaSelect(); renderizarTabelaSaida(); }); carregarSaidasRegistradas(); }
+      if(aba === 'eventos') { carregarEstoque().then(() => { carregarKitsParaSelect(); atualizarDatalistEstoque(); renderizarTabelaSaida(); }); carregarSaidasRegistradas(); }
       if(aba === 'equipe') carregarEquipe();
     }
 
@@ -790,7 +793,7 @@
       if(!db) return;
       const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
       estoqueGlobal = data || [];
-      const filtro = document.getElementById('busca-estoque') ? document.getElementById('busca-estoque').value.toLowerCase() : '';
+      const filtro = document.getElementById('busca-estoque') ? document.getElementById('busca-estoque'].value.toLowerCase() : '';
       const lista = filtro ? estoqueGlobal.filter(i => i.nome.toLowerCase().includes(filtro)) : estoqueGlobal;
       const adm = isAdministracaoOuSuperior();
 
@@ -807,6 +810,7 @@
           </td>
         </tr>
       `).join('');
+      atualizarDatalistEstoque();
       lucide.createIcons();
     }
     async function salvarEstoque() {
@@ -920,50 +924,83 @@
       if(kitsGlobal.length === 0) { const { data } = await db.from('kits').select('*'); kitsGlobal = data || []; }
     }
 
-    // EVENTOS / SAÍDAS (COM DIGITAÇÃO DE NOME DE ITEM)
-    function atualizarHeaderPrint() { document.getElementById('print-info-evento').innerText = `Evento: ${document.getElementById('ev-nome').value||'--'} | Cliente: ${document.getElementById('ev-contato').value||'--'} | Data: ${document.getElementById('ev-data').value||'--'}`; }
-    function gerarPDFSaida() { html2pdf().set({ margin: 0.3, filename: `Saida.pdf`, jsPDF: { unit: 'in', format: 'letter' } }).from(document.getElementById('area-pdf-saida')).save(); }
+    // EVENTOS / SAÍDAS (COM BUSCA NO ACERVO E EDIÇÃO DE QTD DIRETA)
+    function atualizarDatalistEstoque() {
+      const dl = document.getElementById('dl-estoque');
+      if(dl) {
+        dl.innerHTML = estoqueGlobal.map(e => `<option value="${e.nome}">`).join('');
+      }
+    }
+
+    function atualizarHeaderPrint() {
+      const nomeEvt = document.getElementById('ev-nome').value.trim() || '--';
+      const localEvt = document.getElementById('ev-local').value.trim() || '--';
+      document.getElementById('print-header-nome-evento').innerText = `EVENTO: ${nomeEvt}`;
+      document.getElementById('print-header-local-evento').innerText = `LOCAL: ${localEvt}`;
+    }
+
+    function gerarPDFSaida() { 
+      html2pdf().set({ margin: 0.3, filename: `Romaneio_Saida.pdf`, jsPDF: { unit: 'in', format: 'letter' } }).from(document.getElementById('area-pdf-saida')).save(); 
+    }
     
-    function adicionarItemManualSaida() {
-      const nome = document.getElementById('input-item-manual-saida').value.trim();
-      const qtd = parseInt(document.getElementById('input-qtd-manual-saida').value) || 1;
-      if(!nome) return alert('Digite o nome do item.');
-      registrosSaida[nome] = (registrosSaida[nome] || 0) + qtd;
-      document.getElementById('input-item-manual-saida').value = '';
-      document.getElementById('input-qtd-manual-saida').value = '1';
+    function adicionarItemSaida() {
+      const input = document.getElementById('input-item-saida');
+      const nomeDigitado = input.value.trim();
+      const qtdInput = parseInt(document.getElementById('input-qtd-saida').value) || 1;
+      if(!nomeDigitado) return alert('Escreva ou selecione um item do acervo.');
+
+      const itemEstoque = estoqueGlobal.find(e => e.nome.toLowerCase() === nomeDigitado.toLowerCase());
+      const chave = itemEstoque ? itemEstoque.id : nomeDigitado;
+
+      registrosSaida[chave] = (registrosSaida[chave] || 0) + qtdInput;
+      input.value = '';
+      document.getElementById('input-qtd-saida').value = '1';
+      renderizarTabelaSaida();
+    }
+
+    function alterarQtdSaida(key, val) {
+      const q = parseInt(val) || 0;
+      if(q <= 0) {
+        delete registrosSaida[key];
+      } else {
+        registrosSaida[key] = q;
+      }
+      renderizarTabelaSaida();
+    }
+
+    function removerItemSaida(key) {
+      delete registrosSaida[key];
       renderizarTabelaSaida();
     }
 
     function renderizarTabelaSaida() {
-      let html = estoqueGlobal.map(i => {
-        const q = registrosSaida[i.id] || 0;
-        return `
-          <tr class="border-b border-zinc-800/40 hover:bg-zinc-800/20">
-            <td class="p-3 font-bold text-white">${i.nome}</td>
-            <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-[9px] font-bold ${getBadgeCategoriaCor(i.categoria)}">${i.categoria}</span></td>
-            <td class="p-3 text-center font-black text-base font-mono ${q>0?'text-emerald-400':'text-zinc-600'}">${q}</td>
-            <td class="p-3 text-center no-print">
-              <button onclick="registrosSaida['${i.id}'] = Math.max(0, (registrosSaida['${i.id}']||0)-1); renderizarTabelaSaida();" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2.5 py-1 rounded-xl text-xs font-bold shadow mr-1">-</button>
-              <button onclick="registrosSaida['${i.id}'] = (registrosSaida['${i.id}']||0)+1; renderizarTabelaSaida();" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded-xl text-xs font-bold shadow">+1</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      atualizarDatalistEstoque();
+      let html = '';
+      const chaves = Object.keys(registrosSaida).filter(k => registrosSaida[k] > 0);
 
-      for(const [key, q] of Object.entries(registrosSaida)) {
-        if(!estoqueGlobal.some(e => e.id === key) && q > 0) {
+      if(chaves.length === 0) {
+        html = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Nenhum item adicionado ao evento ainda. Escreva acima para buscar no acervo ou digite um item.</td></tr>`;
+      } else {
+        chaves.forEach(key => {
+          const qtd = registrosSaida[key];
+          const itemEst = estoqueGlobal.find(e => e.id === key);
+          const nome = itemEst ? itemEst.nome : key;
+          const categoria = itemEst ? (itemEst.categoria || 'Acervo') : 'Manual';
+          const badgeClass = itemEst ? getBadgeCategoriaCor(itemEst.categoria) : 'bg-zinc-800 text-zinc-300';
+
           html += `
-            <tr class="border-b border-zinc-800/40 hover:bg-zinc-800/20 bg-blue-950/20">
-              <td class="p-3 font-bold text-white">${key} <span class="text-[9px] text-amber-400 font-mono">(Digitado)</span></td>
-              <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-[9px] font-bold bg-zinc-800 text-zinc-300">Manual</span></td>
-              <td class="p-3 text-center font-black text-base font-mono text-emerald-400">${q}</td>
+            <tr class="border-b border-zinc-800/40 hover:bg-zinc-800/20">
+              <td class="p-3 font-bold text-white">${nome}</td>
+              <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-[9px] font-bold ${badgeClass}">${categoria}</span></td>
+              <td class="p-3 text-center">
+                <input type="number" min="1" value="${qtd}" onchange="alterarQtdSaida('${key}', this.value)" class="w-20 bg-zinc-950 border border-zinc-700 rounded-lg p-1 text-center font-mono font-bold text-emerald-400 text-xs">
+              </td>
               <td class="p-3 text-center no-print">
-                <button onclick="registrosSaida['${key}'] = Math.max(0, (registrosSaida['${key}']||0)-1); renderizarTabelaSaida();" class="bg-zinc-800 text-zinc-300 px-2.5 py-1 rounded text-xs font-bold shadow mr-1">-</button>
-                <button onclick="registrosSaida['${key}'] = (registrosSaida['${key}']||0)+1; renderizarTabelaSaida();" class="bg-zinc-800 text-zinc-300 px-3 py-1 rounded text-xs font-bold shadow">+1</button>
+                <button onclick="removerItemSaida('${key}')" class="text-red-400 hover:text-red-300 px-2.5 py-1 rounded-xl text-xs font-bold bg-red-950/30 hover:bg-red-900/40 border border-red-900/40">Excluir</button>
               </td>
             </tr>
           `;
-        }
+        });
       }
       document.getElementById('checklist-itens-evento').innerHTML = html;
     }
@@ -971,6 +1008,7 @@
     async function salvarSaidaMaterialBD() {
       if(!temPermissaoSaida()) return;
       const evt = document.getElementById('ev-nome').value.trim();
+      const local = document.getElementById('ev-local').value.trim();
       if(!evt) return alert('Nome do evento obrigatório.');
       const itens = [];
       for (const [idOrName, q] of Object.entries(registrosSaida)) {
@@ -984,22 +1022,24 @@
         }
       }
       if(!itens.length) return alert('Nenhum item selecionado.');
-      await db.from('saida_materiais').insert([{ evento_nome: evt, contato_evento: document.getElementById('ev-contato').value, telefone_evento: document.getElementById('ev-telefone').value, data_evento: document.getElementById('ev-data').value, responsavel: document.getElementById('ev-responsavel').value, itens, criado_por: usuarioAtual.nome }]);
+      await db.from('saida_materiais').insert([{ evento_nome: evt, contato_evento: local, telefone_evento: '', data_evento: '', responsavel: '', itens, criado_por: usuarioAtual.nome }]);
       alert('Romaneio de saída registrado com sucesso!'); registrosSaida = {}; renderizarTabelaSaida(); carregarSaidasRegistradas();
     }
+
     async function carregarSaidasRegistradas() {
       if(!db) return;
       const { data } = await db.from('saida_materiais').select('*').order('created_at', { ascending: false });
       document.getElementById('lista-saidas-registradas').innerHTML = (data||[]).map(s => `
         <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
           <div class="flex justify-between border-b border-zinc-800 pb-2"><h4 class="font-extrabold text-white text-sm">${s.evento_nome}</h4><span class="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800 font-bold">${s.status}</span></div>
+          <div class="text-[11px] text-zinc-400 mb-1">Local: ${s.contato_evento || 'Não informado'}</div>
           <div class="bg-zinc-950 p-3 rounded-xl text-xs max-h-24 overflow-y-auto space-y-1">${(s.itens||[]).map(i=>`<div><b class="text-emerald-400">${i.quantidade}x</b>${i.nome}</div>`).join('')}</div>
           ${s.status !== 'CONCLUIDO' ? `<button onclick="db.from('saida_materiais').update({status:'CONCLUIDO'}).eq('id','${s.id}').then(()=>carregarSaidasRegistradas())" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-bold transition">Concluir / Dar Baixa no Evento</button>` : ''}
         </div>
       `).join('');
     }
 
-    // DEMANDAS (COM CRIAR, EDITAR E EXCLUIR)
+    // DEMANDAS
     function fecharModalDemanda() { document.getElementById('modal-demanda').classList.add('hidden'); }
     function abrirModalDemanda(d = null) {
       document.getElementById('modal-demanda').classList.remove('hidden');
@@ -1051,7 +1091,7 @@
       `).join('');
     }
 
-    // MANUTENÇÃO (COM CRIAR, EDITAR E EXCLUIR)
+    // MANUTENÇÃO
     function fecharModalManutencao() { document.getElementById('modal-manutencao').classList.add('hidden'); }
     function abrirModalManutencao(m = null) {
       document.getElementById('modal-manutencao').classList.remove('hidden');
