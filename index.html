@@ -396,17 +396,6 @@
       return 'bg-zinc-800 text-zinc-400 border border-zinc-700';
     }
 
-    async function limparPerfisParaTestes() {
-      if(!db) return;
-      const exec = localStorage.getItem('lm_perfis_limpos_v3');
-      if(!exec) {
-        await db.from('perfis').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        localStorage.setItem('lm_perfis_limpos_v3', 'true');
-        localStorage.clear();
-        usuarioAtual = null;
-      }
-    }
-
     function aplicarLogoNaInterface() {
       if (logoEmpresaUrl) {
         document.getElementById('box-logo-login').innerHTML = `<img src="${logoEmpresaUrl}" class="max-h-16 object-contain">`;
@@ -478,14 +467,13 @@
       if((cargo === 'administracao' || cargo === 'gerencia' || cargo === 'ceo') && document.getElementById('cad-senha-mestra').value !== SENHA_MESTRA_ADM) return alert('Chave ADM incorreta.');
       const perfil = { nome, email, senha, telefone: document.getElementById('cad-whatsapp').value, data_nascimento: document.getElementById('cad-nascimento').value, cargo, pode_criar_saida: isAdministracaoOuSuperior() };
       const { data, error } = await db.from('perfis').insert([perfil]).select().single();
-      if(error) return alert('Erro: ' + error.message);
+      if(error) return alert('Erro ao cadastrar: ' + error.message);
       usuarioAtual = data || perfil; localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual)); localStorage.setItem('lm_login_time', Date.now().toString());
       iniciarSistema();
     }
     function trocarUsuario() { localStorage.clear(); location.reload(); }
 
     async function iniciarSistema() {
-      await limparPerfisParaTestes();
       aplicarLogoNaInterface(); carregarLogoConfig();
       if (!usuarioAtual) return document.getElementById('tela-login').classList.remove('hidden');
       document.getElementById('tela-login').classList.add('hidden');
@@ -772,5 +760,3 @@
   </script>
 </body>
 </html>
-
-
