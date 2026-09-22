@@ -448,7 +448,8 @@
   <!-- MODAL DEMANDA -->
   <div id="modal-demanda" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
-      <h3 class="text-base font-bold text-teal-400">Nova Demanda</h3>
+      <h3 class="text-base font-bold text-teal-400">Gerenciar Demanda</h3>
+      <input type="hidden" id="dem-id">
       <textarea id="dem-descricao" placeholder="Descreva a demanda..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs" rows="3"></textarea>
       <div class="grid grid-cols-2 gap-3">
         <select id="dem-status" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs"><option value="PENDENTE">PENDENTE</option><option value="ATRASADO">ATRASADO</option><option value="CONCLUIDO">CONCLUIDO</option></select>
@@ -818,7 +819,7 @@
     }
     async function deletarEstoque(id) { if(isAdministracaoOuSuperior() && confirm('Excluir equipamento?')) { await db.from('estoque').delete().eq('id', id); carregarEstoque(); } }
 
-    // KITS (COM ADICIONAR E EXCLUIR)
+    // KITS
     function fecharModalKit() { document.getElementById('modal-kit').classList.add('hidden'); }
     function abrirModalKit(k = null) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
@@ -998,12 +999,32 @@
       `).join('');
     }
 
-    // DEMANDAS (COM ADICIONAR E EXCLUIR)
+    // DEMANDAS (COM CRIAR, EDITAR E EXCLUIR)
     function fecharModalDemanda() { document.getElementById('modal-demanda').classList.add('hidden'); }
-    function abrirModalDemanda() { document.getElementById('modal-demanda').classList.remove('hidden'); }
+    function abrirModalDemanda(d = null) {
+      document.getElementById('modal-demanda').classList.remove('hidden');
+      document.getElementById('dem-id').value = d ? d.id : '';
+      document.getElementById('dem-descricao').value = d ? d.descricao : '';
+      document.getElementById('dem-status').value = d ? d.status : 'PENDENTE';
+      document.getElementById('dem-data').value = d ? (d.data_limite || '') : '';
+    }
     async function salvarDemanda() {
-      await db.from('demandas').insert([{ descricao: document.getElementById('dem-descricao').value, status: document.getElementById('dem-status').value, data_limite: document.getElementById('dem-data').value, criado_por: usuarioAtual.nome }]);
-      fecharModalDemanda(); carregarDemandas();
+      const id = document.getElementById('dem-id').value;
+      const descricao = document.getElementById('dem-descricao').value.trim();
+      if(!descricao) return alert('Preencha a descrição.');
+      const payload = {
+        descricao,
+        status: document.getElementById('dem-status').value,
+        data_limite: document.getElementById('dem-data').value,
+        criado_por: usuarioAtual.nome
+      };
+      if(id) {
+        await db.from('demandas').update(payload).eq('id', id);
+      } else {
+        await db.from('demandas').insert([payload]);
+      }
+      fecharModalDemanda();
+      carregarDemandas();
     }
     async function deletarDemanda(id) {
       if(confirm('Tem certeza que deseja excluir esta demanda?')) {
@@ -1014,23 +1035,50 @@
     async function carregarDemandas() {
       const { data } = await db.from('demandas').select('*');
       document.getElementById('cards-demandas').innerHTML = (data||[]).map(d => `
-        <div class="bg-gradient-to-br from-zinc-900 to-teal-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2">
-          <div class="flex justify-between items-start">
-            <span class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full bg-teal-900/40 text-teal-300 border border-teal-800">${d.status}</span>
-            <button onclick="deletarDemanda('${d.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold">✕ Excluir</button>
+        <div class="bg-gradient-to-br from-zinc-900 to-teal-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full bg-teal-900/40 text-teal-300 border border-teal-800">${d.status}</span>
+              <div class="flex gap-2">
+                <button onclick='abrirModalDemanda(${JSON.stringify(d)})' class="text-teal-400 hover:text-teal-300 text-xs font-bold">Editar</button>
+                <button onclick="deletarDemanda('${d.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold">Excluir</button>
+              </div>
+            </div>
+            <p class="text-xs text-white mt-1">${d.descricao}</p>
           </div>
-          <p class="text-xs text-white mt-1">${d.descricao}</p>
-          <div class="text-[10px] text-zinc-500 font-mono">Prazo: ${d.data_limite || 'Sem prazo'}</div>
+          <div class="text-[10px] text-zinc-500 font-mono pt-2 border-t border-zinc-800/60">Prazo: ${d.data_limite || 'Sem prazo'}</div>
         </div>
       `).join('');
     }
 
-    // MANUTENÇÃO (COM ADICIONAR E EXCLUIR)
+    // MANUTENÇÃO (COM CRIAR, EDITAR E EXCLUIR)
     function fecharModalManutencao() { document.getElementById('modal-manutencao').classList.add('hidden'); }
-    function abrirModalManutencao() { document.getElementById('modal-manutencao').classList.remove('hidden'); }
+    function abrirModalManutencao(m = null) {
+      document.getElementById('modal-manutencao').classList.remove('hidden');
+      document.getElementById('man-id').value = m ? m.id : '';
+      document.getElementById('man-item').value = m ? m.item : '';
+      document.getElementById('man-status').value = m ? m.status : 'PENDENTE';
+      document.getElementById('man-data-limite').value = m ? (m.data_limite || '') : '';
+      document.getElementById('man-defeito').value = m ? (m.defeito_relatado || '') : '';
+    }
     async function salvarManutencao() {
-      await db.from('manutencao_separada').insert([{ item: document.getElementById('man-item').value, status: document.getElementById('man-status').value, data_limite: document.getElementById('man-data-limite').value, defeito_relatado: document.getElementById('man-defeito').value, criado_por: usuarioAtual.nome }]);
-      fecharModalManutencao(); carregarManutencao();
+      const id = document.getElementById('man-id').value;
+      const item = document.getElementById('man-item').value.trim();
+      if(!item) return alert('Preencha o nome do equipamento.');
+      const payload = {
+        item,
+        status: document.getElementById('man-status').value,
+        data_limite: document.getElementById('man-data-limite').value,
+        defeito_relatado: document.getElementById('man-defeito').value,
+        criado_por: usuarioAtual.nome
+      };
+      if(id) {
+        await db.from('manutencao_separada').update(payload).eq('id', id);
+      } else {
+        await db.from('manutencao_separada').insert([payload]);
+      }
+      fecharModalManutencao();
+      carregarManutencao();
     }
     async function deletarManutencao(id) {
       if(confirm('Tem certeza que deseja excluir esta ficha de manutenção?')) {
@@ -1041,18 +1089,23 @@
     async function carregarManutencao() {
       const { data } = await db.from('manutencao_separada').select('*');
       document.getElementById('cards-manutencao').innerHTML = (data||[]).map(m => `
-        <div class="bg-gradient-to-br from-zinc-900 to-amber-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2">
-          <div class="flex justify-between items-start">
-            <h4 class="font-bold text-white text-sm">${m.item}</h4>
-            <button onclick="deletarManutencao('${m.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold">✕ Excluir</button>
+        <div class="bg-gradient-to-br from-zinc-900 to-amber-950/20 border border-zinc-800 p-4 rounded-2xl shadow-xl space-y-2 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-bold text-white text-sm">${m.item}</h4>
+              <div class="flex gap-2">
+                <button onclick='abrirModalManutencao(${JSON.stringify(m)})' class="text-amber-400 hover:text-amber-300 text-xs font-bold">Editar</button>
+                <button onclick="deletarManutencao('${m.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold">Excluir</button>
+              </div>
+            </div>
+            <p class="text-xs text-amber-300/90">${m.defeito_relatado}</p>
           </div>
-          <p class="text-xs text-amber-300/90">${m.defeito_relatado}</p>
-          <div class="text-[10px] text-zinc-500 font-mono">Limite: ${m.data_limite || 'Sem prazo'}</div>
+          <div class="text-[10px] text-zinc-500 font-mono pt-2 border-t border-zinc-800/60">Limite: ${m.data_limite || 'Sem prazo'}</div>
         </div>
       `).join('');
     }
 
-    // EQUIPE (DADOS COMPLETOS: FOTO, NOME, FONE, NASCIMENTO, EMAIL, BIO + EDITAR ADMIN)
+    // EQUIPE
     async function carregarEquipe() {
       const { data } = await db.from('perfis').select('*');
       const adm = isAdministracaoOuSuperior();
