@@ -51,7 +51,7 @@
     <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-8 w-full max-w-sm space-y-6 shadow-2xl my-auto">
       <div class="text-center space-y-2">
         <div id="box-logo-login" class="h-16 flex items-center justify-center mb-4"><h1 class="text-3xl font-black text-white tracking-widest">LEGALMART</h1></div>
-        <p class="text-xs text-zinc-500 uppercase tracking-widest font-semibold" id="auth-subtitulo">Corporate Login</p>
+        <p class="text-xs text-zinc-500 uppercase tracking-widest font-semibold" id="auth-subtitulo">Login da Equipe</p>
       </div>
       <div id="form-login-box" class="space-y-4">
         <div>
@@ -396,13 +396,12 @@
       return 'bg-zinc-800 text-zinc-400 border border-zinc-700';
     }
 
-    // LIMPEZA AUTOMÁTICA DE PERFIS SOLICITADA PARA TESTES
     async function limparPerfisParaTestes() {
       if(!db) return;
-      const exec = localStorage.getItem('lm_perfis_limpos_v2');
+      const exec = localStorage.getItem('lm_perfis_limpos_v3');
       if(!exec) {
         await db.from('perfis').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        localStorage.setItem('lm_perfis_limpos_v2', 'true');
+        localStorage.setItem('lm_perfis_limpos_v3', 'true');
         localStorage.clear();
         usuarioAtual = null;
       }
@@ -558,7 +557,6 @@
       lucide.createIcons();
     }
 
-    // QR CODE ETIQUETAS
     function abrirModalEtiquetaQR(id, nome) {
       document.getElementById('modal-etiqueta-qr').classList.remove('hidden');
       document.getElementById('etiqueta-titulo').innerText = nome;
@@ -568,7 +566,6 @@
     }
     function fecharModalEtiqueta() { document.getElementById('modal-etiqueta-qr').classList.add('hidden'); }
 
-    // LEITOR QR CODE (APENAS PARA MANUTENÇÃO E SAÍDA)
     function abrirModalLeitorQR(modo) {
       modoLeitorQRAtual = modo;
       document.getElementById('modal-leitor-qr').classList.remove('hidden');
@@ -599,7 +596,6 @@
     function abrirModalLeitorQRParaManutencao() { abrirModalLeitorQR('manutencao'); }
     function abrirModalLeitorQRParaSaida() { abrirModalLeitorQR('saida'); }
 
-    // ESTOQUE
     function fecharModalEstoque() { document.getElementById('modal-estoque').classList.add('hidden'); }
     function abrirModalEstoque(d = null) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
@@ -642,7 +638,6 @@
     }
     async function deletarEstoque(id) { if(isAdministracaoOuSuperior() && confirm('Excluir?')) { await db.from('estoque').delete().eq('id', id); carregarEstoque(); } }
 
-    // KITS
     function fecharModalKit() { document.getElementById('modal-kit').classList.add('hidden'); }
     function abrirModalKit(k = null) {
       if(!isAdministracaoOuSuperior()) return alert('Acesso restrito.');
@@ -689,7 +684,6 @@
       if(kitsGlobal.length === 0) { const { data } = await db.from('kits').select('*'); kitsGlobal = data || []; }
     }
 
-    // EVENTOS / SAÍDAS
     function atualizarHeaderPrint() { document.getElementById('print-info-evento').innerText = `Evento: ${document.getElementById('ev-nome').value||'--'} | Cliente: ${document.getElementById('ev-contato').value||'--'} | Data: ${document.getElementById('ev-data').value||'--'}`; }
     function gerarPDFSaida() { html2pdf().set({ margin: 0.3, filename: `Saida.pdf`, jsPDF: { unit: 'in', format: 'letter' } }).from(document.getElementById('area-pdf-saida')).save(); }
     
@@ -730,7 +724,6 @@
       `).join('');
     }
 
-    // DEMANDAS E MANUTENÇÃO
     function fecharModalDemanda() { document.getElementById('modal-demanda').classList.add('hidden'); }
     function abrirModalDemanda() { document.getElementById('modal-demanda').classList.remove('hidden'); }
     async function salvarDemanda() {
@@ -753,7 +746,6 @@
       document.getElementById('cards-manutencao').innerHTML = (data||[]).map(m => `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-lg shadow"><h4 class="font-bold text-white text-sm">${m.item}</h4><p class="text-xs text-red-400 mt-1">${m.defeito_relatado}</p></div>`).join('');
     }
 
-    // EQUIPE COM WHATSAPP
     async function carregarEquipe() {
       const { data } = await db.from('perfis').select('*');
       document.getElementById('cards-equipe').innerHTML = (data||[]).map(p => {
