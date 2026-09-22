@@ -17,11 +17,12 @@
     }
     .print-only { display: none; }
     /* Scrollbar personalizada e suave para telemóveis */
-    .custom-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
   </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen font-sans flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
   <script>
     const SUPABASE_URL = 'https://havsqawfqzwvwppfvugd.supabase.co';
@@ -43,66 +44,73 @@
   </script>
 
   <!-- TELA DE AUTENTICAÇÃO -->
-  <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
+  <div id="tela-login" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-opacity-20">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-md space-y-6 shadow-2xl my-auto relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-teal-400"></div>
       
-      <div class="text-center space-y-2 flex flex-col items-center">
-        <div id="box-logo-login" class="h-14 sm:h-16 flex items-center justify-center">
-          <h1 class="text-2xl sm:text-3xl font-black text-blue-500 tracking-wider">LEGALMART</h1>
+      <div class="text-center space-y-2 flex flex-col items-center pt-2">
+        <div id="box-logo-login" class="h-16 flex items-center justify-center">
+          <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300 tracking-wider">LEGALMART</h1>
         </div>
-        <p class="text-xs text-gray-400" id="auth-subtitulo">Acesse sua conta para continuar</p>
+        <p class="text-xs text-slate-400 font-medium" id="auth-subtitulo">Acesse sua conta para continuar</p>
       </div>
 
       <!-- FORMULÁRIO DE LOGIN -->
-      <div id="form-login-box" class="space-y-3">
+      <div id="form-login-box" class="space-y-4">
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">E-mail (Login)</label>
-          <input type="email" id="login-email" placeholder="seuemail@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">E-mail</label>
+          <div class="relative">
+            <i data-lucide="mail" class="w-4 h-4 absolute left-3 top-3.5 text-slate-500"></i>
+            <input type="email" id="login-email" placeholder="seuemail@empresa.com" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors">
+          </div>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Senha</label>
-          <input type="password" id="login-senha" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Senha</label>
+          <div class="relative">
+            <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-3.5 text-slate-500"></i>
+            <input type="password" id="login-senha" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors">
+          </div>
         </div>
-        <button onclick="realizarLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition active:scale-95 text-sm">
+        <button onclick="realizarLogin()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg transition-transform active:scale-95 text-sm mt-2">
           Entrar no Sistema
         </button>
-        <div class="flex justify-between items-center text-xs pt-2">
-          <button onclick="mostrarTelaCadastro()" class="text-blue-400 hover:underline font-bold">Criar Cadastro</button>
-          <button onclick="esqueciSenha()" class="text-gray-400 hover:underline">Esqueci minha senha</button>
+        <div class="flex justify-between items-center text-xs pt-3 px-1">
+          <button onclick="mostrarTelaCadastro()" class="text-teal-400 hover:text-teal-300 font-bold transition">Criar Cadastro</button>
+          <button onclick="esqueciSenha()" class="text-slate-500 hover:text-slate-300 transition">Esqueci minha senha</button>
         </div>
       </div>
 
       <!-- FORMULÁRIO DE CADASTRO -->
       <div id="form-cadastro-box" class="space-y-3 hidden">
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
-          <input type="text" id="cad-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Nome Completo</label>
+          <input type="text" id="cad-nome" placeholder="Ex: Kelvin Nogueira" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none focus:border-teal-500">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Foto de Perfil</label>
-          <input type="file" id="cad-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Foto de Perfil</label>
+          <input type="file" id="cad-foto-file" accept="image/*" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl p-2 text-xs text-slate-300">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">E-mail</label>
-          <input type="email" id="cad-email" placeholder="nome@empresa.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">E-mail</label>
+          <input type="email" id="cad-email" placeholder="nome@empresa.com" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none focus:border-teal-500">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Senha</label>
-          <input type="password" id="cad-senha" placeholder="Digite sua senha" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Senha</label>
+          <input type="password" id="cad-senha" placeholder="Digite sua senha" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none focus:border-teal-500">
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
-            <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">WhatsApp/Tel</label>
-            <input type="tel" id="cad-telefone" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">WhatsApp/Tel</label>
+            <input type="tel" id="cad-telefone" placeholder="(88) 99999-9999" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none focus:border-teal-500">
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nascimento</label>
-            <input type="date" id="cad-nascimento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Nascimento</label>
+            <input type="date" id="cad-nascimento" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none focus:border-teal-500">
           </div>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Cargo / Função</label>
-          <select id="cad-cargo" onchange="verificarSelecaoCargoCadastro()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Cargo / Função</label>
+          <select id="cad-cargo" onchange="verificarSelecaoCargoCadastro()" class="w-full bg-slate-950 border border-slate-700/50 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none focus:border-teal-500">
             <option value="auxiliar_tecnico">Auxiliar Técnico</option>
             <option value="tecnico">Técnico</option>
             <option value="administrador">Administrador (ADM)</option>
@@ -111,147 +119,147 @@
 
         <div id="campo-senha-adm-cad" class="hidden">
           <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1">Senha ADM</label>
-          <input type="password" id="cad-senha-adm" placeholder="Digite a chave ADM" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none">
+          <input type="password" id="cad-senha-adm" placeholder="Digite a chave ADM" class="w-full bg-slate-950 border border-amber-800/60 rounded-xl p-2.5 sm:p-3 text-white text-sm focus:outline-none focus:border-amber-500">
         </div>
 
-        <button onclick="realizarCadastro()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg transition text-sm">
+        <button onclick="realizarCadastro()" class="w-full bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-500 hover:to-emerald-400 text-white font-bold py-3.5 rounded-xl shadow-lg transition-transform active:scale-95 text-sm mt-2">
           Finalizar Cadastro
         </button>
-        <div class="text-center pt-1">
-          <button onclick="mostrarTelaLogin()" class="text-gray-400 text-xs hover:underline">Já possui conta? Faça Login</button>
+        <div class="text-center pt-2">
+          <button onclick="mostrarTelaLogin()" class="text-slate-400 text-xs hover:text-white transition">Já possui conta? Faça Login</button>
         </div>
       </div>
-
     </div>
   </div>
 
   <!-- HEADER -->
-  <header class="bg-gray-900 border-b border-blue-600/40 p-3 sm:p-4 sticky top-0 z-40 no-print shadow-lg">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+  <header class="bg-slate-900 border-b border-slate-800 p-3 sm:p-4 sticky top-0 z-40 no-print shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
       
       <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
+        <div class="flex items-center space-x-3">
           <div id="header-logo-container" class="flex items-center">
-            <div class="bg-blue-600 p-2 rounded-xl text-black font-black text-lg">LM</div>
+            <div class="bg-gradient-to-br from-blue-500 to-teal-400 p-2 rounded-xl text-white font-black text-lg shadow-lg">LM</div>
           </div>
           <div>
-            <h1 class="text-lg sm:text-xl font-black tracking-wider text-blue-500" id="header-app-title">LEGALMART</h1>
-            <div class="flex items-center gap-1.5">
-              <img id="header-user-avatar" src="" class="w-5 h-5 rounded-full object-cover hidden border border-blue-500">
-              <p class="text-[11px] sm:text-xs text-gray-400 cursor-pointer hover:text-white truncate max-w-[180px] sm:max-w-none" onclick="abrirModalMeuPerfil()" id="user-info-bar">Carregando...</p>
+            <h1 class="text-lg sm:text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300" id="header-app-title">LEGALMART</h1>
+            <div class="flex items-center gap-2 mt-0.5">
+              <img id="header-user-avatar" src="" class="w-5 h-5 rounded-full object-cover hidden border border-slate-600">
+              <p class="text-[11px] sm:text-xs text-slate-400 cursor-pointer hover:text-white truncate max-w-[180px] sm:max-w-none transition" onclick="abrirModalMeuPerfil()" id="user-info-bar">Carregando...</p>
             </div>
           </div>
         </div>
         
-        <button onclick="trocarUsuario()" class="md:hidden px-3 py-1.5 rounded-lg text-xs font-bold text-red-400 bg-gray-950 border border-gray-800">
-          Sair
+        <button onclick="trocarUsuario()" class="md:hidden p-2 rounded-lg text-red-400 bg-slate-950 border border-slate-800 hover:bg-slate-800 transition">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
       </div>
       
       <!-- MENU DE NAVEGAÇÃO RESPONSIVO -->
-      <nav class="flex items-center gap-1 bg-gray-950 p-1.5 rounded-xl border border-gray-800 overflow-x-auto custom-scroll max-w-full">
-        <button onclick="mudarAba('equipamentos')" id="tab-equipamentos" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <i data-lucide="box" class="w-4 h-4"></i> Equipamentos
+      <nav class="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 overflow-x-auto custom-scroll max-w-full">
+        <button onclick="mudarAba('equipamentos')" id="tab-equipamentos" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 whitespace-nowrap shrink-0">
+          📦 <span class="hidden sm:inline">Equipamentos</span>
         </button>
-        <button onclick="mudarAba('demandas')" id="tab-demandas" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <i data-lucide="clipboard-list" class="w-4 h-4"></i> Demandas
+        <button onclick="mudarAba('demandas')" id="tab-demandas" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 whitespace-nowrap shrink-0">
+          📋 <span class="hidden sm:inline">Demandas</span>
         </button>
-        <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <i data-lucide="wrench" class="w-4 h-4"></i> Manutenção
+        <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 whitespace-nowrap shrink-0">
+          🔧 <span class="hidden sm:inline">Manutenção</span>
         </button>
-        <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <i data-lucide="truck" class="w-4 h-4"></i> Saída de Material
+        <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 whitespace-nowrap shrink-0">
+          🚚 <span class="hidden sm:inline">Saída de Material</span>
         </button>
-        <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <i data-lucide="users" class="w-4 h-4"></i> Equipe
+        <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 whitespace-nowrap shrink-0">
+          👥 <span class="hidden sm:inline">Equipe</span>
         </button>
-        <button onclick="abrirModalMeuPerfil()" class="px-3 py-2 rounded-lg text-xs font-bold text-blue-400 hover:bg-gray-900 transition flex items-center gap-1 whitespace-nowrap shrink-0">
-          <i data-lucide="user" class="w-4 h-4"></i> Meu Perfil
+        <div class="w-px h-5 bg-slate-700 hidden sm:block mx-1"></div>
+        <button onclick="abrirModalMeuPerfil()" class="px-3 py-2 rounded-lg text-xs font-semibold text-blue-400 hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap shrink-0">
+          <i data-lucide="user-circle" class="w-4 h-4"></i> <span class="hidden sm:inline">Perfil</span>
         </button>
-        <button onclick="trocarUsuario()" class="hidden md:block px-3 py-2 rounded-lg text-xs font-bold text-red-400 hover:bg-gray-900 transition whitespace-nowrap shrink-0">
-          Sair
+        <button onclick="trocarUsuario()" class="hidden md:flex px-3 py-2 rounded-lg text-xs font-semibold text-red-400 hover:bg-slate-800 transition items-center gap-2 whitespace-nowrap shrink-0">
+          <i data-lucide="log-out" class="w-4 h-4"></i> Sair
         </button>
       </nav>
     </div>
   </header>
 
   <!-- PRINCIPAL -->
-  <main class="max-w-7xl mx-auto p-3 sm:p-4 flex-1 w-full space-y-6">
+  <main class="max-w-7xl mx-auto p-3 sm:p-5 flex-1 w-full space-y-6">
 
     <!-- EQUIPAMENTOS (Antigo Estoque) -->
     <section id="sec-equipamentos" class="space-y-4 sm:space-y-6 no-print">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-xl sm:text-2xl font-black text-blue-400">Lista de Equipamentos</h2>
-          <p class="text-xs text-gray-400">Consulta geral do acervo</p>
+          <h2 class="text-xl sm:text-2xl font-black text-blue-400 flex items-center gap-2">📦 Lista de Equipamentos</h2>
+          <p class="text-xs text-slate-400 mt-1">Consulta geral do acervo da empresa</p>
         </div>
-        <button id="btn-add-estoque" onclick="abrirModalEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm hidden w-full sm:w-auto">
-          + Novo Equipamento (ADM)
+        <button id="btn-add-estoque" onclick="abrirModalEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm hidden w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg shadow-blue-900/50">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Novo Equipamento (ADM)
         </button>
       </div>
 
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto custom-scroll w-full">
           <table class="w-full text-left border-collapse min-w-[600px]">
             <thead>
-              <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-[11px] sm:text-xs uppercase whitespace-nowrap">
-                <th class="p-3 sm:p-4">Foto</th>
-                <th class="p-3 sm:p-4">Equipamento</th>
-                <th class="p-3 sm:p-4">Modelo</th>
-                <th class="p-3 sm:p-4">Categoria</th>
-                <th class="p-3 sm:p-4">Qtde Total</th>
-                <th class="p-3 sm:p-4 text-right adm-only">Ações</th>
+              <tr class="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-[11px] sm:text-xs uppercase whitespace-nowrap font-bold">
+                <th class="p-4 w-16">Foto</th>
+                <th class="p-4">Equipamento</th>
+                <th class="p-4">Modelo</th>
+                <th class="p-4">Categoria</th>
+                <th class="p-4 text-center">Qtde Total</th>
+                <th class="p-4 text-right adm-only">Ações</th>
               </tr>
             </thead>
-            <tbody id="lista-estoque" class="divide-y divide-gray-800/60 text-xs sm:text-sm"></tbody>
+            <tbody id="lista-estoque" class="divide-y divide-slate-800/60 text-xs sm:text-sm"></tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- DEMANDAS (Antiga Limpeza) -->
+    <!-- DEMANDAS -->
     <section id="sec-demandas" class="space-y-4 sm:space-y-6 hidden no-print">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-xl sm:text-2xl font-black text-teal-400">Quadro de Demandas</h2>
-          <p class="text-xs text-gray-400">Gerenciamento de tarefas, cargas, limpezas e atividades</p>
+          <h2 class="text-xl sm:text-2xl font-black text-teal-400 flex items-center gap-2">📋 Quadro de Demandas</h2>
+          <p class="text-xs text-slate-400 mt-1">Gerenciamento de tarefas, cargas e atividades</p>
         </div>
-        <button onclick="abrirModalDemanda()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm w-full sm:w-auto">
-          + Nova Demanda
+        <button onclick="abrirModalDemanda()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg shadow-teal-900/50">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Nova Demanda
         </button>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="cards-demandas"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-demandas"></div>
     </section>
 
     <!-- MANUTENÇÃO -->
     <section id="sec-manutencao" class="space-y-4 sm:space-y-6 hidden no-print">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-xl sm:text-2xl font-black text-amber-500">Fichas Técnicas de Manutenção</h2>
-          <p class="text-xs text-gray-400">Controle de reparos, prazos e laudo técnico</p>
+          <h2 class="text-xl sm:text-2xl font-black text-amber-500 flex items-center gap-2">🔧 Fichas de Manutenção</h2>
+          <p class="text-xs text-slate-400 mt-1">Controle de reparos, prazos e laudos técnicos</p>
         </div>
-        <button onclick="abrirModalManutencao()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm w-full sm:w-auto">
-          + Nova Ficha de Manutenção
+        <button onclick="abrirModalManutencao()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg shadow-amber-900/50">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Nova Ficha Técnica
         </button>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="cards-manutencao"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-manutencao"></div>
     </section>
 
     <!-- SAÍDA DE MATERIAL -->
     <section id="sec-eventos" class="space-y-4 sm:space-y-6 hidden">
-      <div class="flex flex-col md:flex-row md:items-center justify-between no-print gap-3">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between no-print gap-4">
         <div>
-          <h2 class="text-xl sm:text-2xl font-black text-green-400">Saída de Material para Evento</h2>
-          <p class="text-xs text-gray-400">Controle de saídas, responsável, impressão e download em PDF</p>
+          <h2 class="text-xl sm:text-2xl font-black text-green-400 flex items-center gap-2">🚚 Saída de Material para Evento</h2>
+          <p class="text-xs text-slate-400 mt-1">Crie a lista de saída e acompanhe as devoluções</p>
         </div>
-        <div class="flex flex-wrap gap-2 w-full md:w-auto">
-          <button onclick="window.print()" class="flex-1 md:flex-none bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex justify-center items-center gap-1.5 border border-gray-700">
+        <div class="flex flex-wrap gap-2 w-full lg:w-auto">
+          <button onclick="window.print()" class="flex-1 lg:flex-none bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex justify-center items-center gap-2 transition">
             <i data-lucide="printer" class="w-4 h-4"></i> Imprimir
           </button>
-          <button onclick="gerarPDFSaida()" class="flex-1 md:flex-none bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex justify-center items-center gap-1.5">
-            <i data-lucide="file-text" class="w-4 h-4"></i> Baixar PDF
+          <button onclick="gerarPDFSaida()" class="flex-1 lg:flex-none bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex justify-center items-center gap-2 transition">
+            <i data-lucide="file-down" class="w-4 h-4"></i> Baixar PDF
           </button>
-          <button id="btn-finalizar-saida" onclick="salvarSaidaMaterialBD()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex justify-center items-center gap-1.5 hidden">
+          <button id="btn-finalizar-saida" onclick="salvarSaidaMaterialBD()" class="w-full lg:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex justify-center items-center gap-2 hidden transition shadow-lg shadow-blue-900/50">
             <i data-lucide="check-circle" class="w-4 h-4"></i> Registrar Saída
           </button>
         </div>
@@ -268,51 +276,59 @@
         </div>
 
         <!-- FORMULÁRIO DE SAÍDA -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6 print:border-0 print:p-0">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 no-print">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 print:border-0 print:p-0 shadow-xl">
+          <!-- Dados do Evento -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 no-print bg-slate-950/50 p-4 rounded-2xl border border-slate-800/60">
             <div>
-              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nome do Evento</label>
-              <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Ex: Show de Verão" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Nome do Evento</label>
+              <input type="text" id="ev-nome" oninput="atualizarHeaderPrint()" placeholder="Ex: Show de Verão" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-green-500">
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Contato do Evento</label>
-              <input type="text" id="ev-contato" oninput="atualizarHeaderPrint()" placeholder="Nome do Produtor" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Contato Evento</label>
+              <input type="text" id="ev-contato" oninput="atualizarHeaderPrint()" placeholder="Nome do Produtor" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-green-500">
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Telefone Contato</label>
-              <input type="tel" id="ev-telefone" oninput="atualizarHeaderPrint()" placeholder="(88) 99999-9999" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Telefone / Whats</label>
+              <input type="tel" id="ev-telefone" oninput="atualizarHeaderPrint()" placeholder="(88) 99999-9999" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-green-500">
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Data Evento</label>
-              <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Data Evento</label>
+              <input type="date" id="ev-data" onchange="atualizarHeaderPrint()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-green-500">
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Resp. pelo Material</label>
-              <input type="text" id="ev-responsavel" oninput="atualizarHeaderPrint()" placeholder="Técnico/Auxiliar" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white text-xs focus:outline-none">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Téc. Responsável</label>
+              <input type="text" id="ev-responsavel" oninput="atualizarHeaderPrint()" placeholder="Quem vai levar?" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-green-500">
             </div>
           </div>
 
-          <div class="overflow-x-auto custom-scroll w-full">
-            <table class="w-full text-left print-table min-w-[550px]">
+          <!-- BARRA DE BUSCA -->
+          <div class="relative no-print area-permissao-saida">
+            <i data-lucide="search" class="w-5 h-5 absolute left-4 top-3.5 text-slate-500"></i>
+            <input type="text" id="busca-saida" oninput="filtrarSaidaMaterial()" placeholder="Buscar equipamento por nome ou categoria..." class="w-full bg-slate-950 border border-slate-700/50 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm focus:outline-none focus:border-green-500 shadow-inner">
+          </div>
+
+          <!-- TABELA DE SELEÇÃO -->
+          <div class="overflow-x-auto custom-scroll w-full border border-slate-800 rounded-2xl print:border-0">
+            <table class="w-full text-left print-table min-w-[600px]">
               <thead>
-                <tr class="border-b border-gray-800 bg-gray-950/80 text-gray-400 text-[11px] uppercase print:bg-white print:text-black whitespace-nowrap">
-                  <th class="p-3">Equipamento</th>
-                  <th class="p-3">Modelo / Categoria</th>
-                  <th class="p-3 text-center no-print area-permissao-saida hidden">Saída (Qtde)</th>
-                  <th class="p-3 text-center">Qtde p/ Evento</th>
-                  <th class="p-3 text-center no-print area-permissao-saida hidden">Ação</th>
+                <tr class="border-b border-slate-800 bg-slate-950/80 text-slate-400 text-[11px] uppercase print:bg-white print:text-black font-bold whitespace-nowrap">
+                  <th class="p-4">Equipamento</th>
+                  <th class="p-4">Categoria</th>
+                  <th class="p-4 text-center no-print area-permissao-saida hidden w-32">Saída (Qtde)</th>
+                  <th class="p-4 text-center w-32">Separado</th>
+                  <th class="p-4 text-center no-print area-permissao-saida hidden w-32">Ação</th>
                 </tr>
               </thead>
-              <tbody id="checklist-itens-evento" class="divide-y divide-gray-800/60 text-xs sm:text-sm"></tbody>
+              <tbody id="checklist-itens-evento" class="divide-y divide-slate-800/50 text-xs sm:text-sm bg-slate-900 print:bg-white"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- LISTA DE SAÍDAS ATIVAS E CONFERÊNCIA DE RETORNO -->
-      <div class="no-print space-y-4 pt-4 border-t border-gray-800">
-        <h3 class="text-lg sm:text-xl font-bold text-amber-400">Eventos Cadastrados (Histórico & Baixas)</h3>
-        <div id="lista-saidas-registradas" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
+      <!-- EVENTOS REGISTRADOS -->
+      <div class="no-print space-y-4 pt-6 border-t border-slate-800">
+        <h3 class="text-lg sm:text-xl font-bold text-amber-400 flex items-center gap-2">🔄 Histórico & Retornos (Baixas)</h3>
+        <div id="lista-saidas-registradas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </section>
 
@@ -320,200 +336,228 @@
     <section id="sec-equipe" class="space-y-4 sm:space-y-6 hidden no-print">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 class="text-xl sm:text-2xl font-black text-purple-400">Equipe & Configurações da Empresa</h2>
-          <p class="text-xs text-gray-400">Gerenciar acessos, permissões de saída e contatos</p>
+          <h2 class="text-xl sm:text-2xl font-black text-purple-400 flex items-center gap-2">👥 Equipe & Acessos</h2>
+          <p class="text-xs text-slate-400 mt-1">Gerenciar logins, permissões e contatos</p>
         </div>
-        <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden w-full sm:w-auto">
-          🖼️ Definir Logo da Empresa (ADM)
+        <button id="btn-config-logo" onclick="abrirModalLogo()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg shadow-purple-900/50">
+          <i data-lucide="image" class="w-4 h-4"></i> Configurar Logo
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="cards-equipe"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-equipe"></div>
     </section>
 
   </main>
 
-  <!-- MODAIS -->
-  <div id="modal-meu-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
-      <h3 class="text-base sm:text-lg font-bold text-blue-400">Meu Perfil & Acesso</h3>
-      <div class="space-y-3">
+  <!-- ==================== MODAIS ==================== -->
+  
+  <!-- MEU PERFIL -->
+  <div id="modal-meu-perfil" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 w-full max-w-md space-y-5 shadow-2xl my-auto">
+      <h3 class="text-lg font-bold text-blue-400 flex items-center gap-2"><i data-lucide="user-circle"></i> Meu Perfil</h3>
+      <div class="space-y-4">
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Seu Nome</label>
-          <input type="text" id="my-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Seu Nome</label>
+          <input type="text" id="my-perf-nome" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Enviar Foto (Câmera / Celular)</label>
-          <input type="file" id="my-perf-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Sua Foto</label>
+          <input type="file" id="my-perf-foto-file" accept="image/*" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-300">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1">Sua Nova Senha</label>
-          <input type="password" id="my-perf-senha" placeholder="Digite para alterar sua senha" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1.5 ml-1">Nova Senha (Opcional)</label>
+          <input type="password" id="my-perf-senha" placeholder="Digite para alterar" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none">
         </div>
       </div>
-      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalMeuPerfil()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
-        <button onclick="salvarMeuPerfil()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar Alterações</button>
+      <div class="flex justify-end gap-2 border-t border-slate-800 pt-5 mt-2">
+        <button onclick="fecharModalMeuPerfil()" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition">Cancelar</button>
+        <button onclick="salvarMeuPerfil()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Salvar</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-logo" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-md space-y-4 shadow-2xl my-auto">
-      <h3 class="text-base sm:text-lg font-bold text-purple-400">Logo Oficial da Empresa</h3>
+  <!-- LOGO -->
+  <div id="modal-logo" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 w-full max-w-md space-y-5 shadow-2xl my-auto">
+      <h3 class="text-lg font-bold text-purple-400 flex items-center gap-2"><i data-lucide="image"></i> Logo Oficial</h3>
       <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Upload da Logo</label>
-        <input type="file" id="input-logo-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Upload da Imagem</label>
+        <input type="file" id="input-logo-file" accept="image/*" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-300">
       </div>
-      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalLogo()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
-        <button onclick="salvarLogoEmpresa()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Atualizar Logo</button>
+      <div class="flex justify-end gap-2 border-t border-slate-800 pt-5 mt-2">
+        <button onclick="fecharModalLogo()" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition">Cancelar</button>
+        <button onclick="salvarLogoEmpresa()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Atualizar Logo</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE EQUIPAMENTOS (EDIÇÃO E NOVO) -->
-  <div id="modal-estoque" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
-      <h3 class="text-base sm:text-lg font-bold text-white" id="modal-est-titulo">Cadastrar Equipamento</h3>
+  <!-- ESTOQUE / EQUIPAMENTOS -->
+  <div id="modal-estoque" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 w-full max-w-lg space-y-5 shadow-2xl my-auto">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2" id="modal-est-titulo"><i data-lucide="box"></i> Cadastrar Equipamento</h3>
       <input type="hidden" id="est-id">
       
-      <input type="text" id="est-nome" placeholder="Nome do Equipamento" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
-      
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input type="text" id="est-modelo" placeholder="Modelo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
-        <input type="number" id="est-qtd" value="1" min="1" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+      <div>
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Nome do Equipamento</label>
+        <input type="text" id="est-nome" placeholder="Ex: Line Array / Mesa de Som" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
       </div>
       
-      <select id="est-categoria" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
-        <option value="Som">Som</option>
-        <option value="Painel de LED">Painel de LED</option>
-        <option value="Iluminação">Iluminação</option>
-        <option value="Consoles">Consoles</option>
-        <option value="Periféricos">Periféricos</option>
-        <option value="Amplificadores">Amplificadores</option>
-        <option value="Cabos/AC">Cabos/AC</option>
-        <option value="Main powers">Main powers</option>
-        <option value="Ferragens/Ferramentas">Ferragens/Ferramentas</option>
-        <option value="Outros">Outros</option>
-      </select>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+           <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Modelo/Marca</label>
+           <input type="text" id="est-modelo" placeholder="Ex: SB28 / Yamaha" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+           <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Quantidade Total</label>
+           <input type="number" id="est-qtd" value="1" min="1" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
+        </div>
+      </div>
       
       <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Foto do Equipamento (Opcional)</label>
-        <input type="file" id="est-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Categoria Principal</label>
+        <select id="est-categoria" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
+          <option value="Som">🔊 Som</option>
+          <option value="Painel de LED">📺 Painel de LED</option>
+          <option value="Iluminação">💡 Iluminação</option>
+          <option value="Consoles">🎛️ Consoles</option>
+          <option value="Periféricos">📻 Periféricos</option>
+          <option value="Amplificadores">⚡ Amplificadores</option>
+          <option value="Cabos/AC">🔌 Cabos/AC</option>
+          <option value="Main powers">🔋 Main powers</option>
+          <option value="Ferragens/Ferramentas">🛠️ Ferragens / Ferramentas</option>
+          <option value="Outros">📦 Outros</option>
+        </select>
       </div>
       
-      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalEstoque()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
-        <button onclick="salvarEstoque()" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar</button>
+      <div>
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Foto (Opcional)</label>
+        <input type="file" id="est-foto-file" accept="image/*" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-300">
+      </div>
+      
+      <div class="flex justify-end gap-2 border-t border-slate-800 pt-5 mt-2">
+        <button onclick="fecharModalEstoque()" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition">Cancelar</button>
+        <button onclick="salvarEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Salvar</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE DEMANDAS -->
-  <div id="modal-demanda" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
-      <h3 class="text-base sm:text-lg font-bold text-white" id="modal-dem-titulo">Nova Demanda</h3>
+  <!-- DEMANDAS -->
+  <div id="modal-demanda" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 w-full max-w-lg space-y-5 shadow-2xl my-auto">
+      <h3 class="text-lg font-bold text-teal-400 flex items-center gap-2" id="modal-dem-titulo"><i data-lucide="clipboard-list"></i> Nova Demanda</h3>
       <input type="hidden" id="dem-id">
       
       <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Descrição da Demanda / Tarefa</label>
-        <textarea id="dem-descricao" placeholder="Ex: Descarga de material do show no galpão, Limpeza geral dos cabos..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none" rows="3"></textarea>
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">O que precisa ser feito?</label>
+        <textarea id="dem-descricao" placeholder="Ex: Limpar baú de cabos, Descarregar carreta..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-teal-500" rows="3"></textarea>
       </div>
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Status</label>
-          <select id="dem-status" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
-            <option value="PENDENTE">PENDENTE</option>
-            <option value="ATRASADO">ATRASADO</option>
-            <option value="CONCLUIDO">CONCLUIDO</option>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Status Atual</label>
+          <select id="dem-status" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-teal-500">
+            <option value="PENDENTE">🟡 PENDENTE</option>
+            <option value="ATRASADO">🔴 ATRASADO</option>
+            <option value="CONCLUIDO">🟢 CONCLUIDO</option>
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Data Limite / Prazo</label>
-          <input type="date" id="dem-data" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Prazo Máximo</label>
+          <input type="date" id="dem-data" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-teal-500">
         </div>
       </div>
       
-      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalDemanda()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
-        <button onclick="salvarDemanda()" class="bg-teal-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar Demanda</button>
+      <div class="flex justify-end gap-2 border-t border-slate-800 pt-5 mt-2">
+        <button onclick="fecharModalDemanda()" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition">Cancelar</button>
+        <button onclick="salvarDemanda()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Salvar Demanda</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-manutencao" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
-      <h3 class="text-base sm:text-lg font-bold text-white" id="modal-man-titulo">Nova Ficha de Manutenção</h3>
+  <!-- MANUTENÇÃO -->
+  <div id="modal-manutencao" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 w-full max-w-lg space-y-4 shadow-2xl my-auto">
+      <h3 class="text-lg font-bold text-amber-500 flex items-center gap-2" id="modal-man-titulo"><i data-lucide="wrench"></i> Ficha de Manutenção</h3>
       <input type="hidden" id="man-id">
+      
       <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Equipamento / Item</label>
-        <input type="text" id="man-item" placeholder="Ex: Mesa PM5D RH" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Equipamento</label>
+        <input type="text" id="man-item" placeholder="Ex: Console Yamaha" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Status</label>
-          <select id="man-status" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
-            <option value="PENDENTE">PENDENTE</option>
-            <option value="ATRASADO">ATRASADO</option>
-            <option value="FINALIZADO">FINALIZADO</option>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Status</label>
+          <select id="man-status" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
+            <option value="PENDENTE">🟡 PENDENTE</option>
+            <option value="ATRASADO">🔴 ATRASADO</option>
+            <option value="FINALIZADO">🟢 FINALIZADO</option>
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Data Limite</label>
-          <input type="date" id="man-data-limite" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Data Limite</label>
+          <input type="date" id="man-data-limite" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
         </div>
       </div>
+      
       <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Técnico Responsável</label>
-        <input type="text" id="man-tecnico" placeholder="Nome do técnico responsável" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Técnico Responsável</label>
+        <input type="text" id="man-tecnico" placeholder="Quem fará o reparo?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
       </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[11px] font-bold text-rose-400 uppercase mb-1.5 ml-1">Defeito Relatado</label>
+          <textarea id="man-defeito" placeholder="Qual o problema?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-rose-500" rows="2"></textarea>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-green-400 uppercase mb-1.5 ml-1">Solução</label>
+          <textarea id="man-solucao" placeholder="O que foi trocado?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-green-500" rows="2"></textarea>
+        </div>
+      </div>
+      
       <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Defeito Relatado</label>
-        <textarea id="man-defeito" placeholder="Descreva o defeito..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none" rows="2"></textarea>
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Foto do Defeito</label>
+        <input type="file" id="man-foto-file" accept="image/*" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-300">
       </div>
-      <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Solução Aplicada</label>
-        <textarea id="man-solucao" placeholder="Descreva os componentes trocados..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none" rows="2"></textarea>
-      </div>
-      <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Foto do Defeito</label>
-        <input type="file" id="man-foto-file" accept="image/*" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs text-gray-300">
-      </div>
-      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalManutencao()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
-        <button onclick="salvarManutencao()" class="bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar Ficha</button>
+      
+      <div class="flex justify-end gap-2 border-t border-slate-800 pt-5 mt-2">
+        <button onclick="fecharModalManutencao()" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition">Cancelar</button>
+        <button onclick="salvarManutencao()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Salvar Ficha</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-perfil" class="fixed inset-0 bg-black/80 flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg space-y-4 my-auto">
-      <h3 class="text-base sm:text-lg font-bold text-purple-400">Redefinir Perfil e Permissões (ADM)</h3>
+  <!-- PERFIL ADM -->
+  <div id="modal-perfil" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 w-full max-w-lg space-y-4 shadow-2xl my-auto">
+      <h3 class="text-lg font-bold text-purple-400 flex items-center gap-2"><i data-lucide="shield"></i> Editar Acessos (ADM)</h3>
       <input type="hidden" id="edit-perf-id">
+      
       <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Nome Completo</label>
-        <input type="text" id="edit-perf-nome" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Nome Completo</label>
+        <input type="text" id="edit-perf-nome" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-purple-500">
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">E-mail</label>
-          <input type="email" id="edit-perf-email" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">E-mail</label>
+          <input type="email" id="edit-perf-email" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-purple-500">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1">Nova Senha</label>
-          <input type="text" id="edit-perf-senha" placeholder="Digite nova senha" class="w-full bg-gray-950 border border-amber-800/60 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1.5 ml-1">Nova Senha</label>
+          <input type="text" id="edit-perf-senha" placeholder="Alterar senha" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
         </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">WhatsApp / Telefone</label>
-          <input type="tel" id="edit-perf-telefone" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">WhatsApp</label>
+          <input type="tel" id="edit-perf-telefone" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-purple-500">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Cargo</label>
-          <select id="edit-perf-cargo" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white text-sm focus:outline-none">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Cargo</label>
+          <select id="edit-perf-cargo" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-purple-500">
             <option value="auxiliar_tecnico">Auxiliar Técnico</option>
             <option value="tecnico">Técnico</option>
             <option value="administrador">Administrador</option>
@@ -521,17 +565,17 @@
         </div>
       </div>
 
-      <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 flex items-center gap-3">
-        <input type="checkbox" id="edit-perf-pode-saida" class="w-5 h-5 accent-green-600 rounded">
+      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center gap-3 mt-2">
+        <input type="checkbox" id="edit-perf-pode-saida" class="w-5 h-5 accent-green-500 rounded cursor-pointer">
         <div>
-          <label for="edit-perf-pode-saida" class="text-xs font-bold text-white cursor-pointer">Permitir criar e adicionar Saídas de Material</label>
-          <p class="text-[10px] text-gray-400">Marque se este colaborador pode selecionar equipamentos e lançar saídas.</p>
+          <label for="edit-perf-pode-saida" class="text-sm font-bold text-white cursor-pointer select-none">Pode Lançar Saída de Material</label>
+          <p class="text-[11px] text-slate-400">Autoriza o colaborador a selecionar itens e registrar eventos.</p>
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 border-t border-gray-800 pt-4">
-        <button onclick="fecharModalPerfil()" class="px-4 py-2 text-gray-400 text-xs sm:text-sm">Cancelar</button>
-        <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Salvar Alterações</button>
+      <div class="flex justify-end gap-2 border-t border-slate-800 pt-5 mt-4">
+        <button onclick="fecharModalPerfil()" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition">Cancelar</button>
+        <button onclick="salvarEdicaoPerfil()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Salvar Alterações</button>
       </div>
     </div>
   </div>
@@ -540,6 +584,30 @@
   <script>
     lucide.createIcons();
     let registrosSaida = {};
+    let estoqueGlobal = [];
+
+    // SISTEMA DE CORES DAS CATEGORIAS
+    function getBadgeCategoria(cat) {
+      // Limpa os emojis do nome para verificar as chaves
+      const catLimpa = cat.replace(/[^\w\s\/-]/gi, '').trim(); 
+      const cores = {
+        'Som': 'bg-blue-950 text-blue-400 border-blue-800/60',
+        'Painel de LED': 'bg-purple-950 text-purple-400 border-purple-800/60',
+        'Iluminação': 'bg-yellow-950 text-yellow-400 border-yellow-800/60',
+        'Consoles': 'bg-pink-950 text-pink-400 border-pink-800/60',
+        'Periféricos': 'bg-cyan-950 text-cyan-400 border-cyan-800/60',
+        'Amplificadores': 'bg-red-950 text-red-400 border-red-800/60',
+        'Cabos/AC': 'bg-slate-800 text-slate-300 border-slate-600',
+        'Main powers': 'bg-orange-950 text-orange-400 border-orange-800/60',
+        'Ferragens/Ferramentas': 'bg-stone-800 text-stone-300 border-stone-600',
+        'Outros': 'bg-gray-800 text-gray-400 border-gray-700'
+      };
+      // Varre as chaves para match parcial
+      for (const key in cores) {
+        if (catLimpa.includes(key)) return cores[key];
+      }
+      return cores['Outros'];
+    }
 
     function temPermissaoSaida() {
       if (!usuarioAtual) return false;
@@ -549,28 +617,20 @@
     async function fazerUploadImagem(inputElementId) {
       const fileInput = document.getElementById(inputElementId);
       if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
-
       const file = fileInput.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-
       if (!db) return null;
-
-      const { data, error } = await db.storage.from('fotos').upload(fileName, file);
-      if (error) {
-        console.error('Erro no upload:', error.message);
-        alert('Erro ao enviar imagem: ' + error.message);
-        return null;
-      }
-
-      const { data: publicUrlData } = db.storage.from('fotos').getPublicUrl(fileName);
-      return publicUrlData ? publicUrlData.publicUrl : null;
+      const { error } = await db.storage.from('fotos').upload(fileName, file);
+      if (error) { alert('Erro na imagem: ' + error.message); return null; }
+      const { data } = db.storage.from('fotos').getPublicUrl(fileName);
+      return data ? data.publicUrl : null;
     }
 
     function aplicarLogoNaInterface() {
       if (logoEmpresaUrl) {
-        document.getElementById('box-logo-login').innerHTML = `<img src="${logoEmpresaUrl}" class="max-h-14 sm:max-h-16 object-contain">`;
-        document.getElementById('header-logo-container').innerHTML = `<img src="${logoEmpresaUrl}" class="h-8 sm:h-9 object-contain">`;
+        document.getElementById('box-logo-login').innerHTML = `<img src="${logoEmpresaUrl}" class="max-h-16 sm:max-h-20 object-contain drop-shadow-xl">`;
+        document.getElementById('header-logo-container').innerHTML = `<img src="${logoEmpresaUrl}" class="h-9 sm:h-10 object-contain drop-shadow-md">`;
         document.getElementById('print-logo-img').src = logoEmpresaUrl;
         document.getElementById('print-logo-img').classList.remove('hidden');
       }
@@ -588,16 +648,14 @@
 
     function abrirModalLogo() { document.getElementById('modal-logo').classList.remove('hidden'); }
     function fecharModalLogo() { document.getElementById('modal-logo').classList.add('hidden'); }
-
     async function salvarLogoEmpresa() {
-      const urlUpload = await fazerUploadImagem('input-logo-file');
-      if (urlUpload) logoEmpresaUrl = urlUpload;
-
-      localStorage.setItem('lm_logo_url', logoEmpresaUrl);
-      if (db && logoEmpresaUrl) {
-        await db.from('configuracoes').upsert({ chave: 'logo_url', valor: logoEmpresaUrl }, { onConflict: 'chave' });
+      const url = await fazerUploadImagem('input-logo-file');
+      if (url) {
+        logoEmpresaUrl = url;
+        localStorage.setItem('lm_logo_url', logoEmpresaUrl);
+        if (db) await db.from('configuracoes').upsert({ chave: 'logo_url', valor: logoEmpresaUrl }, { onConflict: 'chave' });
+        aplicarLogoNaInterface();
       }
-      aplicarLogoNaInterface();
       fecharModalLogo();
     }
 
@@ -608,71 +666,38 @@
       document.getElementById('my-perf-senha').value = '';
     }
     function fecharModalMeuPerfil() { document.getElementById('modal-meu-perfil').classList.add('hidden'); }
-
     async function salvarMeuPerfil() {
       const nome = document.getElementById('my-perf-nome').value.trim();
       const senha = document.getElementById('my-perf-senha').value.trim();
-      const novaFotoUrl = await fazerUploadImagem('my-perf-foto-file');
-
+      const foto = await fazerUploadImagem('my-perf-foto-file');
       if (!nome) return;
-
       usuarioAtual.nome = nome;
-      if (novaFotoUrl) usuarioAtual.foto_url = novaFotoUrl;
+      if (foto) usuarioAtual.foto_url = foto;
       if (senha) usuarioAtual.senha = senha;
-
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
-
       if (db && usuarioAtual.id) {
         const dados = { nome };
-        if (novaFotoUrl) dados.foto_url = novaFotoUrl;
+        if (foto) dados.foto_url = foto;
         if (senha) dados.senha = senha;
         await db.from('perfis').update(dados).eq('id', usuarioAtual.id);
       }
-
       fecharModalMeuPerfil();
       iniciarSistema();
     }
 
-    function mostrarTelaCadastro() {
-      document.getElementById('form-login-box').classList.add('hidden');
-      document.getElementById('form-cadastro-box').classList.remove('hidden');
-      document.getElementById('auth-subtitulo').innerText = "Crie sua conta para começar";
-    }
-
-    function mostrarTelaLogin() {
-      document.getElementById('form-cadastro-box').classList.add('hidden');
-      document.getElementById('form-login-box').classList.remove('hidden');
-      document.getElementById('auth-subtitulo').innerText = "Acesse sua conta para continuar";
-    }
-
-    function verificarSelecaoCargoCadastro() {
-      const cargo = document.getElementById('cad-cargo').value;
-      document.getElementById('campo-senha-adm-cad').classList.toggle('hidden', cargo !== 'administrador');
-    }
-
-    function esqueciSenha() {
-      alert('Por motivos de segurança, solicite a redefinição da sua senha diretamente a um Administrador da LEGALMART.');
-    }
+    function mostrarTelaCadastro() { document.getElementById('form-login-box').classList.add('hidden'); document.getElementById('form-cadastro-box').classList.remove('hidden'); document.getElementById('auth-subtitulo').innerText = "Crie sua conta na plataforma"; }
+    function mostrarTelaLogin() { document.getElementById('form-cadastro-box').classList.add('hidden'); document.getElementById('form-login-box').classList.remove('hidden'); document.getElementById('auth-subtitulo').innerText = "Acesse sua conta para continuar"; }
+    function verificarSelecaoCargoCadastro() { document.getElementById('campo-senha-adm-cad').classList.toggle('hidden', document.getElementById('cad-cargo').value !== 'administrador'); }
+    function esqueciSenha() { alert('Solicite a redefinição de senha a um Administrador.'); }
 
     async function realizarLogin() {
       const email = document.getElementById('login-email').value.trim();
       const senha = document.getElementById('login-senha').value.trim();
-
-      if (!email || !senha) { alert('Informe o E-mail e a Senha!'); return; }
-
+      if (!email || !senha) return alert('Informe E-mail e Senha!');
       if (!db) return;
       const { data, error } = await db.from('perfis').select('*').eq('email', email).single();
-
-      if (error || !data) {
-        alert('Usuário não encontrado. Verifique o e-mail ou crie um cadastro.');
-        return;
-      }
-
-      if (data.senha && data.senha !== senha) {
-        alert('Senha incorreta! Verifique ou solicite redefinição a um Administrador.');
-        return;
-      }
-
+      if (error || !data) return alert('Usuário não encontrado.');
+      if (data.senha && data.senha !== senha) return alert('Senha incorreta!');
       usuarioAtual = data;
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
       localStorage.setItem('lm_login_time', Date.now().toString());
@@ -680,94 +705,45 @@
     }
 
     async function realizarCadastro() {
-      const nome = document.getElementById('cad-nome').value.trim();
-      const email = document.getElementById('cad-email').value.trim();
-      const senha = document.getElementById('cad-senha').value.trim();
-      const telefone = document.getElementById('cad-telefone').value.trim();
-      const data_nascimento = document.getElementById('cad-nascimento').value;
+      const nome = document.getElementById('cad-nome').value.trim(), email = document.getElementById('cad-email').value.trim(), senha = document.getElementById('cad-senha').value.trim();
       let cargo = document.getElementById('cad-cargo').value;
-
-      if (!nome || !email || !senha) {
-        alert('Preencha os campos obrigatórios: Nome, E-mail e Senha!');
-        return;
+      if (!nome || !email || !senha) return alert('Preencha Nome, E-mail e Senha!');
+      if (cargo === 'administrador' && document.getElementById('cad-senha-adm').value !== SENHA_MESTRA_ADM) {
+        alert('Senha ADM incorreta! Cadastro como Auxiliar.'); cargo = 'auxiliar_tecnico';
       }
-
-      if (cargo === 'administrador') {
-        const senhaInput = document.getElementById('cad-senha-adm').value;
-        if (senhaInput !== SENHA_MESTRA_ADM) {
-          alert('Senha de ADM incorreta! Cargo alterado para Auxiliar Técnico.');
-          cargo = 'auxiliar_tecnico';
-        }
-      }
-
       if (!db) return;
-
-      const { data: existe } = await db.from('perfis').select('id').eq('email', email).maybeSingle();
-      if (existe) {
-        alert('Este e-mail já está cadastrado no sistema!');
-        return;
-      }
-
-      const foto_url = await fazerUploadImagem('cad-foto-file');
-      const novoPerfil = { nome, foto_url, email, senha, telefone, data_nascimento, cargo, pode_criar_saida: cargo === 'administrador' };
-      const { data, error } = await db.from('perfis').insert([novoPerfil]).select().single();
-
-      if (error) {
-        alert('Erro ao realizar cadastro: ' + error.message);
-        return;
-      }
-
-      usuarioAtual = data || novoPerfil;
+      const { data: ex } = await db.from('perfis').select('id').eq('email', email).maybeSingle();
+      if (ex) return alert('E-mail já cadastrado!');
+      const foto = await fazerUploadImagem('cad-foto-file');
+      const perfil = { nome, foto_url: foto, email, senha, telefone: document.getElementById('cad-telefone').value, data_nascimento: document.getElementById('cad-nascimento').value, cargo, pode_criar_saida: cargo === 'administrador' };
+      const { data, error } = await db.from('perfis').insert([perfil]).select().single();
+      if (error) return alert('Erro: ' + error.message);
+      usuarioAtual = data || perfil;
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
       localStorage.setItem('lm_login_time', Date.now().toString());
-      alert('Cadastro realizado com sucesso!');
       iniciarSistema();
     }
 
-    function trocarUsuario() {
-      localStorage.removeItem('lm_usuario');
-      localStorage.removeItem('lm_login_time');
-      location.reload();
-    }
+    function trocarUsuario() { localStorage.clear(); location.reload(); }
 
     function iniciarSistema() {
-      aplicarLogoNaInterface();
-      carregarLogoConfig();
-
-      if (!usuarioAtual) {
-        document.getElementById('tela-login').classList.remove('hidden');
-        return;
-      }
-
+      aplicarLogoNaInterface(); carregarLogoConfig();
+      if (!usuarioAtual) return document.getElementById('tela-login').classList.remove('hidden');
       document.getElementById('tela-login').classList.add('hidden');
       document.getElementById('user-info-bar').innerText = `${usuarioAtual.nome} (${usuarioAtual.cargo ? usuarioAtual.cargo.toUpperCase() : 'AUXILIAR'})`;
-
-      if (usuarioAtual.foto_url) {
-        const avatarImg = document.getElementById('header-user-avatar');
-        avatarImg.src = usuarioAtual.foto_url;
-        avatarImg.classList.remove('hidden');
-      }
-
-      const isAdm = usuarioAtual.cargo === 'administrador';
-      document.getElementById('btn-add-estoque').classList.toggle('hidden', !isAdm);
-      document.getElementById('btn-config-logo').classList.toggle('hidden', !isAdm);
-
+      if (usuarioAtual.foto_url) { const img = document.getElementById('header-user-avatar'); img.src = usuarioAtual.foto_url; img.classList.remove('hidden'); }
+      const adm = usuarioAtual.cargo === 'administrador';
+      document.getElementById('btn-add-estoque').classList.toggle('hidden', !adm);
+      document.getElementById('btn-config-logo').classList.toggle('hidden', !adm);
       mudarAba('equipamentos');
     }
 
     function mudarAba(aba) {
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(`sec-${aba}`).classList.remove('hidden');
-
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.className = "nav-btn px-3 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap shrink-0";
-      });
-
-      const tabAtiva = document.getElementById(`tab-${aba}`);
-      if (tabAtiva) {
-        tabAtiva.className = "nav-btn px-3 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap shrink-0";
-      }
-
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.className = "nav-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 whitespace-nowrap shrink-0");
+      const tab = document.getElementById(`tab-${aba}`);
+      if (tab) tab.className = "nav-btn px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white shadow transition flex items-center gap-2 whitespace-nowrap shrink-0 ring-1 ring-slate-700";
       if(aba === 'equipamentos') carregarEstoque();
       if(aba === 'demandas') carregarDemandas();
       if(aba === 'manutencao') carregarManutencao();
@@ -780,24 +756,15 @@
     function fecharModalManutencao() { document.getElementById('modal-manutencao').classList.add('hidden'); }
     function fecharModalPerfil() { document.getElementById('modal-perfil').classList.add('hidden'); }
 
-    // EQUIPAMENTOS (ESTOQUE)
-    function abrirModalEstoque(dados = null) { 
+    // EQUIPAMENTOS
+    function abrirModalEstoque(d = null) { 
       document.getElementById('modal-estoque').classList.remove('hidden'); 
-      if (dados) {
-        document.getElementById('modal-est-titulo').innerText = "Editar Equipamento";
-        document.getElementById('est-id').value = dados.id;
-        document.getElementById('est-nome').value = dados.nome || '';
-        document.getElementById('est-modelo').value = dados.modelo || '';
-        document.getElementById('est-qtd').value = dados.quantidade || 1;
-        document.getElementById('est-categoria').value = dados.categoria || 'Som';
-      } else {
-        document.getElementById('modal-est-titulo').innerText = "Cadastrar Equipamento";
-        document.getElementById('est-id').value = '';
-        document.getElementById('est-nome').value = '';
-        document.getElementById('est-modelo').value = '';
-        document.getElementById('est-qtd').value = 1;
-        document.getElementById('est-categoria').value = 'Som';
-      }
+      document.getElementById('modal-est-titulo').innerHTML = d ? '<i data-lucide="edit"></i> Editar Equipamento' : '<i data-lucide="box"></i> Cadastrar Equipamento';
+      document.getElementById('est-id').value = d ? d.id : '';
+      document.getElementById('est-nome').value = d ? d.nome : '';
+      document.getElementById('est-modelo').value = d ? (d.modelo || '') : '';
+      document.getElementById('est-qtd').value = d ? d.quantidade : 1;
+      lucide.createIcons();
     }
 
     async function carregarEstoque() {
@@ -806,425 +773,289 @@
       const { data } = await db.from('estoque').select('*').order('created_at', { ascending: false });
       const isAdm = usuarioAtual.cargo === 'administrador';
 
-      container.innerHTML = (data || []).map(item => `
-        <tr class="hover:bg-gray-950/50 transition border-b border-gray-800/40 whitespace-nowrap">
+      container.innerHTML = (data || []).map(i => {
+        const badgeColor = getBadgeCategoria(i.categoria || '');
+        return `
+        <tr class="hover:bg-slate-800/30 transition border-b border-slate-800/60 whitespace-nowrap">
           <td class="p-3 sm:p-4">
-            ${item.foto_url ? `<img src="${item.foto_url}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover border border-gray-700">` : '<div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 flex items-center justify-center text-xs text-gray-500">📦</div>'}
+            ${i.foto_url ? `<img src="${i.foto_url}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shadow-sm">` : '<div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-sm">📦</div>'}
           </td>
-          <td class="p-3 sm:p-4 font-bold text-white">${item.nome}</td>
-          <td class="p-3 sm:p-4 text-gray-400 font-mono">${item.modelo || '-'}</td>
-          <td class="p-3 sm:p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-950 text-blue-400 border border-blue-800/60">${item.categoria}</span></td>
-          <td class="p-3 sm:p-4 font-mono font-bold text-base sm:text-lg text-blue-400">${item.quantidade}</td>
+          <td class="p-3 sm:p-4 font-bold text-slate-100">${i.nome}</td>
+          <td class="p-3 sm:p-4 text-slate-400 font-mono text-xs">${i.modelo || '-'}</td>
+          <td class="p-3 sm:p-4"><span class="px-3 py-1 rounded-full text-[10px] font-bold border ${badgeColor}">${i.categoria}</span></td>
+          <td class="p-3 sm:p-4 text-center font-mono font-black text-lg text-blue-400">${i.quantidade}</td>
           <td class="p-3 sm:p-4 text-right ${isAdm ? '' : 'hidden'}">
-            <button onclick='abrirModalEstoque(${JSON.stringify(item)})' class="text-blue-400 hover:text-blue-300 p-1.5"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-            <button onclick="deletarEstoque('${item.id}')" class="text-red-400 hover:text-red-300 p-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            <button onclick='abrirModalEstoque(${JSON.stringify(i)})' class="text-blue-400 hover:text-blue-300 p-2 transition hover:scale-110"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+            <button onclick="deletarEstoque('${i.id}')" class="text-rose-500 hover:text-rose-400 p-2 transition hover:scale-110"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
       lucide.createIcons();
     }
 
     async function salvarEstoque() {
-      const id = document.getElementById('est-id').value;
-      const nome = document.getElementById('est-nome').value.trim();
-      const modelo = document.getElementById('est-modelo').value.trim();
-      const quantidade = parseInt(document.getElementById('est-qtd').value) || 1;
-      const categoria = document.getElementById('est-categoria').value;
-      const novaFotoUrl = await fazerUploadImagem('est-foto-file');
-
+      const id = document.getElementById('est-id').value, nome = document.getElementById('est-nome').value.trim();
+      const modelo = document.getElementById('est-modelo').value.trim(), qtd = parseInt(document.getElementById('est-qtd').value) || 1;
+      const cat = document.getElementById('est-categoria');
+      const categoria = cat.options[cat.selectedIndex].text; // pega texto com emoji
+      const foto = await fazerUploadImagem('est-foto-file');
       if (!nome) return;
-
-      const dados = { nome, modelo, quantidade, categoria };
-      if (novaFotoUrl) dados.foto_url = novaFotoUrl;
-
-      if (id) {
-        await db.from('estoque').update(dados).eq('id', id);
-      } else {
-        await db.from('estoque').insert([dados]);
-      }
-      
-      fecharModalEstoque();
-      carregarEstoque();
+      const dados = { nome, modelo, quantidade: qtd, categoria };
+      if (foto) dados.foto_url = foto;
+      if (id) await db.from('estoque').update(dados).eq('id', id); else await db.from('estoque').insert([dados]);
+      fecharModalEstoque(); carregarEstoque();
     }
+    async function deletarEstoque(id) { if(confirm('Excluir equipamento definitivamente?')) { await db.from('estoque').delete().eq('id', id); carregarEstoque(); } }
 
-    async function deletarEstoque(id) {
-      if(usuarioAtual.cargo !== 'administrador') return;
-      if(!confirm('Excluir equipamento definitivamente?')) return;
-      await db.from('estoque').delete().eq('id', id);
-      carregarEstoque();
-    }
-
-    // DEMANDAS (NOVO FORMATO)
-    function abrirModalDemanda(dados = null) {
+    // DEMANDAS
+    function abrirModalDemanda(d = null) {
       document.getElementById('modal-demanda').classList.remove('hidden');
-      if (dados) {
-        document.getElementById('modal-dem-titulo').innerText = "Editar Demanda";
-        document.getElementById('dem-id').value = dados.id;
-        document.getElementById('dem-descricao').value = dados.descricao || '';
-        document.getElementById('dem-status').value = dados.status || 'PENDENTE';
-        document.getElementById('dem-data').value = dados.data_limite || '';
-      } else {
-        document.getElementById('modal-dem-titulo').innerText = "Nova Demanda";
-        document.getElementById('dem-id').value = '';
-        document.getElementById('dem-descricao').value = '';
-        document.getElementById('dem-status').value = 'PENDENTE';
-        document.getElementById('dem-data').value = '';
-      }
+      document.getElementById('modal-dem-titulo').innerHTML = d ? '<i data-lucide="edit"></i> Editar Demanda' : '<i data-lucide="clipboard-list"></i> Nova Demanda';
+      document.getElementById('dem-id').value = d ? d.id : '';
+      document.getElementById('dem-descricao').value = d ? d.descricao : '';
+      document.getElementById('dem-status').value = d ? d.status : 'PENDENTE';
+      document.getElementById('dem-data').value = d ? d.data_limite : '';
+      lucide.createIcons();
     }
-
     async function carregarDemandas() {
       const container = document.getElementById('cards-demandas');
       if(!db) return;
       const { data } = await db.from('demandas').select('*').order('created_at', { ascending: false });
       const isAdm = usuarioAtual.cargo === 'administrador';
-
       container.innerHTML = (data || []).map(d => {
-        let statusCor = 'bg-teal-950 text-teal-400';
-        if (d.status === 'ATRASADO') statusCor = 'bg-red-950 text-red-400 border border-red-800';
-        if (d.status === 'CONCLUIDO') statusCor = 'bg-green-950 text-green-400 border border-green-800';
-
+        let sc = 'bg-teal-950 text-teal-400 border-teal-800/60';
+        if (d.status === 'ATRASADO') sc = 'bg-rose-950 text-rose-400 border-rose-800/60';
+        if (d.status === 'CONCLUIDO') sc = 'bg-emerald-950 text-emerald-400 border-emerald-800/60';
         return `
-          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex justify-between items-start mb-2">
-                <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold ${statusCor}">
-                  ${d.status || 'PENDENTE'}
-                </span>
-                <p class="text-xs text-gray-500 font-mono">${d.data_limite ? 'Prazo: ' + d.data_limite : 'Sem prazo'}</p>
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 flex flex-col justify-between shadow-lg hover:border-slate-700 transition">
+            <div class="space-y-3">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${sc}">${d.status}</span>
+                <span class="text-xs text-slate-500 font-mono bg-slate-950 px-2 py-1 rounded-lg">${d.data_limite ? '📅 ' + d.data_limite : '⏳ Sem prazo'}</span>
               </div>
-              <p class="text-sm text-gray-200 font-medium whitespace-pre-line">${d.descricao}</p>
+              <p class="text-sm text-slate-200 font-medium whitespace-pre-line leading-relaxed">${d.descricao}</p>
             </div>
-            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
-              <span>Por: <b class="text-gray-300">${d.criado_por || 'Anônimo'}</b></span>
+            <div class="pt-4 border-t border-slate-800/60 flex justify-between items-center text-xs text-slate-500">
+              <span class="flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${d.criado_por || 'Anônimo'}</span>
               <div class="flex gap-2">
-                <button onclick='abrirModalDemanda(${JSON.stringify(d)})' class="text-teal-400 font-bold">Editar</button>
-                ${isAdm ? `<button onclick="deletarDemanda('${d.id}')" class="text-red-400 font-bold">Excluir</button>` : ''}
+                <button onclick='abrirModalDemanda(${JSON.stringify(d)})' class="text-teal-400 font-bold hover:text-teal-300">Editar</button>
+                ${isAdm ? `<button onclick="deletarDemanda('${d.id}')" class="text-rose-500 font-bold hover:text-rose-400">Excluir</button>` : ''}
               </div>
             </div>
           </div>
-        `;
-      }).join('');
+        `}).join('');
+        lucide.createIcons();
     }
-
     async function salvarDemanda() {
-      const id = document.getElementById('dem-id').value;
-      const descricao = document.getElementById('dem-descricao').value.trim();
-      const status = document.getElementById('dem-status').value;
-      const data_limite = document.getElementById('dem-data').value;
-
-      if(!descricao) return;
-
-      const dados = { descricao, status, data_limite, criado_por: usuarioAtual.nome };
-
-      if (id) {
-        await db.from('demandas').update(dados).eq('id', id);
-      } else {
-        await db.from('demandas').insert([dados]);
-      }
-      
-      fecharModalDemanda();
-      carregarDemandas();
+      const id = document.getElementById('dem-id').value, desc = document.getElementById('dem-descricao').value.trim();
+      if(!desc) return;
+      const dados = { descricao: desc, status: document.getElementById('dem-status').value, data_limite: document.getElementById('dem-data').value, criado_por: usuarioAtual.nome };
+      if (id) await db.from('demandas').update(dados).eq('id', id); else await db.from('demandas').insert([dados]);
+      fecharModalDemanda(); carregarDemandas();
     }
+    async function deletarDemanda(id) { if(confirm('Excluir demanda?')) { await db.from('demandas').delete().eq('id', id); carregarDemandas(); } }
 
-    async function deletarDemanda(id) {
-      if(usuarioAtual.cargo !== 'administrador') return;
-      if(!confirm('Deseja excluir esta demanda?')) return;
-      await db.from('demandas').delete().eq('id', id);
-      carregarDemandas();
-    }
-
-    // MANUTENÇÃO COM FOTOS
-    function abrirModalManutencao(dados = null) {
+    // MANUTENÇÃO
+    function abrirModalManutencao(d = null) {
       document.getElementById('modal-manutencao').classList.remove('hidden');
-      if (dados) {
-        document.getElementById('modal-man-titulo').innerText = "Editar Ficha de Manutenção";
-        document.getElementById('man-id').value = dados.id;
-        document.getElementById('man-item').value = dados.item || '';
-        document.getElementById('man-status').value = dados.status || 'PENDENTE';
-        document.getElementById('man-data-limite').value = dados.data_limite || '';
-        document.getElementById('man-tecnico').value = dados.tecnico_responsavel || '';
-        document.getElementById('man-defeito').value = dados.defeito_relatado || '';
-        document.getElementById('man-solucao').value = dados.solucao_aplicada || '';
-      } else {
-        document.getElementById('modal-man-titulo').innerText = "Nova Ficha de Manutenção";
-        document.getElementById('man-id').value = '';
-        document.getElementById('man-item').value = '';
-        document.getElementById('man-status').value = 'PENDENTE';
-        document.getElementById('man-data-limite').value = '';
-        document.getElementById('man-tecnico').value = '';
-        document.getElementById('man-defeito').value = '';
-        document.getElementById('man-solucao').value = '';
-      }
+      document.getElementById('modal-man-titulo').innerHTML = d ? '<i data-lucide="edit"></i> Editar Ficha' : '<i data-lucide="wrench"></i> Ficha de Manutenção';
+      document.getElementById('man-id').value = d ? d.id : '';
+      document.getElementById('man-item').value = d ? d.item : '';
+      document.getElementById('man-status').value = d ? d.status : 'PENDENTE';
+      document.getElementById('man-data-limite').value = d ? (d.data_limite||'') : '';
+      document.getElementById('man-tecnico').value = d ? (d.tecnico_responsavel||'') : '';
+      document.getElementById('man-defeito').value = d ? (d.defeito_relatado||'') : '';
+      document.getElementById('man-solucao').value = d ? (d.solucao_aplicada||'') : '';
+      lucide.createIcons();
     }
-
     async function carregarManutencao() {
-      const container = document.getElementById('cards-manutencao');
+      const c = document.getElementById('cards-manutencao');
       if(!db) return;
       const { data } = await db.from('manutencao_separada').select('*').order('created_at', { ascending: false });
-      const isAdm = usuarioAtual.cargo === 'administrador';
-
-      container.innerHTML = (data || []).map(m => {
-        let statusCor = 'bg-amber-950 text-amber-400';
-        if (m.status === 'ATRASADO') statusCor = 'bg-red-950 text-red-400 border border-red-800';
-        if (m.status === 'FINALIZADO') statusCor = 'bg-green-950 text-green-400 border border-green-800';
-
+      const adm = usuarioAtual.cargo === 'administrador';
+      c.innerHTML = (data || []).map(m => {
+        let sc = 'bg-amber-950 text-amber-400 border-amber-800/60';
+        if (m.status === 'ATRASADO') sc = 'bg-rose-950 text-rose-400 border-rose-800/60';
+        if (m.status === 'FINALIZADO') sc = 'bg-emerald-950 text-emerald-400 border-emerald-800/60';
         return `
-          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 flex flex-col justify-between">
-            <div class="space-y-2">
-              ${m.foto_url ? `<img src="${m.foto_url}" class="w-full h-32 sm:h-36 rounded-xl object-cover border border-amber-800/50 mb-2">` : ''}
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 flex flex-col justify-between shadow-lg">
+            <div class="space-y-3">
+              ${m.foto_url ? `<img src="${m.foto_url}" class="w-full h-36 rounded-2xl object-cover border border-slate-700 shadow-sm">` : ''}
               <div class="flex justify-between items-start">
-                <h3 class="font-bold text-base sm:text-lg text-white">${m.item}</h3>
-                <span class="text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-bold ${statusCor}">
-                  ${m.status || 'PENDENTE'}
-                </span>
+                <h3 class="font-bold text-lg text-slate-100">${m.item}</h3>
+                <span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${sc}">${m.status}</span>
               </div>
-              <p class="text-xs text-gray-400"><b>Técnico:</b> ${m.tecnico_responsavel || 'Não atribuído'}</p>
-              <p class="text-xs text-red-400"><b>Defeito:</b> ${m.defeito_relatado || 'Sem descrição'}</p>
-              ${m.solucao_aplicada ? `<p class="text-xs text-green-400"><b>Solução:</b> ${m.solucao_aplicada}</p>` : ''}
-              <p class="text-xs text-amber-400"><b>Data Limite:</b> ${m.data_limite || 'Sem prazo'}</p>
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60 space-y-1">
+                <p class="text-[11px] text-slate-400"><b class="text-slate-300">Técnico:</b> ${m.tecnico_responsavel || '-'}</p>
+                <p class="text-[11px] text-rose-400"><b class="text-rose-300">Defeito:</b> ${m.defeito_relatado || '-'}</p>
+                ${m.solucao_aplicada ? `<p class="text-[11px] text-emerald-400"><b class="text-emerald-300">Solução:</b> ${m.solucao_aplicada}</p>` : ''}
+                <p class="text-[11px] text-amber-400"><b class="text-amber-300">Prazo:</b> ${m.data_limite || '-'}</p>
+              </div>
             </div>
-            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
-              <span>Por: <b class="text-gray-300">${m.criado_por || 'Anônimo'}</b></span>
+            <div class="pt-3 flex justify-between items-center text-xs text-slate-500">
+              <span class="flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${m.criado_por || '-'}</span>
               <div class="flex gap-2">
                 <button onclick='abrirModalManutencao(${JSON.stringify(m)})' class="text-amber-400 font-bold">Ficha</button>
-                ${isAdm ? `<button onclick="deletarManutencao('${m.id}')" class="text-red-400 font-bold">Excluir</button>` : ''}
+                ${adm ? `<button onclick="deletarManutencao('${m.id}')" class="text-rose-500 font-bold">Excluir</button>` : ''}
               </div>
             </div>
           </div>
-        `;
-      }).join('');
+        `}).join('');
+        lucide.createIcons();
     }
-
     async function salvarManutencao() {
-      const id = document.getElementById('man-id').value;
-      const item = document.getElementById('man-item').value.trim();
-      const status = document.getElementById('man-status').value;
-      const data_limite = document.getElementById('man-data-limite').value;
-      const tecnico_responsavel = document.getElementById('man-tecnico').value.trim();
-      const defeito_relatado = document.getElementById('man-defeito').value.trim();
-      const solucao_aplicada = document.getElementById('man-solucao').value.trim();
-      const novaFotoUrl = await fazerUploadImagem('man-foto-file');
-
+      const id = document.getElementById('man-id').value, item = document.getElementById('man-item').value.trim();
+      const foto = await fazerUploadImagem('man-foto-file');
       if (!item) return;
+      const d = { item, status: document.getElementById('man-status').value, data_limite: document.getElementById('man-data-limite').value, tecnico_responsavel: document.getElementById('man-tecnico').value, defeito_relatado: document.getElementById('man-defeito').value, solucao_aplicada: document.getElementById('man-solucao').value, criado_por: usuarioAtual.nome };
+      if (foto) d.foto_url = foto;
+      if (id) await db.from('manutencao_separada').update(d).eq('id', id); else await db.from('manutencao_separada').insert([d]);
+      fecharModalManutencao(); carregarManutencao();
+    }
+    async function deletarManutencao(id) { if(confirm('Excluir ficha?')) { await db.from('manutencao_separada').delete().eq('id', id); carregarManutencao(); } }
 
-      const dados = {
-        item, status, data_limite, tecnico_responsavel, defeito_relatado, solucao_aplicada,
-        criado_por: usuarioAtual.nome
-      };
-
-      if (novaFotoUrl) dados.foto_url = novaFotoUrl;
-
-      if (id) {
-        await db.from('manutencao_separada').update(dados).eq('id', id);
-      } else {
-        await db.from('manutencao_separada').insert([dados]);
-      }
-
-      fecharModalManutencao();
-      carregarManutencao();
+    // SAÍDA DE MATERIAL & FILTRO DE BUSCA
+    function atualizarHeaderPrint() {
+      document.getElementById('print-info-evento').innerText = `Evento: ${document.getElementById('ev-nome').value||'--'} | Contato: ${document.getElementById('ev-contato').value||'--'} | Tel: ${document.getElementById('ev-telefone').value||'--'} | Data: ${document.getElementById('ev-data').value||'--'} | Resp: ${document.getElementById('ev-responsavel').value||'--'}`;
+    }
+    function gerarPDFSaida() {
+      const e = document.getElementById('area-pdf-saida');
+      html2pdf().set({ margin: 0.3, filename: `Saida_${document.getElementById('ev-nome').value||'Evento'}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(e).save();
     }
 
-    async function deletarManutencao(id) {
-      if(usuarioAtual.cargo !== 'administrador') return;
-      if(!confirm('Excluir esta ficha de manutenção?')) return;
-      await db.from('manutencao_separada').delete().eq('id', id);
-      carregarManutencao();
+    function filtrarSaidaMaterial() {
+      const termo = document.getElementById('busca-saida').value.toLowerCase();
+      renderizarTabelaSaida(termo);
     }
-
-    // SAÍDA DE MATERIAL & PERMISSÕES
-    let estoqueGlobal = [];
 
     async function carregarEventoChecklist() {
-      const container = document.getElementById('checklist-itens-evento');
       if(!db) return;
       const { data } = await db.from('estoque').select('*');
       estoqueGlobal = data || [];
+      renderizarTabelaSaida();
+    }
 
+    function renderizarTabelaSaida(filtro = '') {
+      const container = document.getElementById('checklist-itens-evento');
       const podeCriar = temPermissaoSaida();
       document.getElementById('btn-finalizar-saida').classList.toggle('hidden', !podeCriar);
+      document.querySelectorAll('.area-permissao-saida').forEach(el => el.classList.toggle('hidden', !podeCriar));
 
-      document.querySelectorAll('.area-permissao-saida').forEach(el => {
-        el.classList.toggle('hidden', !podeCriar);
-      });
+      const lista = filtro ? estoqueGlobal.filter(i => i.nome.toLowerCase().includes(filtro) || (i.categoria && i.categoria.toLowerCase().includes(filtro))) : estoqueGlobal;
 
-      container.innerHTML = estoqueGlobal.map(i => {
-        const qtdeNoEvento = registrosSaida[i.id] || 0;
+      if(lista.length === 0) {
+        container.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-slate-500 italic">Nenhum equipamento encontrado com "${filtro}" 🤷‍♂️</td></tr>`;
+        return;
+      }
+
+      container.innerHTML = lista.map(i => {
+        const q = registrosSaida[i.id] || 0;
+        const bc = getBadgeCategoria(i.categoria || '');
         return `
-          <tr class="border-b border-gray-800/60 print:border-gray-300 whitespace-nowrap">
-            <td class="p-3 font-bold text-white print:text-black">${i.nome}</td>
-            <td class="p-3 text-gray-400 print:text-black font-mono text-xs">${i.modelo || '-'} (${i.categoria})</td>
-            <td class="p-3 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
-              <input type="number" id="qtd-saida-${i.id}" value="1" min="1" max="${i.quantidade}" class="w-14 sm:w-16 bg-gray-950 border border-gray-800 rounded-lg p-1 text-center text-white text-xs">
+          <tr class="border-b border-slate-800/50 print:border-slate-300 whitespace-nowrap hover:bg-slate-800/30">
+            <td class="p-3 sm:p-4 font-bold text-slate-200 print:text-black">
+              ${i.nome}
+              <div class="text-[10px] text-slate-500 font-mono mt-0.5 print:hidden">Mod: ${i.modelo || '-'}</div>
             </td>
-            <td class="p-3 text-center font-bold font-mono text-base sm:text-lg ${qtdeNoEvento > 0 ? 'text-amber-400 print:text-black' : 'text-gray-500 print:text-black'}">
-              ${qtdeNoEvento}
+            <td class="p-3 sm:p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${bc}">${i.categoria}</span></td>
+            <td class="p-3 sm:p-4 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
+              <input type="number" id="qtd-saida-${i.id}" value="1" min="1" max="${i.quantidade}" class="w-16 bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-center text-white text-xs focus:outline-none focus:border-green-500">
             </td>
-            <td class="p-3 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
-              <button onclick="registrarSaidaItem('${i.id}')" class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
-                + Selecionar
+            <td class="p-3 sm:p-4 text-center font-black font-mono text-lg ${q > 0 ? 'text-amber-400 print:text-black' : 'text-slate-600 print:text-black'}">${q}</td>
+            <td class="p-3 sm:p-4 text-center no-print area-permissao-saida ${podeCriar ? '' : 'hidden'}">
+              <button onclick="registrarSaidaItem('${i.id}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow transition active:scale-95 flex items-center justify-center gap-1 mx-auto">
+                <i data-lucide="plus" class="w-3 h-3"></i> Add
               </button>
             </td>
           </tr>
-        `;
-      }).join('');
+        `}).join('');
+        lucide.createIcons();
     }
 
     function registrarSaidaItem(id) {
-      if (!temPermissaoSaida()) {
-        alert('Você não tem permissão para lançar saídas de material.');
-        return;
-      }
-      const input = document.getElementById(`qtd-saida-${id}`);
-      const valor = parseInt(input.value) || 0;
-      if(valor <= 0) return;
-      registrosSaida[id] = (registrosSaida[id] || 0) + valor;
-      carregarEventoChecklist();
+      if (!temPermissaoSaida()) return alert('Sem permissão.');
+      const v = parseInt(document.getElementById(`qtd-saida-${id}`).value) || 0;
+      if(v > 0) { registrosSaida[id] = (registrosSaida[id] || 0) + v; renderizarTabelaSaida(document.getElementById('busca-saida').value.toLowerCase()); }
     }
 
     async function salvarSaidaMaterialBD() {
-      if (!temPermissaoSaida()) {
-        alert('Você não tem permissão para lançar saídas de material.');
-        return;
+      if (!temPermissaoSaida()) return;
+      const ev = document.getElementById('ev-nome').value.trim(), resp = document.getElementById('ev-responsavel').value.trim();
+      if (!ev || !resp) return alert('Informe o Nome do Evento e o Responsável!');
+      const itens = [];
+      for (const [id, q] of Object.entries(registrosSaida)) {
+        if (q > 0) { const i = estoqueGlobal.find(e => e.id === id); if (i) itens.push({ id_estoque: id, nome: i.nome, quantidade: q }); }
       }
-
-      const evento_nome = document.getElementById('ev-nome').value.trim();
-      const contato_evento = document.getElementById('ev-contato').value.trim();
-      const telefone_evento = document.getElementById('ev-telefone').value.trim();
-      const data_evento = document.getElementById('ev-data').value;
-      const responsavel = document.getElementById('ev-responsavel').value.trim();
-
-      if (!evento_nome || !responsavel) {
-        alert('Informe o Nome do Evento e o Responsável pelo Material!');
-        return;
-      }
-
-      const itensSaida = [];
-      for (const [id, qtd] of Object.entries(registrosSaida)) {
-        if (qtd > 0) {
-          const item = estoqueGlobal.find(e => e.id === id);
-          if (item) {
-            itensSaida.push({ id_estoque: id, nome: item.nome, quantidade: qtd });
-          }
-        }
-      }
-
-      if (itensSaida.length === 0) {
-        alert('Selecione pelo menos 1 equipamento para registrar a saída!');
-        return;
-      }
-
-      if (!db) return;
-
-      const { error } = await db.from('saida_materiais').insert([{
-        evento_nome, contato_evento, telefone_evento, data_evento, responsavel, itens: itensSaida, criado_por: usuarioAtual.nome
-      }]);
-
-      if (error) {
-        alert('Erro ao registrar saída: ' + error.message);
-        return;
-      }
-
-      alert('Saída de material registrada com sucesso!');
-      registrosSaida = {};
-      document.getElementById('ev-nome').value = '';
-      document.getElementById('ev-contato').value = '';
-      document.getElementById('ev-telefone').value = '';
-      document.getElementById('ev-responsavel').value = '';
-      carregarEventoChecklist();
-      carregarSaidasRegistradas();
+      if (itens.length === 0) return alert('Selecione pelo menos 1 equipamento!');
+      const d = { evento_nome: ev, contato_evento: document.getElementById('ev-contato').value, telefone_evento: document.getElementById('ev-telefone').value, data_evento: document.getElementById('ev-data').value, responsavel: resp, itens, criado_por: usuarioAtual.nome };
+      const { error } = await db.from('saida_materiais').insert([d]);
+      if (error) return alert('Erro: ' + error.message);
+      alert('Saída registrada com sucesso! 🚀');
+      registrosSaida = {}; document.querySelectorAll('input').forEach(i => { if(i.id.startsWith('ev-')) i.value=''; });
+      carregarEventoChecklist(); carregarSaidasRegistradas();
     }
 
     async function carregarSaidasRegistradas() {
-      const container = document.getElementById('lista-saidas-registradas');
+      const c = document.getElementById('lista-saidas-registradas');
       if(!db) return;
       const { data } = await db.from('saida_materiais').select('*').order('created_at', { ascending: false });
-
-      if (!data || data.length === 0) {
-        container.innerHTML = `<p class="text-xs text-gray-500 italic">Nenhum evento registrado no momento.</p>`;
-        return;
-      }
-
-      const podeCriar = temPermissaoSaida();
-
-      container.innerHTML = data.map(s => `
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3">
-          <div class="flex justify-between items-start gap-2">
+      if (!data || data.length === 0) return c.innerHTML = `<div class="col-span-2 text-center p-6 text-slate-500 italic bg-slate-900 rounded-3xl border border-dashed border-slate-700">Nenhum evento registrado. 📭</div>`;
+      const pc = temPermissaoSaida();
+      c.innerHTML = data.map(s => `
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+          <div class="flex justify-between items-start gap-3 border-b border-slate-800/60 pb-3">
             <div>
-              <h4 class="font-bold text-white text-base">${s.evento_nome}</h4>
-              <p class="text-xs text-amber-400 font-semibold">👤 Resp.: ${s.responsavel || 'Não informado'}</p>
-              <p class="text-xs text-gray-400">📞 Contato: ${s.contato_evento || '-'} (${s.telefone_evento || '-'})</p>
-              <p class="text-xs text-gray-400">📅 Data: ${s.data_evento || 'Sem data'}</p>
+              <h4 class="font-black text-white text-base flex items-center gap-1.5"><i data-lucide="truck" class="w-4 h-4 text-slate-400"></i> ${s.evento_nome}</h4>
+              <p class="text-xs text-amber-400 font-semibold mt-1">👤 Resp: ${s.responsavel || '-'}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">📞 Contato: ${s.contato_evento || '-'} (${s.telefone_evento || '-'}) | 📅 Data: ${s.data_evento || '-'}</p>
             </div>
-            <span class="text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-bold whitespace-nowrap ${s.status === 'CONCLUIDO' ? 'bg-green-950 text-green-400' : 'bg-amber-950 text-amber-400'}">
-              ${s.status === 'CONCLUIDO' ? 'BAIXADO' : 'EM EVENTO'}
+            <span class="text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap border ${s.status === 'CONCLUIDO' ? 'bg-emerald-950 text-emerald-400 border-emerald-800/60' : 'bg-amber-950 text-amber-400 border-amber-800/60'}">
+              ${s.status === 'CONCLUIDO' ? '✅ BAIXADO' : '🚚 EM EVENTO'}
             </span>
           </div>
-
-          <div class="bg-gray-950 p-3 rounded-xl space-y-1 text-xs">
-            <p class="font-bold text-gray-400 uppercase mb-1">Lista de Materiais Lançados:</p>
-            ${(s.itens || []).map(i => `<p class="text-gray-300">• <b>${i.quantidade}x</b>${i.nome}</p>`).join('')}
+          <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800/50 space-y-1.5 text-xs max-h-32 overflow-y-auto custom-scroll">
+            <p class="font-bold text-slate-500 uppercase mb-2 sticky top-0 bg-slate-950">Materiais Lançados:</p>
+            ${(s.itens || []).map(i => `<div class="flex items-center gap-2 text-slate-300"><span class="bg-blue-900/40 text-blue-400 font-mono px-1.5 py-0.5 rounded text-[10px] font-bold">${i.quantidade}x</span>${i.nome}</div>`).join('')}
           </div>
-
-          ${(s.status !== 'CONCLUIDO' && podeCriar) ? `
-            <button onclick="darBaixaMaterialGalpao('${s.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 rounded-xl text-xs flex justify-center items-center gap-1">
-              ✅ Conferir e Dar Baixa no Galpão
-            </button>
-          ` : (s.status === 'CONCLUIDO' ? '<p class="text-center text-xs text-green-400 font-bold">✓ Todos os itens conferidos e devolvidos</p>' : '')}
+          ${(s.status !== 'CONCLUIDO' && pc) ? `<button onclick="darBaixaMaterialGalpao('${s.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs flex justify-center items-center gap-1.5 transition active:scale-95"><i data-lucide="check-circle" class="w-4 h-4"></i> Dar Baixa no Galpão</button>` : (s.status === 'CONCLUIDO' ? '<p class="text-center text-xs text-emerald-500 font-bold bg-emerald-950/30 py-2 rounded-xl">✓ Materiais devolvidos</p>' : '')}
         </div>
       `).join('');
+      lucide.createIcons();
     }
+    async function darBaixaMaterialGalpao(id) { if(confirm('Confirmar retorno total para o galpão?')) { await db.from('saida_materiais').update({ status: 'CONCLUIDO' }).eq('id', id); carregarSaidasRegistradas(); } }
 
-    async function darBaixaMaterialGalpao(id) {
-      if (!confirm('Confirmar retorno de todos os materiais deste evento para o galpão?')) return;
-      if (!db) return;
-
-      await db.from('saida_materiais').update({ status: 'CONCLUIDO' }).eq('id', id);
-      alert('Baixa concluída! Materiais retornados com sucesso.');
-      carregarSaidasRegistradas();
-    }
-
-    // EQUIPE E WHATSAPP
+    // EQUIPE
     async function carregarEquipe() {
-      const container = document.getElementById('cards-equipe');
+      const c = document.getElementById('cards-equipe');
       if(!db) return;
       const { data } = await db.from('perfis').select('*').order('nome', { ascending: true });
-      const isAdm = usuarioAtual.cargo === 'administrador';
-
-      container.innerHTML = (data || []).map(p => {
-        const telLimpo = (p.telefone || '').replace(/\D/g, '');
-        const linkWhatsapp = telLimpo ? `https://wa.me/55${telLimpo}` : '#';
-
+      const adm = usuarioAtual.cargo === 'administrador';
+      c.innerHTML = (data || []).map(p => {
+        const tel = (p.telefone || '').replace(/\D/g, '');
         return `
-          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex items-center gap-3">
-                ${p.foto_url ? `<img src="${p.foto_url}" class="w-10 h-10 rounded-full object-cover border border-purple-500">` : '<div class="w-10 h-10 rounded-full bg-purple-900/60 border border-purple-500 flex items-center justify-center font-bold text-purple-300">👤</div>'}
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 flex flex-col justify-between shadow-lg">
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 border-b border-slate-800/60 pb-3">
+                ${p.foto_url ? `<img src="${p.foto_url}" class="w-12 h-12 rounded-full object-cover border-2 border-slate-700">` : '<div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-500">👤</div>'}
                 <div>
                   <h3 class="font-bold text-base text-white">${p.nome}</h3>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${p.cargo === 'administrador' ? 'bg-purple-950 text-purple-400' : 'bg-blue-950 text-blue-400'}">
-                    ${p.cargo ? p.cargo.replace('_', ' ') : 'AUXILIAR'}
-                  </span>
+                  <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${p.cargo === 'administrador' ? 'bg-purple-950 text-purple-400 border-purple-800/60' : 'bg-slate-800 text-slate-300 border-slate-700'}">${p.cargo ? p.cargo.replace('_', ' ') : 'AUX'}</span>
                 </div>
               </div>
-              <p class="text-xs text-gray-400">📧 ${p.email || 'Não informado'}</p>
-              <p class="text-xs text-gray-400">📱 ${p.telefone || 'Não informado'}</p>
-              <p class="text-xs font-semibold ${p.pode_criar_saida ? 'text-green-400' : 'text-gray-500'}">
-                ${p.pode_criar_saida ? '✓ Pode criar Saídas' : '✗ Apenas visualiza Saídas'}
-              </p>
+              <div class="space-y-1.5 pt-1">
+                <p class="text-xs text-slate-400 flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5"></i> ${p.email || '-'}</p>
+                <p class="text-xs text-slate-400 flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5"></i> ${p.telefone || '-'}</p>
+                <p class="text-xs font-semibold flex items-center gap-2 ${p.pode_criar_saida ? 'text-emerald-400' : 'text-slate-500'}"><i data-lucide="${p.pode_criar_saida ? 'check' : 'x'}" class="w-3.5 h-3.5"></i> ${p.pode_criar_saida ? 'Pode criar Saídas' : 'Apenas visualiza'}</p>
+              </div>
             </div>
-            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-xs">
-              ${telLimpo ? `
-                <a href="${linkWhatsapp}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
-                  💬 WhatsApp
-                </a>
-              ` : '<span class="text-gray-500">Sem WhatsApp</span>'}
-              ${isAdm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 font-bold">Editar Acessos</button>` : ''}
+            <div class="pt-4 border-t border-slate-800/60 flex justify-between items-center text-xs">
+              ${tel ? `<a href="https://wa.me/55${tel}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition"><i data-lucide="message-circle" class="w-4 h-4"></i> Whats</a>` : '<span class="text-slate-600 text-[11px] italic">Sem número</span>'}
+              ${adm ? `<button onclick='abrirModalPerfil(${JSON.stringify(p)})' class="text-purple-400 hover:text-purple-300 font-bold transition">Editar</button>` : ''}
             </div>
           </div>
-        `;
-      }).join('');
+        `}).join('');
+        lucide.createIcons();
     }
-
     function abrirModalPerfil(p) {
       document.getElementById('modal-perfil').classList.remove('hidden');
       document.getElementById('edit-perf-id').value = p.id;
@@ -1235,24 +1066,14 @@
       document.getElementById('edit-perf-cargo').value = p.cargo || 'auxiliar_tecnico';
       document.getElementById('edit-perf-pode-saida').checked = p.pode_criar_saida || false;
     }
-
     async function salvarEdicaoPerfil() {
-      const id = document.getElementById('edit-perf-id').value;
-      const nome = document.getElementById('edit-perf-nome').value.trim();
-      const email = document.getElementById('edit-perf-email').value.trim();
+      const id = document.getElementById('edit-perf-id').value, nome = document.getElementById('edit-perf-nome').value.trim(), email = document.getElementById('edit-perf-email').value.trim();
       const senha = document.getElementById('edit-perf-senha').value.trim();
-      const telefone = document.getElementById('edit-perf-telefone').value.trim();
-      const cargo = document.getElementById('edit-perf-cargo').value;
-      const pode_criar_saida = document.getElementById('edit-perf-pode-saida').checked;
-
       if(!id || !nome || !email) return;
-
-      const dados = { nome, email, telefone, cargo, pode_criar_saida };
-      if (senha) dados.senha = senha;
-
-      await db.from('perfis').update(dados).eq('id', id);
-      fecharModalPerfil();
-      carregarEquipe();
+      const d = { nome, email, telefone: document.getElementById('edit-perf-telefone').value, cargo: document.getElementById('edit-perf-cargo').value, pode_criar_saida: document.getElementById('edit-perf-pode-saida').checked };
+      if (senha) d.senha = senha;
+      await db.from('perfis').update(d).eq('id', id);
+      fecharModalPerfil(); carregarEquipe();
     }
 
     iniciarSistema();
