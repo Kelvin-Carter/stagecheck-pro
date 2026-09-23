@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     @media print {
       body { background: white !important; color: black !important; font-family: Arial, sans-serif; }
@@ -127,11 +128,14 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dash-cards"></div>
     </section>
 
-    <!-- EQUIPAMENTOS (Layout Restaurado com Categoria e Propriedade) -->
+    <!-- EQUIPAMENTOS (Layout Restaurado com Categoria, Propriedade e QR Code) -->
     <section id="sec-equipamentos" class="space-y-4 hidden no-print">
-      <div class="flex justify-between items-center">
-        <h2 class="text-xl font-extrabold text-white">Gestão de Equipamentos</h2>
-        <button id="btn-add-estoque" onclick="abrirModalEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 shadow hidden"><i data-lucide="plus" class="w-4 h-4"></i> Novo Equipamento</button>
+      <div class="flex justify-between items-center gap-2 flex-wrap">
+        <h2 class="text-xl font-extrabold text-white">Gestão de Equipamentos & QR Code</h2>
+        <div class="flex gap-2">
+          <button onclick="abrirModalScanner()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 shadow"><i data-lucide="scan" class="w-4 h-4"></i> Ler QR Code</button>
+          <button id="btn-add-estoque" onclick="abrirModalEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 shadow hidden"><i data-lucide="plus" class="w-4 h-4"></i> Novo Equipamento</button>
+        </div>
       </div>
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
@@ -142,6 +146,7 @@
                 <th class="p-4">Categoria</th>
                 <th class="p-4">Propriedade</th>
                 <th class="p-4 text-center">Qtde</th>
+                <th class="p-4 text-center">QR Code</th>
                 <th class="p-4 text-right" id="th-acoes-estoque">Ações</th>
               </tr>
             </thead>
@@ -233,6 +238,30 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="cards-equipe"></div>
     </section>
   </main>
+
+  <!-- MODAL QR CODE VISUALIZAÇÃO -->
+  <div id="modal-qrcode" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm text-center space-y-4 my-auto">
+      <h3 class="text-base font-bold text-white" id="qr-modal-titulo">QR Code do Equipamento</h3>
+      <div id="qr-code-container" class="bg-white p-4 rounded-xl inline-block mx-auto shadow-inner flex justify-center items-center"></div>
+      <p class="text-xs text-zinc-400 font-mono" id="qr-modal-sub">Identificação de Ativo</p>
+      <div class="flex justify-center gap-2 pt-2">
+        <button onclick="document.getElementById('modal-qrcode').classList.add('hidden')" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-4 py-2 rounded-xl text-xs">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SCANNER QR CODE -->
+  <div id="modal-scanner" class="fixed inset-0 bg-zinc-950/9 الخ flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 my-auto">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-indigo-400">Leitor de QR Code</h3>
+        <button onclick="fecharModalScanner()" class="text-zinc-400 text-xs font-bold hover:text-white">Fechar</button>
+      </div>
+      <div id="reader" class="w-full rounded-xl overflow-hidden bg-black"></div>
+      <p class="text-xs text-zinc-400 text-center" id="scanner-status">Aponte a câmara para o código QR do equipamento.</p>
+    </div>
+  </div>
 
   <!-- MODAL MEU PERFIL -->
   <div id="modal-meu-perfil" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
@@ -511,6 +540,46 @@
     }
 
     // ==========================================
+    // QR CODE (Visualização e Leitor)
+    // ==========================================
+    function gerarQRCodeItem(nome, modelo) {
+      document.getElementById('modal-qrcode').classList.remove('hidden');
+      const container = document.getElementById('qr-code-container');
+      container.innerHTML = '';
+      document.getElementById('qr-modal-titulo').innerText = nome;
+      document.getElementById('qr-modal-sub').innerText = `Modelo: ${modelo || 'N/D'}`;
+      
+      const dadosQR = encodeURIComponent(`LEGALMART_ITEM:${nome}|MOD:${modelo || 'ND'}`);
+      const img = document.createElement('img');
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${dadosQR}`;
+      img.alt = "QR Code do Equipamento";
+      img.className = "rounded-lg";
+      container.appendChild(img);
+    }
+
+    let html5QrcodeScanner = null;
+    function abrirModalScanner() {
+      document.getElementById('modal-scanner').classList.remove('hidden');
+      setTimeout(() => {
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render((decodedText) => {
+          document.getElementById('scanner-status').innerText = `Detectado: ${decodedText}`;
+          fecharModalScanner();
+          alert(`Item Lido via QR Code: ${decodedText}`);
+        }, (error) => {
+          // Erros de leitura ignorados em loop
+        });
+      }, 300);
+    }
+
+    function fecharModalScanner() {
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(e => console.error(e));
+      }
+      document.getElementById('modal-scanner').classList.add('hidden');
+    }
+
+    // ==========================================
     // EQUIPAMENTOS (Layout Restaurado com Categoria e Propriedade)
     // ==========================================
     function abrirModalEstoque(id = null) {
@@ -567,6 +636,9 @@
           <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300">${i.categoria || 'Som'}</span></td>
           <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] ${i.propriedade === 'Próprio' ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${i.propriedade || 'Próprio'}</span></td>
           <td class="p-4 text-center font-mono font-bold text-blue-400">${i.quantidade} un</td>
+          <td class="p-4 text-center">
+            <button onclick="gerarQRCodeItem('${i.nome.replace(/'/g, "\\'")}', '${(i.modelo||'').replace(/'/g, "\\'")}')" class="bg-zinc-800 hover:bg-zinc-700 text-indigo-300 p-2 rounded-xl transition" title="Ver QR Code"><i data-lucide="qr-code" class="w-4 h-4 inline"></i></button>
+          </td>
           ${adm ? `
             <td class="p-4 text-right">
               <button onclick="abrirModalEstoque('${i.id}')" class="text-blue-400 text-xs font-bold hover:underline mr-3">Editar</button>
@@ -574,7 +646,8 @@
             </td>
           ` : ''}
         </tr>
-      `).join('') || '<tr><td colspan="5" class="p-6 text-center text-zinc-500 italic">Nenhum equipamento no acervo.</td></tr>';
+      `).join('') || '<tr><td colspan="6" class="p-6 text-center text-zinc-500 italic">Nenhum equipamento no acervo.</td></tr>';
+      lucide.createIcons();
       atualizarDatalistEstoque();
     }
 
@@ -862,7 +935,6 @@
       document.getElementById('print-header-local-evento').innerText = `LOCAL: ${s.contato_evento || '--'}`;
       document.getElementById('print-tabela-corpo').innerHTML = (s.itens||[]).map(i => `<tr style="border-bottom:1px solid #ddd;"><td style="padding:8px; color:black;">${i.nome}</td><td style="padding:8px; text-align:center; font-weight:bold; color:black;">${i.quantidade}</td></tr>`).join('');
       
-      // Torna visível temporariamente para o gerador capturar sem erros
       pdfBox.style.display = 'block';
 
       setTimeout(() => {
@@ -873,7 +945,7 @@
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).save().then(() => {
-          pdfBox.style.display = 'none'; // oculta novamente
+          pdfBox.style.display = 'none';
         });
       }, 200);
     }
