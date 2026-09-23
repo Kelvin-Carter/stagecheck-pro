@@ -264,6 +264,7 @@
             <button onclick="ajustarQtdAdicaoSaida(1)" class="text-zinc-400 hover:text-white px-2 py-1 font-bold">+</button>
           </div>
           <button onclick="adicionarItemSaida()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl text-xs">Adicionar ao Romaneio</button>
+          <button onclick="abrirModalScannerRomaneio()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center gap-2 shadow"><i data-lucide="scan" class="w-4 h-4"></i> Ler QR para Romaneio</button>
         </div>
 
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4 no-print shadow-xl">
@@ -400,9 +401,10 @@
         <input type="date" id="my-nascimento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
       <div>
-        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">URL da Foto de Perfil</label>
-        <input type="url" id="my-foto" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-      </div>
+  <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Foto de Perfil (Dispositivo ou URL)</label>
+  <input type="file" accept="image/*" onchange="converterArquivoParaBase64(event, 'my-foto')" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2 text-white text-xs mb-2">
+  <input type="url" id="my-foto" placeholder="Ou cole a URL da foto..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+</div>
       <div>
         <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nova Senha (Opcional)</label>
         <input type="password" id="my-senha" placeholder="Deixe em branco para manter" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
@@ -892,6 +894,43 @@
       document.getElementById('est-categoria').value = item ? (item.categoria || 'Som') : 'Som';
       document.getElementById('est-propriedade').value = item ? (item.propriedade || 'Próprio') : 'Próprio';
       document.getElementById('est-qtd').value = item ? (item.quantidade || 1) : 1;
+    }
+    
+// Função para fechar o modal do leitor de QR Code
+function fecharModalScanner() {
+  const modal = document.getElementById('modal-scanner');
+  if (modal) modal.classList.add('hidden');
+  if (typeof html5QrcodeScanner !== 'undefined' && html5QrcodeScanner) {
+    try {
+      html5QrcodeScanner.clear();
+    } catch (e) {}
+  }
+}
+   // Função para carregar imagens locais do telemóvel ou computador
+    function converterArquivoParaBase64(event, targetInputId) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(uploadevento) {
+        document.getElementById(targetInputId).value = uploadevento.target.result;
+        alert('Imagem carregada com sucesso do dispositivo!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Função para ler QR Code diretamente para o romaneio do evento
+    function abrirModalScannerRomaneio() {
+      document.getElementById('modal-scanner').classList.remove('hidden');
+      setTimeout(() => {
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render((text) => {
+          fecharModalScanner();
+          const nomeItem = text.replace('LEGALMART_ITEM:', '').split('|')[0] || text;
+          registrosSaida[nomeItem] = (registrosSaida[nomeItem] || 0) + 1;
+          renderizarTabelaSaida();
+          alert(`Equipamento "${nomeItem}" adicionado ao romaneio!`);
+        }, (err)=>{});
+      }, 300);
     }
 
     async function salvarEstoque() {
