@@ -334,11 +334,11 @@
         <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nome da Empresa</label>
         <input type="text" id="cfg-nome-empresa" placeholder="Nome da Empresa" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
-      <div>
-        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">URL da Logótipo (Imagem)</label>
-        <input type="url" id="cfg-logo-empresa" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
+<div>
+  <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Logótipo (Dispositivo ou URL)</label>
+  <input type="file" accept="image/*" onchange="converterArquivoParaBase64(event, 'cfg-logo-empresa')" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2 text-white text-xs mb-2">
+  <input type="url" id="cfg-logo-empresa" placeholder="Ou cole a URL da imagem..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+</div>      <div class="flex justify-end gap-2 pt-2">
         <button onclick="document.getElementById('modal-config-empresa').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button>
         <button onclick="salvarConfigEmpresa()" class="bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar Configurações</button>
       </div>
@@ -694,13 +694,18 @@
       usuarioAtual.foto_url = foto_url;
       if(senha) usuarioAtual.senha = senha;
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
-      
-      document.getElementById('modal-meu-perfil').classList.add('hidden');
-      document.getElementById('header-user-info').innerText = `${usuarioAtual.nome} • ${(usuarioAtual.cargo||'').toUpperCase()}`;
-      alert('Perfil atualizado com sucesso!');
-      carregarEquipe();
-    }
 
+  // Atualizar imagens de perfil visíveis no ecrã
+  document.querySelectorAll('.user-avatar, img[src*="placeholder"], img.rounded-full').forEach(img => {
+    if (foto_url) img.src = foto_url;
+  });
+
+  document.getElementById('modal-meu-perfil').classList.add('hidden');
+  document.getElementById('header-user-info').innerText = `${usuarioAtual.nome} - ${(usuarioAtual.cargo||'').toUpperCase()}`;
+  alert('Perfil atualizado com sucesso!');
+  carregarEquipe();
+  
+    }
     async function carregarDadosGlobais() {
       try {
         const [est, kit, dem, man, sai, eq] = await Promise.all([
@@ -710,10 +715,26 @@
         ]);
         estoqueGlobal = est.data || []; kitsGlobal = kit.data || [];
         demandasGlobal = dem.data || []; manutencaoGlobal = man.data || [];
-        saidasGlobal = sai.data || []; equipeGlobal = eq.data || [];
-      } catch(e) { console.error("Erro na carga de dados", e); }
-    }
+saidasGlobal = sai.data || []; equipeGlobal = eq.data || [];
+    
+    preencherDatalistEstoque(); // <-- ADICIONE ESTA LINHA AQUI
 
+  } catch(e) { console.error("Erro na carga de dados", e); }
+}
+
+// E logo abaixo (antes da função iniciarSistema), cole a função completa:
+function preencherDatalistEstoque() {
+  const datalist = document.getElementById('dl-estoque');
+  if (!datalist) return;
+  datalist.innerHTML = '';
+  if (window.estoqueGlobal && Array.isArray(estoqueGlobal)) {
+    estoqueGlobal.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.nome;
+      datalist.appendChild(option);
+    });
+  }
+}
     async function iniciarSistema() {
       if (!usuarioAtual) { document.getElementById('tela-login').classList.remove('hidden'); return; }
       document.getElementById('tela-login').classList.add('hidden');
