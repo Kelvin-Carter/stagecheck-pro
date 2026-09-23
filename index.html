@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>LEGALMART - ERP System</title>
+  <title>LEGALMART EVENTOS LTDA</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b0b0f">
   <meta name="mobile-web-app-capable" content="yes">
@@ -931,8 +931,21 @@ function atualizarDatalistEstoque() {
       }, 300);
     }
 
-    // EQUIPAMENTOS
-   async function salvarEstoque() {
+ // EQUIPAMENTOS
+    function abrirModalEstoque(id = null) {
+      if(!checkPermissaoOuAlerta()) return;
+      document.getElementById('modal-estoque').classList.remove('hidden');
+      const item = id ? estoqueGlobal.find(e => e.id == id) : null;
+      document.getElementById('modal-estoque-titulo').innerText = item ? 'Editar Equipamento' : 'Novo Equipamento';
+      document.getElementById('est-id').value = item ? item.id : '';
+      document.getElementById('est-nome').value = item ? (item.nome || '') : '';
+      document.getElementById('est-modelo').value = item ? (item.modelo || '') : '';
+      document.getElementById('est-categoria').value = item ? (item.categoria || 'Som') : 'Som';
+      document.getElementById('est-propriedade').value = item ? (item.propriedade || 'Próprio') : 'Próprio';
+      document.getElementById('est-qtd').value = item ? (item.quantidade || 1) : 1;
+    }
+
+    async function salvarEstoque() {
       if(!checkPermissaoOuAlerta()) return;
       const id = document.getElementById('est-id').value;
       const nome = document.getElementById('est-nome').value.trim();
