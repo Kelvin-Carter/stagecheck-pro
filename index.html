@@ -317,7 +317,6 @@
       <div id="qr-code-container" class="bg-white p-4 rounded-xl inline-block mx-auto shadow-inner flex justify-center items-center"></div>
       <p class="text-xs text-zinc-400 font-mono" id="qr-modal-sub">Identificação de Ativo</p>
       
-      <!-- Rastreabilidade de Eventos Recentes -->
       <div class="text-left bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-1">
         <p class="text-[10px] font-bold text-blue-400 uppercase">Rastreabilidade em Eventos:</p>
         <div id="qr-modal-rastreio" class="text-xs text-zinc-300 max-h-24 overflow-y-auto space-y-1"></div>
@@ -342,7 +341,7 @@
     </div>
   </div>
 
-  <!-- MODAL MEU PERFIL -->
+  <!-- MODAL MEU PERFIL (COM FOTO E NASCIMENTO) -->
   <div id="modal-meu-perfil" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 my-auto">
       <h3 class="text-base font-bold text-blue-400">Meu Perfil</h3>
@@ -441,7 +440,7 @@
     </div>
   </div>
 
-  <!-- MODAL KIT -->
+  <!-- MODAL KIT (COM ADIÇÃO DE ITENS) -->
   <div id="modal-kit" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-auto max-h-[90vh] overflow-y-auto custom-scroll">
       <h3 class="text-base font-bold text-purple-400" id="modal-kit-titulo">Novo Kit / Baú</h3>
@@ -643,7 +642,7 @@
       if(senha) payload.senha = senha;
 
       const { error } = await db.from('perfis').update(payload).eq('id', usuarioAtual.id);
-      if(error) return alert('Erro ao atualizar perfil.');
+      if(error) return alert('Erro ao atualizar perfil: ' + error.message);
 
       usuarioAtual.nome = nome;
       usuarioAtual.telefone = telefone;
@@ -708,7 +707,6 @@
       if(aba === 'equipe') carregarEquipe();
     }
 
-    // DASHBOARD COM ALERTAS DE PRAZOS E RESUMO
     function carregarDashboard() {
       const hoje = new Date().toISOString().split('T')[0];
       const totalProprio = estoqueGlobal.filter(e => e.propriedade === 'Próprio').reduce((acc, curr) => acc + (curr.quantidade || 0), 0);
@@ -741,7 +739,6 @@
       lucide.createIcons();
     }
 
-    // QR CODE E RASTREABILIDADE
     let qrTextoAtual = '', qrSubAtual = '';
     function gerarQRCodeItem(nome, modelo) {
       document.getElementById('modal-qrcode').classList.remove('hidden');
@@ -751,7 +748,6 @@
       document.getElementById('qr-modal-sub').innerText = `Modelo: ${modelo || 'N/D'}`;
       qrTextoAtual = nome; qrSubAtual = modelo || 'N/D';
 
-      // Rastreabilidade: procura em quais eventos este item foi alocado
       const eventosEncontrados = saidasGlobal.filter(s => (s.itens || []).some(i => i.nome.toLowerCase() === nome.toLowerCase()));
       const rastreioBox = document.getElementById('qr-modal-rastreio');
       if (eventosEncontrados.length > 0) {
@@ -797,7 +793,6 @@
       document.getElementById('modal-scanner').classList.add('hidden');
     }
 
-    // EQUIPAMENTOS
     function abrirModalEstoque(id = null) {
       if(!checkPermissaoOuAlerta()) return;
       document.getElementById('modal-estoque').classList.remove('hidden');
@@ -851,7 +846,7 @@
       lucide.createIcons(); atualizarDatalistEstoque();
     }
 
-    // KITS COM SUPORTE A AVULSOS E ACERVO
+    // KITS COM ADIÇÃO DE ITENS
     function abrirModalKit(id = null) {
       if(!checkPermissaoOuAlerta()) return;
       document.getElementById('modal-kit').classList.remove('hidden');
@@ -904,8 +899,11 @@
       if(itensKitAtual.length === 0) return alert('Adicione pelo menos um item ao kit.');
 
       const payload = { nome, itens: itensKitAtual, criado_por: usuarioAtual.nome };
-      if(id) await db.from('kits').update(payload).eq('id', id);
-      else await db.from('kits').insert([payload]);
+      let res;
+      if(id) res = await db.from('kits').update(payload).eq('id', id);
+      else res = await db.from('kits').insert([payload]);
+
+      if(res.error) return alert('Erro ao salvar kit: ' + res.error.message);
 
       document.getElementById('modal-kit').classList.add('hidden');
       await carregarDadosGlobais(); carregarKits();
@@ -1003,7 +1001,7 @@
       }).join('') || '<p class="text-zinc-500 text-xs italic col-span-3">Nenhuma demanda.</p>';
     }
 
-    // MANUTENÇÃO
+    // MANUTENÇÃO (COM TRATAMENTO DE ERRO EXPLÍCITO)
     function preencherManutencaoComAcervo(nome) {
       const match = estoqueGlobal.find(e => e.nome.toLowerCase() === nome.toLowerCase());
       if(match) {
@@ -1037,9 +1035,21 @@
       const responsavel = document.getElementById('man-responsavel').value.trim();
       const data_limite = document.getElementById('man-data').value;
       if(!item) return alert('Preencha o equipamento.');
+
       const payload = { item, modelo, defeito_relatado, observacao, responsavel, data_limite, criado_por: usuarioAtual.nome };
-      if(id) await db.from('manutencao_separada').update(payload).eq('id', id);
-      else { payload.status = 'PENDENTE'; await db.from('manutencao_separada').insert([payload]); }
+      let res;
+      if(id) {
+        res = await db.from('manutencao_separada').update(payload).eq('id', id);
+      } else {
+        payload.status = 'PENDENTE';
+        res = await db.from('manutencao_separada').insert([payload]);
+      }
+
+      if(res.error) {
+        alert('Erro ao registar manutenção: ' + res.error.message);
+        return;
+      }
+
       document.getElementById('modal-manutencao').classList.add('hidden');
       await carregarDadosGlobais(); carregarManutencao();
     }
@@ -1073,7 +1083,7 @@
       `).join('') || '<p class="text-zinc-500 text-xs italic col-span-3">Nenhuma manutenção.</p>';
     }
 
-    // EVENTOS / ROMANEIOS COM INDICADOR DE CUSTO (PRÓPRIO VS SUBLOCADO)
+    // EVENTOS / ROMANEIOS
     function atualizarDatalistEstoque() { document.getElementById('dl-estoque').innerHTML = estoqueGlobal.map(e => `<option value="${e.nome} (${e.modelo||'ND'})">`).join(''); }
     
     function ajustarQtdAdicaoSaida(delta) {
@@ -1206,7 +1216,7 @@
       }).join('') || '<p class="text-zinc-500 text-xs italic col-span-2">Nenhum evento registado.</p>';
     }
 
-    // EQUIPA & PERFIS COM FOTO, NASCIMENTO E WHATSAPP EM DESTAQUE
+    // EQUIPA & PERFIS
     function abrirModalEditarMembro(id) {
       if(!checkPermissaoOuAlerta()) return;
       const m = equipeGlobal.find(p => p.id == id);
@@ -1231,7 +1241,7 @@
       if(!nome) return alert('O nome é obrigatório.');
 
       const { error } = await db.from('perfis').update({ nome, telefone, data_nascimento, foto_url, cargo }).eq('id', id);
-      if(error) return alert('Erro ao atualizar membro.');
+      if(error) return alert('Erro ao atualizar membro: ' + error.message);
 
       document.getElementById('modal-editar-membro').classList.add('hidden');
       await carregarDadosGlobais(); carregarEquipe();
