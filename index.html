@@ -151,7 +151,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dash-cards"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
         <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow space-y-3">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-400"></i> Alertas & Prazos Próximos</h3>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-400"></i> Alertas & Prazos Críticos</h3>
           <div id="dash-alertas" class="space-y-2 text-xs text-zinc-300"></div>
         </div>
         <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow space-y-3">
@@ -310,12 +310,19 @@
     </div>
   </div>
 
-  <!-- MODAL QR CODE -->
+  <!-- MODAL QR CODE COM RASTREABILIDADE -->
   <div id="modal-qrcode" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm text-center space-y-4 my-auto">
       <h3 class="text-base font-bold text-white" id="qr-modal-titulo">QR Code do Ativo</h3>
       <div id="qr-code-container" class="bg-white p-4 rounded-xl inline-block mx-auto shadow-inner flex justify-center items-center"></div>
       <p class="text-xs text-zinc-400 font-mono" id="qr-modal-sub">Identificação de Ativo</p>
+      
+      <!-- Rastreabilidade de Eventos Recentes -->
+      <div class="text-left bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-1">
+        <p class="text-[10px] font-bold text-blue-400 uppercase">Rastreabilidade em Eventos:</p>
+        <div id="qr-modal-rastreio" class="text-xs text-zinc-300 max-h-24 overflow-y-auto space-y-1"></div>
+      </div>
+
       <div class="flex justify-center gap-2 pt-2">
         <button onclick="imprimirEtiquetaQRCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs">Imprimir Etiqueta</button>
         <button onclick="document.getElementById('modal-qrcode').classList.add('hidden')" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-4 py-2 rounded-xl text-xs">Fechar</button>
@@ -434,7 +441,7 @@
     </div>
   </div>
 
-  <!-- MODAL KIT (COM SUPORTE A ITENS DO ACERVO E ITENS AVULSOS) -->
+  <!-- MODAL KIT -->
   <div id="modal-kit" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-auto max-h-[90vh] overflow-y-auto custom-scroll">
       <h3 class="text-base font-bold text-purple-400" id="modal-kit-titulo">Novo Kit / Baú</h3>
@@ -444,7 +451,6 @@
         <input type="text" id="kit-nome" placeholder="Ex: Baú Microfones Shure" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
 
-      <!-- Adicionar item avulso ou do acervo no kit -->
       <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
         <label class="block text-[10px] font-bold text-purple-400 uppercase">Adicionar Itens ao Baú (Acervo ou Avulso)</label>
         <div class="flex gap-2">
@@ -702,6 +708,7 @@
       if(aba === 'equipe') carregarEquipe();
     }
 
+    // DASHBOARD COM ALERTAS DE PRAZOS E RESUMO
     function carregarDashboard() {
       const hoje = new Date().toISOString().split('T')[0];
       const totalProprio = estoqueGlobal.filter(e => e.propriedade === 'Próprio').reduce((acc, curr) => acc + (curr.quantidade || 0), 0);
@@ -717,7 +724,7 @@
       let htmlAlertas = '';
       demandasGlobal.filter(d => d.status !== 'CONCLUIDO' && d.data_limite).forEach(d => {
         if (d.data_limite <= hoje) {
-          htmlAlertas += `<div class="p-2.5 rounded-xl bg-red-950/40 border border-red-900/40 text-red-300 flex justify-between items-center"><span><b>Demanda Urgente:</b> ${d.descricao}</span><span class="font-mono font-bold">${d.data_limite}</span></div>`;
+          htmlAlertas += `<div class="p-2.5 rounded-xl bg-red-950/40 border border-red-900/40 text-red-300 flex justify-between items-center"><span><b>Demanda Urgente / Vencida:</b> ${d.descricao}</span><span class="font-mono font-bold">${d.data_limite}</span></div>`;
         }
       });
       manutencaoGlobal.filter(m => m.data_limite).forEach(m => {
@@ -725,7 +732,7 @@
           htmlAlertas += `<div class="p-2.5 rounded-xl bg-amber-950/40 border border-amber-900/40 text-amber-300 flex justify-between items-center"><span><b>Manutenção Vencida:</b> ${m.item}</span><span class="font-mono font-bold">${m.data_limite}</span></div>`;
         }
       });
-      document.getElementById('dash-alertas').innerHTML = htmlAlertas || '<p class="text-zinc-500 italic">Nenhum alerta de prazo crítico.</p>';
+      document.getElementById('dash-alertas').innerHTML = htmlAlertas || '<p class="text-zinc-500 italic">Nenhum alerta de prazo crítico para hoje.</p>';
 
       document.getElementById('dash-propriedade').innerHTML = `
         <div class="flex justify-between items-center bg-zinc-950 p-3 rounded-xl border border-zinc-800"><span class="text-emerald-400 font-bold">Equipamentos Próprios:</span><span class="font-mono text-white font-bold">${totalProprio} unidades</span></div>
@@ -734,6 +741,7 @@
       lucide.createIcons();
     }
 
+    // QR CODE E RASTREABILIDADE
     let qrTextoAtual = '', qrSubAtual = '';
     function gerarQRCodeItem(nome, modelo) {
       document.getElementById('modal-qrcode').classList.remove('hidden');
@@ -742,6 +750,16 @@
       document.getElementById('qr-modal-titulo').innerText = nome;
       document.getElementById('qr-modal-sub').innerText = `Modelo: ${modelo || 'N/D'}`;
       qrTextoAtual = nome; qrSubAtual = modelo || 'N/D';
+
+      // Rastreabilidade: procura em quais eventos este item foi alocado
+      const eventosEncontrados = saidasGlobal.filter(s => (s.itens || []).some(i => i.nome.toLowerCase() === nome.toLowerCase()));
+      const rastreioBox = document.getElementById('qr-modal-rastreio');
+      if (eventosEncontrados.length > 0) {
+        rastreioBox.innerHTML = eventosEncontrados.map(ev => `<div>• <b>${ev.evento_nome}</b> (${ev.status})</div>`).join('');
+      } else {
+        rastreioBox.innerHTML = '<span class="text-zinc-500 italic">Nenhum evento recente registado.</span>';
+      }
+
       const dadosQR = encodeURIComponent(`LEGALMART_ITEM:${nome}|MOD:${modelo || 'ND'}`);
       const img = document.createElement('img');
       img.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${dadosQR}`;
@@ -779,6 +797,7 @@
       document.getElementById('modal-scanner').classList.add('hidden');
     }
 
+    // EQUIPAMENTOS
     function abrirModalEstoque(id = null) {
       if(!checkPermissaoOuAlerta()) return;
       document.getElementById('modal-estoque').classList.remove('hidden');
@@ -832,7 +851,7 @@
       lucide.createIcons(); atualizarDatalistEstoque();
     }
 
-    // KITS (COM SUPORTE A ADIÇÃO DE ITENS AVULSOS OU DO ACERVO)
+    // KITS COM SUPORTE A AVULSOS E ACERVO
     function abrirModalKit(id = null) {
       if(!checkPermissaoOuAlerta()) return;
       document.getElementById('modal-kit').classList.remove('hidden');
@@ -1054,7 +1073,7 @@
       `).join('') || '<p class="text-zinc-500 text-xs italic col-span-3">Nenhuma manutenção.</p>';
     }
 
-    // EVENTOS / ROMANEIOS
+    // EVENTOS / ROMANEIOS COM INDICADOR DE CUSTO (PRÓPRIO VS SUBLOCADO)
     function atualizarDatalistEstoque() { document.getElementById('dl-estoque').innerHTML = estoqueGlobal.map(e => `<option value="${e.nome} (${e.modelo||'ND'})">`).join(''); }
     
     function ajustarQtdAdicaoSaida(delta) {
@@ -1088,9 +1107,10 @@
         const itemAcervo = estoqueGlobal.find(e => e.nome.toLowerCase() === k.toLowerCase());
         const cat = itemAcervo ? itemAcervo.categoria : 'Avulso';
         const mod = itemAcervo ? (itemAcervo.modelo || 'N/D') : 'Avulso';
+        const prop = itemAcervo ? (itemAcervo.propriedade || 'Próprio') : 'Próprio';
         htmlInteractive += `
           <tr class="border-b border-zinc-800/60">
-            <td class="p-3"><div class="text-white font-bold">${k}</div><div class="text-[10px] text-zinc-400">Modelo: ${mod} | Cat: ${cat}</div></td>
+            <td class="p-3"><div class="text-white font-bold">${k}</div><div class="text-[10px] text-zinc-400">Modelo: ${mod} | Cat: ${cat} | <span class="${prop==='Sublocado'?'text-purple-400':'text-emerald-400'}">${prop}</span></div></td>
             <td class="p-3 text-center text-emerald-400 font-bold">${registrosSaida[k]} un</td>
             <td class="p-3 text-right"><button onclick="removerItemSaida('${k}')" class="text-red-400 text-xs font-bold hover:underline">Tirar</button></td>
           </tr>
@@ -1108,7 +1128,7 @@
       
       const itens = Object.keys(registrosSaida).map(k => {
         const itemAcervo = estoqueGlobal.find(e => e.nome.toLowerCase() === k.toLowerCase());
-        return { nome: k, quantidade: registrosSaida[k], modelo: itemAcervo ? (itemAcervo.modelo || 'N/D') : 'N/D', categoria: itemAcervo ? (itemAcervo.categoria || 'Avulso') : 'Avulso' };
+        return { nome: k, quantidade: registrosSaida[k], modelo: itemAcervo ? (itemAcervo.modelo || 'N/D') : 'N/D', categoria: itemAcervo ? (itemAcervo.categoria || 'Avulso') : 'Avulso', propriedade: itemAcervo ? (itemAcervo.propriedade || 'Próprio') : 'Próprio' };
       });
 
       await db.from('saida_materiais').insert([{ evento_nome: evt, contato_evento: local, itens, responsavel: usuarioAtual.nome, status: 'EM ANDAMENTO' }]);
@@ -1161,22 +1181,29 @@
 
     function carregarSaidasRegistradas() {
       const adm = isAdministracaoOuSuperior();
-      document.getElementById('lista-saidas-registradas').innerHTML = saidasGlobal.map(s => `
-        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow space-y-3">
-          <div class="flex justify-between border-b border-zinc-800 pb-2">
-            <h4 class="font-bold text-white text-sm uppercase">${s.evento_nome}</h4>
-            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${s.status === 'CONCLUIDO' ? 'bg-zinc-800 text-zinc-400' : 'bg-emerald-950 text-emerald-400 border border-emerald-800'}">${s.status}</span>
+      document.getElementById('lista-saidas-registradas').innerHTML = saidasGlobal.map(s => {
+        const itensArr = s.itens || [];
+        const qtdSublocados = itensArr.filter(i => i.propriedade === 'Sublocado').length;
+        return `
+          <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow space-y-3">
+            <div class="flex justify-between border-b border-zinc-800 pb-2">
+              <h4 class="font-bold text-white text-sm uppercase">${s.evento_nome}</h4>
+              <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${s.status === 'CONCLUIDO' ? 'bg-zinc-800 text-zinc-400' : 'bg-emerald-950 text-emerald-400 border border-emerald-800'}">${s.status}</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-zinc-400">Local: ${s.contato_evento || '--'}</span>
+              ${qtdSublocados > 0 ? `<span class="bg-purple-950 text-purple-300 px-2 py-0.5 rounded text-[10px] font-bold">Contém Sublocados</span>` : `<span class="bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold">100% Próprio</span>`}
+            </div>
+            <div class="bg-zinc-950 p-3 rounded-lg text-xs text-zinc-300 max-h-24 overflow-y-auto">${itensArr.map(i=>`<div><span class="text-emerald-400 font-bold">${i.quantidade}x</span>${i.nome} <span class="text-[10px] text-zinc-500">(${i.propriedade||'Próprio'})</span></div>`).join('')}</div>
+            <div class="flex gap-2 pt-2 border-t border-zinc-800/60 flex-wrap">
+              <button onclick="imprimirRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">Imprimir</button>
+              <button onclick="gerarPDFRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">PDF</button>
+              ${adm && s.status !== 'CONCLUIDO' ? `<button onclick="finalizarEvento('${s.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold">Concluir</button>` : ''}
+              ${adm ? `<button onclick="apagarEvento('${s.id}')" class="bg-red-950/50 hover:bg-red-900 text-red-400 px-3 py-2 rounded-xl text-xs font-bold border border-red-900/40">Excluir</button>` : ''}
+            </div>
           </div>
-          <p class="text-xs text-zinc-400">Local: ${s.contato_evento || '--'}</p>
-          <div class="bg-zinc-950 p-3 rounded-lg text-xs text-zinc-300 max-h-24 overflow-y-auto">${(s.itens||[]).map(i=>`<div><span class="text-emerald-400 font-bold">${i.quantidade}x</span>${i.nome} <span class="text-[10px] text-zinc-500">(${i.categoria})</span></div>`).join('')}</div>
-          <div class="flex gap-2 pt-2 border-t border-zinc-800/60 flex-wrap">
-            <button onclick="imprimirRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">Imprimir</button>
-            <button onclick="gerarPDFRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">PDF</button>
-            ${adm && s.status !== 'CONCLUIDO' ? `<button onclick="finalizarEvento('${s.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold">Concluir</button>` : ''}
-            ${adm ? `<button onclick="apagarEvento('${s.id}')" class="bg-red-950/50 hover:bg-red-900 text-red-400 px-3 py-2 rounded-xl text-xs font-bold border border-red-900/40">Excluir</button>` : ''}
-          </div>
-        </div>
-      `).join('') || '<p class="text-zinc-500 text-xs italic col-span-2">Nenhum evento registado.</p>';
+        `;
+      }).join('') || '<p class="text-zinc-500 text-xs italic col-span-2">Nenhum evento registado.</p>';
     }
 
     // EQUIPA & PERFIS COM FOTO, NASCIMENTO E WHATSAPP EM DESTAQUE
@@ -1249,3 +1276,4 @@
   </script>
 </body>
 </html>
+
