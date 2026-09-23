@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>LEGALMART - ERP System</title>
+  <title>LEGALMART</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -14,7 +14,7 @@
       body { background: white !important; color: black !important; font-family: Arial, sans-serif; }
       .no-print { display: none !important; }
       .print-only { display: block !important; }
-      #area-pdf-saida { display: block !important; background: white !important; color: black !important; padding: 20px !important; width: 100% !important; }
+      #area-pdf-saida { display: block !important; background: white !important; color: black !important; padding: 25px !important; width: 100% !important; }
     }
     .print-only { display: none; }
     .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
@@ -40,6 +40,8 @@
     }
 
     let usuarioAtual = JSON.parse(localStorage.getItem('lm_usuario')) || null;
+    let configEmpresa = JSON.parse(localStorage.getItem('lm_empresa')) || { nome: 'LEGALMART PRODUÇÕES', logo: '' };
+    
     let estoqueGlobal = [], kitsGlobal = [], demandasGlobal = [], manutencaoGlobal = [], saidasGlobal = [], equipeGlobal = [];
     let registrosSaida = {};
   </script>
@@ -48,7 +50,7 @@
   <div id="tela-login" class="fixed inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-blue-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-zinc-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-8 w-full max-w-sm space-y-6 shadow-2xl shadow-blue-950/50 my-auto">
       <div class="text-center space-y-2">
-        <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-white tracking-widest">LEGALMART</h1>
+        <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-white tracking-widest" id="login-titulo-empresa">LEGALMART</h1>
         <p class="text-xs text-blue-400/80 uppercase tracking-widest font-bold">Acesso à Equipa</p>
       </div>
 
@@ -75,6 +77,10 @@
         <input type="email" id="cad-email" placeholder="E-mail" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
         <input type="password" id="cad-senha" placeholder="Crie uma Senha" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
         <input type="tel" id="cad-whatsapp" placeholder="WhatsApp (Ex: 5511999999999)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+        <div>
+          <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Data de Nascimento</label>
+          <input type="date" id="cad-nascimento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+        </div>
         
         <label class="block text-[10px] font-bold text-zinc-400 uppercase mt-2">Nível de Acesso</label>
         <select id="cad-cargo" onchange="verificarSelecaoCargoCadastro()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs focus:border-blue-500">
@@ -98,9 +104,9 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="flex items-center w-full md:w-auto justify-between">
         <div class="flex items-center gap-3">
-          <div class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-sm px-2.5 py-1 rounded-lg shadow-md">LM</div>
+          <div id="header-logo-container" class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-sm px-2.5 py-1.5 rounded-lg shadow-md flex items-center justify-center">LM</div>
           <div>
-            <h1 class="text-lg font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white">LEGALMART</h1>
+            <h1 class="text-lg font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white" id="header-nome-empresa">LEGALMART</h1>
             <p class="text-[10px] font-semibold text-blue-400" id="header-user-info">Carregando...</p>
           </div>
         </div>
@@ -108,13 +114,14 @@
       <nav class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto custom-scroll pb-1 md:pb-0">
         <button onclick="mudarAba('dashboard')" id="tab-dashboard" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-blue-400"></i>Dashboard</button>
         <button onclick="mudarAba('equipamentos')" id="tab-equipamentos" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="server" class="w-3.5 h-3.5 text-indigo-400"></i>Equipamentos</button>
-        <button onclick="mudarAba('kits')" id="tab-kits" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="layers" class="w-3.5 h-3.5 text-purple-400"></i>Kits</button>
+        <button onclick="mudarAba('kits')" id="tab-kits" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="layers" class="w-3.5 h-3.5 text-purple-400"></i>Kits / Baús</button>
         <button onclick="mudarAba('demandas')" id="tab-demandas" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-teal-400"></i>Demandas</button>
         <button onclick="mudarAba('manutencao')" id="tab-manutencao" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="tool" class="w-3.5 h-3.5 text-amber-400"></i>Manutenção</button>
-        <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="truck" class="w-3.5 h-3.5 text-emerald-400"></i>Eventos</button>
+        <button onclick="mudarAba('eventos')" id="tab-eventos" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="truck" class="w-3.5 h-3.5 text-emerald-400"></i>Eventos & Saídas</button>
         <button onclick="mudarAba('equipe')" id="tab-equipe" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition whitespace-nowrap flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5 text-pink-400"></i>Equipa</button>
         <div class="w-px h-5 bg-zinc-800 mx-1 hidden sm:block"></div>
-        <button onclick="abrirModalMeuPerfil()" class="px-3 py-2 rounded-xl text-xs font-bold text-blue-400 bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800/50 flex items-center gap-1.5 transition whitespace-nowrap"><i data-lucide="user-cog" class="w-3.5 h-3.5"></i> Meu Perfil</button>
+        <button onclick="abrirModalConfigEmpresa()" id="btn-config-empresa" class="p-2 rounded-xl text-xs font-bold text-amber-400 bg-amber-950/30 hover:bg-amber-900/40 border border-amber-900/40 items-center justify-center transition hidden" title="Configurar Empresa (CEO/Develop)"><i data-lucide="settings" class="w-3.5 h-3.5"></i></button>
+        <button onclick="abrirModalMeuPerfil()" class="px-3 py-2 rounded-xl text-xs font-bold text-blue-400 bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800/50 flex items-center gap-1.5 transition whitespace-nowrap"><i data-lucide="user-cog" class="w-3.5 h-3.5"></i> Perfil</button>
         <button onclick="trocarUsuario()" class="p-2 rounded-xl text-xs font-bold text-red-400 bg-red-950/30 hover:bg-red-900/40 border border-red-900/40 items-center justify-center transition flex" title="Sair"><i data-lucide="log-out" class="w-3.5 h-3.5"></i></button>
       </nav>
     </div>
@@ -124,8 +131,21 @@
   <main class="max-w-7xl mx-auto p-4 flex-1 w-full space-y-6">
     <!-- DASHBOARD -->
     <section id="sec-dashboard" class="space-y-6 no-print">
-      <div><h2 class="text-xl font-extrabold text-white">Dashboard Operacional</h2></div>
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-extrabold text-white">Dashboard Operacional</h2>
+      </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dash-cards"></div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
+        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-400"></i> Alertas & Prazos Próximos</h3>
+          <div id="dash-alertas" class="space-y-2 text-xs text-zinc-300"></div>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4 text-blue-400"></i> Resumo de Propriedade do Acervo</h3>
+          <div id="dash-propriedade" class="space-y-2 text-xs text-zinc-300"></div>
+        </div>
+      </div>
     </section>
 
     <!-- EQUIPAMENTOS -->
@@ -156,11 +176,11 @@
       </div>
     </section>
 
-    <!-- KITS -->
+    <!-- KITS / BAÚS -->
     <section id="sec-kits" class="space-y-4 hidden no-print">
       <div class="flex justify-between items-center">
-        <h2 class="text-xl font-extrabold text-white">Kits Pré-montados</h2>
-        <button id="btn-add-kit" onclick="abrirModalKit()" class="bg-purple-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">Criar Kit</button>
+        <h2 class="text-xl font-extrabold text-white">Kits & Baús Pré-montados</h2>
+        <button id="btn-add-kit" onclick="abrirModalKit()" class="bg-purple-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">Criar Kit / Baú</button>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="cards-kits"></div>
     </section>
@@ -178,23 +198,30 @@
     <section id="sec-manutencao" class="space-y-4 hidden no-print">
       <div class="flex justify-between items-center">
         <h2 class="text-xl font-extrabold text-white">Fichas de Manutenção</h2>
-        <button id="btn-add-manutencao" onclick="abrirModalManutencao()" class="bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">Nova Ficha</button>
+        <div class="flex gap-2">
+          <button onclick="abrirModalScannerManutencao()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 shadow"><i data-lucide="scan" class="w-4 h-4"></i> Ler QR Code</button>
+          <button id="btn-add-manutencao" onclick="abrirModalManutencao()" class="bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs hidden">Nova Ficha</button>
+        </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="cards-manutencao"></div>
     </section>
 
-    <!-- EVENTOS -->
+    <!-- EVENTOS & SAÍDAS -->
     <section id="sec-eventos" class="space-y-6 hidden">
       <div class="flex justify-between items-center no-print border-b border-zinc-800 pb-4">
-        <h2 class="text-xl font-extrabold text-white">Gestão de Eventos & Saídas</h2>
+        <h2 class="text-xl font-extrabold text-white">Gestão de Eventos & Romaneios</h2>
       </div>
       
       <div id="area-add-saida" class="hidden space-y-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 no-print flex gap-3 items-center">
-          <input type="text" id="input-item-saida" list="dl-estoque" placeholder="Nome do equipamento..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 no-print flex gap-3 items-center flex-wrap">
+          <input type="text" id="input-item-saida" list="dl-estoque" placeholder="Nome ou Modelo do Equipamento..." class="flex-1 min-w-[200px] bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
           <datalist id="dl-estoque"></datalist>
-          <input type="number" id="input-qtd-saida" value="1" min="1" class="w-20 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs text-center">
-          <button onclick="adicionarItemSaida()" class="bg-blue-600 text-white font-bold px-5 py-3 rounded-xl text-xs">Adicionar</button>
+          <div class="flex items-center gap-1 bg-zinc-950 border border-zinc-800 rounded-xl px-2 py-1">
+            <button onclick="ajustarQtdAdicaoSaida(-1)" class="text-zinc-400 hover:text-white px-2 py-1 font-bold">-</button>
+            <input type="number" id="input-qtd-saida" value="1" min="1" class="w-12 bg-transparent text-white text-xs text-center focus:outline-none">
+            <button onclick="ajustarQtdAdicaoSaida(1)" class="text-zinc-400 hover:text-white px-2 py-1 font-bold">+</button>
+          </div>
+          <button onclick="adicionarItemSaida()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl text-xs">Adicionar ao Romaneio</button>
         </div>
 
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4 no-print shadow-xl">
@@ -204,26 +231,40 @@
           </div>
           <div class="overflow-x-auto"><table class="w-full text-left"><tbody id="checklist-itens-evento" class="text-xs"></tbody></table></div>
           <div class="flex justify-end pt-2">
-            <button onclick="salvarSaidaMaterialBD()" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl text-xs shadow-lg">Registrar Saída de Evento</button>
+            <button onclick="salvarSaidaMaterialBD()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl text-xs shadow-lg">Registrar Saída de Evento</button>
           </div>
         </div>
       </div>
 
-      <!-- CONTENTOR SECRETO PARA EXPORTAÇÃO DE PDF GARANTIDA SEM ERROS -->
-      <div id="area-pdf-saida" class="print-only bg-white text-black p-6">
-        <div style="border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 15px;">
-          <h1 style="font-size: 18px; font-weight: bold; text-transform: uppercase;" id="print-header-nome-evento">EVENTO: --</h1>
-          <p style="font-size: 12px; font-weight: bold; margin-top: 5px;" id="print-header-local-evento">LOCAL: --</p>
+      <!-- CONTENTOR PARA PDF / IMPRESSÃO PROFISSIONAL COM LOGÓTIPO -->
+      <div id="area-pdf-saida" class="print-only bg-white text-black p-8 font-sans">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid black; padding-bottom: 15px; margin-bottom: 20px;">
+          <div>
+            <h1 style="font-size: 20px; font-weight: 900; text-transform: uppercase; margin: 0;" id="print-empresa-nome">LEGALMART PRODUÇÕES</h1>
+            <p style="font-size: 11px; color: #551; margin: 3px 0 0 0;">Sistema Integrado de Logística de Eventos</p>
+          </div>
+          <div id="print-logo-box" style="text-align: right;">
+            <!-- Logo injetado via JS -->
+          </div>
+        </div>
+        <div style="background: #f4f4f5; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+          <h2 style="font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0;" id="print-header-nome-evento">EVENTO: --</h2>
+          <p style="font-size: 12px; margin: 0;" id="print-header-local-evento">LOCAL: --</p>
         </div>
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: black;">
           <thead>
-            <tr style="border-bottom: 2px solid black;">
-              <th style="padding: 8px; text-align: left;">Equipamento</th>
-              <th style="padding: 8px; text-align: center; width: 100px;">Quantidade</th>
+            <tr style="border-bottom: 2px solid black; background: #e4e4e7;">
+              <th style="padding: 10px; text-align: left;">Equipamento / Modelo</th>
+              <th style="padding: 10px; text-align: left;">Categoria</th>
+              <th style="padding: 10px; text-align: center; width: 100px;">Quantidade</th>
             </tr>
           </thead>
           <tbody id="print-tabela-corpo"></tbody>
         </table>
+        <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; border-top: 1px solid #ccc; padding-top: 15px;">
+          <div>Responsável Expedição: __________________________</div>
+          <div>Conferente / Técnico: __________________________</div>
+        </div>
       </div>
 
       <div class="no-print space-y-4 pt-4 border-t border-zinc-800">
@@ -239,13 +280,33 @@
     </section>
   </main>
 
-  <!-- MODAL QR CODE VISUALIZAÇÃO -->
+  <!-- MODAL CONFIG EMPRESA (CEO / DEVELOP) -->
+  <div id="modal-config-empresa" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 my-auto">
+      <h3 class="text-base font-bold text-amber-400">Configurações da Empresa</h3>
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nome da Empresa</label>
+        <input type="text" id="cfg-nome-empresa" placeholder="Nome da Empresa" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">URL da Logótipo (Imagem)</label>
+        <input type="url" id="cfg-logo-empresa" placeholder="https://exemplo.com/logo.png" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="document.getElementById('modal-config-empresa').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button>
+        <button onclick="salvarConfigEmpresa()" class="bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar Configurações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL QR CODE VISUALIZAÇÃO E ETIQUETA -->
   <div id="modal-qrcode" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm text-center space-y-4 my-auto">
-      <h3 class="text-base font-bold text-white" id="qr-modal-titulo">QR Code do Equipamento</h3>
+      <h3 class="text-base font-bold text-white" id="qr-modal-titulo">QR Code do Ativo</h3>
       <div id="qr-code-container" class="bg-white p-4 rounded-xl inline-block mx-auto shadow-inner flex justify-center items-center"></div>
       <p class="text-xs text-zinc-400 font-mono" id="qr-modal-sub">Identificação de Ativo</p>
       <div class="flex justify-center gap-2 pt-2">
+        <button onclick="imprimirEtiquetaQRCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs">Imprimir Etiqueta</button>
         <button onclick="document.getElementById('modal-qrcode').classList.add('hidden')" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-4 py-2 rounded-xl text-xs">Fechar</button>
       </div>
     </div>
@@ -267,8 +328,16 @@
   <div id="modal-meu-perfil" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 my-auto">
       <h3 class="text-base font-bold text-blue-400">Meu Perfil</h3>
-      <input type="text" id="my-nome" placeholder="Nome" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      <input type="text" id="my-nome" placeholder="Nome Completo" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       <input type="tel" id="my-whatsapp" placeholder="WhatsApp (Ex: 5511999999999)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      <div>
+        <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Data de Nascimento</label>
+        <input type="date" id="my-nascimento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
+      <div>
+        <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">URL da Foto de Perfil</label>
+        <input type="url" id="my-foto" placeholder="https://exemplo.com/foto.jpg" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
       <input type="password" id="my-senha" placeholder="Nova Senha (deixe em branco para manter)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="document.getElementById('modal-meu-perfil').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button>
@@ -283,12 +352,20 @@
       <h3 class="text-base font-bold text-pink-400">Editar Membro da Equipa</h3>
       <input type="hidden" id="adm-edit-id">
       <div>
-        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nome</label>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nome Completo</label>
         <input type="text" id="adm-edit-nome" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
       <div>
         <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">WhatsApp</label>
         <input type="tel" id="adm-edit-whatsapp" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Data de Nascimento</label>
+        <input type="date" id="adm-edit-nascimento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">URL da Foto</label>
+        <input type="url" id="adm-edit-foto" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
       <div>
         <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Cargo / Nível de Acesso</label>
@@ -320,6 +397,11 @@
           <option value="Som">Som</option>
           <option value="Painel de LED">Painel de LED</option>
           <option value="Iluminação">Iluminação</option>
+          <option value="Consoles">Consoles</option>
+          <option value="Cabos">Cabos</option>
+          <option value="AC">AC</option>
+          <option value="Periféricos">Periféricos</option>
+          <option value="Backline">Backline</option>
           <option value="Outros">Outros</option>
         </select>
         <select id="est-propriedade" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
@@ -334,11 +416,20 @@
 
   <!-- MODAL KIT -->
   <div id="modal-kit" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4">
-      <h3 class="text-base font-bold text-purple-400" id="modal-kit-titulo">Novo Kit</h3>
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-auto max-h-[90vh] overflow-y-auto custom-scroll">
+      <h3 class="text-base font-bold text-purple-400" id="modal-kit-titulo">Novo Kit / Baú</h3>
       <input type="hidden" id="kit-id">
-      <input type="text" id="kit-nome" placeholder="Nome do Kit" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-      <div class="flex justify-end gap-2"><button onclick="document.getElementById('modal-kit').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button><button onclick="salvarKit()" class="bg-purple-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar</button></div>
+      <input type="text" id="kit-nome" placeholder="Nome do Kit ou Baú (Ex: Baú Microfones Shure)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Selecionar Itens do Acervo para o Baú</label>
+        <div id="kit-itens-selecao" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 text-xs"></div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="document.getElementById('modal-kit').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button>
+        <button onclick="salvarKit()" class="bg-purple-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar Kit / Baú</button>
+      </div>
     </div>
   </div>
 
@@ -383,9 +474,31 @@
   <script>
     lucide.createIcons();
 
+    function atualizarIdentidadeVisualEmpresa() {
+      document.getElementById('header-nome-empresa').innerText = configEmpresa.nome || 'LEGALMART';
+      document.getElementById('login-titulo-empresa').innerText = configEmpresa.nome || 'LEGALMART';
+      document.getElementById('print-empresa-nome').innerText = configEmpresa.nome || 'LEGALMART PRODUÇÕES';
+      
+      const logoBoxHeader = document.getElementById('header-logo-container');
+      const logoBoxPrint = document.getElementById('print-logo-box');
+
+      if (configEmpresa.logo) {
+        logoBoxHeader.innerHTML = `<img src="${configEmpresa.logo}" alt="Logo" class="w-8 h-8 object-contain rounded-md bg-white p-0.5">`;
+        logoBoxPrint.innerHTML = `<img src="${configEmpresa.logo}" alt="Logo" style="max-height: 45px; max-width: 140px; object-fit: contain;">`;
+      } else {
+        logoBoxHeader.innerHTML = 'LM';
+        logoBoxPrint.innerHTML = `<span style="font-size: 14px; font-weight: bold; color: #333;">${configEmpresa.nome}</span>`;
+      }
+    }
+
     function isAdministracaoOuSuperior() {
       if (!usuarioAtual) return false;
       return ['develop', 'ceo', 'gerencia', 'administracao'].includes(usuarioAtual.cargo);
+    }
+
+    function isCEOouDevelop() {
+      if (!usuarioAtual) return false;
+      return ['develop', 'ceo'].includes(usuarioAtual.cargo);
     }
 
     function checkPermissaoOuAlerta() {
@@ -428,6 +541,7 @@
       const email = document.getElementById('cad-email').value.trim().toLowerCase();
       const senha = document.getElementById('cad-senha').value.trim();
       const telefone = document.getElementById('cad-whatsapp').value.trim();
+      const data_nascimento = document.getElementById('cad-nascimento').value;
       const cargo = document.getElementById('cad-cargo').value;
       const senhaMestraInserida = document.getElementById('cad-senha-mestra').value.trim();
 
@@ -436,7 +550,7 @@
       if (['administracao', 'gerencia', 'ceo'].includes(cargo) && senhaMestraInserida !== SENHA_MESTRA_ADM) return alert('Senha Mestra inválida.');
 
       try {
-        const { data, error } = await db.from('perfis').insert([{ nome, email, senha, telefone, cargo }]).select().single();
+        const { data, error } = await db.from('perfis').insert([{ nome, email, senha, telefone, data_nascimento, cargo, foto_url: '' }]).select().single();
         if (error) return alert('Erro ao registar. O email já pode estar em uso.');
         usuarioAtual = data;
         localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
@@ -450,22 +564,44 @@
       location.reload();
     }
 
+    // CONFIG EMPRESA (CEO / DEVELOP)
+    function abrirModalConfigEmpresa() {
+      if(!isCEOouDevelop()) return alert('Acesso restrito a CEO e Develop.');
+      document.getElementById('modal-config-empresa').classList.remove('hidden');
+      document.getElementById('cfg-nome-empresa').value = configEmpresa.nome || '';
+      document.getElementById('cfg-logo-empresa').value = configEmpresa.logo || '';
+    }
+
+    function salvarConfigEmpresa() {
+      if(!isCEOouDevelop()) return;
+      configEmpresa.nome = document.getElementById('cfg-nome-empresa').value.trim() || 'LEGALMART';
+      configEmpresa.logo = document.getElementById('cfg-logo-empresa').value.trim();
+      localStorage.setItem('lm_empresa', JSON.stringify(configEmpresa));
+      document.getElementById('modal-config-empresa').classList.add('hidden');
+      atualizarIdentidadeVisualEmpresa();
+      alert('Configurações da empresa atualizadas com sucesso!');
+    }
+
     // GESTÃO DO PERFIL PESSOAL
     function abrirModalMeuPerfil() {
       if(!usuarioAtual) return;
       document.getElementById('modal-meu-perfil').classList.remove('hidden');
       document.getElementById('my-nome').value = usuarioAtual.nome || '';
       document.getElementById('my-whatsapp').value = usuarioAtual.telefone || '';
+      document.getElementById('my-nascimento').value = usuarioAtual.data_nascimento || '';
+      document.getElementById('my-foto').value = usuarioAtual.foto_url || '';
       document.getElementById('my-senha').value = '';
     }
 
     async function salvarMeuPerfil() {
       const nome = document.getElementById('my-nome').value.trim();
       const telefone = document.getElementById('my-whatsapp').value.trim();
+      const data_nascimento = document.getElementById('my-nascimento').value;
+      const foto_url = document.getElementById('my-foto').value.trim();
       const senha = document.getElementById('my-senha').value.trim();
       if(!nome) return alert('O nome é obrigatório.');
 
-      let payload = { nome, telefone };
+      let payload = { nome, telefone, data_nascimento, foto_url };
       if(senha) payload.senha = senha;
 
       const { error } = await db.from('perfis').update(payload).eq('id', usuarioAtual.id);
@@ -473,6 +609,8 @@
 
       usuarioAtual.nome = nome;
       usuarioAtual.telefone = telefone;
+      usuarioAtual.data_nascimento = data_nascimento;
+      usuarioAtual.foto_url = foto_url;
       if(senha) usuarioAtual.senha = senha;
       localStorage.setItem('lm_usuario', JSON.stringify(usuarioAtual));
       
@@ -498,13 +636,16 @@
     async function iniciarSistema() {
       if (!usuarioAtual) { document.getElementById('tela-login').classList.remove('hidden'); return; }
       document.getElementById('tela-login').classList.add('hidden');
+      atualizarIdentidadeVisualEmpresa();
       document.getElementById('header-user-info').innerText = `${usuarioAtual.nome} • ${(usuarioAtual.cargo||'').toUpperCase()}`;
       
       const adm = isAdministracaoOuSuperior();
+      const ceoDev = isCEOouDevelop();
       document.getElementById('btn-add-estoque').classList.toggle('hidden', !adm);
       document.getElementById('btn-add-kit').classList.toggle('hidden', !adm);
       document.getElementById('btn-add-demanda').classList.toggle('hidden', !adm);
       document.getElementById('btn-add-manutencao').classList.toggle('hidden', !adm);
+      document.getElementById('btn-config-empresa').classList.toggle('hidden', !ceoDev);
       document.getElementById('th-acoes-estoque').style.display = adm ? '' : 'none';
       document.getElementById('area-add-saida').classList.toggle('hidden', !adm);
 
@@ -529,19 +670,52 @@
       if(aba === 'equipe') carregarEquipe();
     }
 
+    // DASHBOARD COM ALERTAS DE PRAZOS E RESUMO DE PROPRIEDADE
     function carregarDashboard() {
+      const hoje = new Date().toISOString().split('T')[0];
+      
+      const totalProprio = estoqueGlobal.filter(e => e.propriedade === 'Próprio').reduce((acc, curr) => acc + (curr.quantidade || 0), 0);
+      const totalSublocado = estoqueGlobal.filter(e => e.propriedade === 'Sublocado').reduce((acc, curr) => acc + (curr.quantidade || 0), 0);
+
       document.getElementById('dash-cards').innerHTML = `
-        <div onclick="mudarAba('equipamentos')" class="cursor-pointer bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow hover:border-blue-500/50 transition"><p class="text-xs text-zinc-400 font-bold uppercase">Acervo Total</p><h3 class="text-2xl font-black text-white">${estoqueGlobal.length}</h3></div>
+        <div onclick="mudarAba('equipamentos')" class="cursor-pointer bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow hover:border-blue-500/50 transition"><p class="text-xs text-zinc-400 font-bold uppercase">Acervo Total (Itens)</p><h3 class="text-2xl font-black text-white">${estoqueGlobal.length}</h3></div>
         <div onclick="mudarAba('eventos')" class="cursor-pointer bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow hover:border-emerald-500/50 transition"><p class="text-xs text-zinc-400 font-bold uppercase">Eventos Ativos</p><h3 class="text-2xl font-black text-white">${saidasGlobal.filter(s=>s.status!=='CONCLUIDO').length}</h3></div>
         <div onclick="mudarAba('manutencao')" class="cursor-pointer bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow hover:border-amber-500/50 transition"><p class="text-xs text-zinc-400 font-bold uppercase">Manutenções</p><h3 class="text-2xl font-black text-white">${manutencaoGlobal.length}</h3></div>
         <div onclick="mudarAba('demandas')" class="cursor-pointer bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow hover:border-teal-500/50 transition"><p class="text-xs text-zinc-400 font-bold uppercase">Demandas</p><h3 class="text-2xl font-black text-white">${demandasGlobal.length}</h3></div>
       `;
+
+      // Alertas de Prazos
+      let htmlAlertas = '';
+      demandasGlobal.filter(d => d.status !== 'CONCLUIDO' && d.data_limite).forEach(d => {
+        const vencido = d.data_limite < hoje;
+        const hojePrazo = d.data_limite === hoje;
+        if (vencido || hojePrazo) {
+          htmlAlertas += `<div class="p-2.5 rounded-xl bg-red-950/40 border border-red-900/40 text-red-300 flex justify-between items-center"><span><b>Demanda Urgente:</b> ${d.descricao}</span><span class="font-mono font-bold">${d.data_limite}</span></div>`;
+        }
+      });
+      manutencaoGlobal.filter(m => m.data_limite).forEach(m => {
+        const vencido = m.data_limite < hoje;
+        const hojePrazo = m.data_limite === hoje;
+        if (vencido || hojePrazo) {
+          htmlAlertas += `<div class="p-2.5 rounded-xl bg-amber-950/40 border border-amber-900/40 text-amber-300 flex justify-between items-center"><span><b>Manutenção Vencendo/Vencida:</b> ${m.item}</span><span class="font-mono font-bold">${m.data_limite}</span></div>`;
+        }
+      });
+      document.getElementById('dash-alertas').innerHTML = htmlAlertas || '<p class="text-zinc-500 italic">Nenhum alerta de prazo crítico para hoje.</p>';
+
+      // Resumo Propriedade
+      document.getElementById('dash-propriedade').innerHTML = `
+        <div class="flex justify-between items-center bg-zinc-950 p-3 rounded-xl border border-zinc-800"><span class="text-emerald-400 font-bold">Equipamentos Próprios:</span><span class="font-mono text-white font-bold">${totalProprio} unidades</span></div>
+        <div class="flex justify-between items-center bg-zinc-950 p-3 rounded-xl border border-zinc-800"><span class="text-purple-400 font-bold">Equipamentos Sublocados:</span><span class="font-mono text-white font-bold">${totalSublocado} unidades</span></div>
+      `;
+
       lucide.createIcons();
     }
 
     // ==========================================
-    // QR CODE (Visualização e Leitor)
+    // QR CODE E ETIQUETAS
     // ==========================================
+    let qrTextoAtual = '';
+    let qrSubAtual = '';
     function gerarQRCodeItem(nome, modelo) {
       document.getElementById('modal-qrcode').classList.remove('hidden');
       const container = document.getElementById('qr-code-container');
@@ -549,12 +723,32 @@
       document.getElementById('qr-modal-titulo').innerText = nome;
       document.getElementById('qr-modal-sub').innerText = `Modelo: ${modelo || 'N/D'}`;
       
+      qrTextoAtual = nome;
+      qrSubAtual = modelo || 'N/D';
+
       const dadosQR = encodeURIComponent(`LEGALMART_ITEM:${nome}|MOD:${modelo || 'ND'}`);
       const img = document.createElement('img');
       img.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${dadosQR}`;
-      img.alt = "QR Code do Equipamento";
+      img.alt = "QR Code";
       img.className = "rounded-lg";
       container.appendChild(img);
+    }
+
+    function imprimirEtiquetaQRCode() {
+      const janela = window.open('', '_print', 'width=400,height=400');
+      janela.document.write(`
+        <html>
+          <head><title>Etiqueta QR Code - ${qrTextoAtual}</title></head>
+          <body style="text-align:center; font-family:Arial, sans-serif; padding:20px;">
+            <h2 style="margin:0 0 5px 0; font-size:16px;">${configEmpresa.nome}</h2>
+            <p style="margin:0 0 10px 0; font-size:12px; font-weight:bold;">${qrTextoAtual}</p>
+            <p style="margin:0 0 15px 0; font-size:10px; color:#555;">Modelo: ${qrSubAtual}</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent('LEGALMART_ITEM:'+qrTextoAtual+'|MOD:'+qrSubAtual)}" style="width:140px;height:140px;" />
+            <script>window.print(); setTimeout(()=>window.close(), 500);<\/script>
+          </body>
+        </html>
+      `);
+      janela.document.close();
     }
 
     let html5QrcodeScanner = null;
@@ -566,6 +760,18 @@
           document.getElementById('scanner-status').innerText = `Detectado: ${decodedText}`;
           fecharModalScanner();
           alert(`Item Lido via QR Code: ${decodedText}`);
+        }, (error) => {});
+      }, 300);
+    }
+
+    function abrirModalScannerManutencao() {
+      document.getElementById('modal-scanner').classList.remove('hidden');
+      setTimeout(() => {
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render((decodedText) => {
+          fecharModalScanner();
+          abrirModalManutencao();
+          document.getElementById('man-item').value = decodedText.replace('LEGALMART_ITEM:', '').split('|')[0] || '';
         }, (error) => {});
       }, 300);
     }
@@ -650,27 +856,53 @@
     }
 
     // ==========================================
-    // KITS
+    // KITS / BAÚS (Com seleção de itens do acervo e QR Code exclusivo)
     // ==========================================
     function abrirModalKit(id = null) {
       if(!checkPermissaoOuAlerta()) return;
       document.getElementById('modal-kit').classList.remove('hidden');
       const kit = id ? kitsGlobal.find(k => k.id == id) : null;
-      document.getElementById('modal-kit-titulo').innerText = kit ? 'Editar Kit' : 'Novo Kit';
+      document.getElementById('modal-kit-titulo').innerText = kit ? 'Editar Kit / Baú' : 'Novo Kit / Baú';
       document.getElementById('kit-id').value = kit ? kit.id : '';
       document.getElementById('kit-nome').value = kit ? (kit.nome || '') : '';
+
+      const itensSelecionados = kit && kit.itens ? kit.itens : [];
+      document.getElementById('kit-itens-selecao').innerHTML = estoqueGlobal.map(e => {
+        const check = itensSelecionados.some(i => i.nome === e.nome);
+        const qtdSel = check ? (itensSelecionados.find(i => i.nome === e.nome).quantidade || 1) : 1;
+        return `
+          <div class="flex items-center justify-between gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+            <label class="flex items-center gap-2 flex-1 text-white cursor-pointer">
+              <input type="checkbox" value="${e.nome}" ${check ? 'checked' : ''} class="kit-chk-item rounded bg-zinc-950 border-zinc-700">
+              <span>${e.nome} <span class="text-[10px] text-zinc-400">(${e.modelo || 'N/D'})</span></span>
+            </label>
+            <input type="number" value="${qtdSel}" min="1" class="kit-qtd-item w-16 bg-zinc-950 border border-zinc-800 rounded p-1 text-center text-white text-xs" data-nome="${e.nome}">
+          </div>
+        `;
+      }).join('') || '<p class="text-zinc-500 italic">Cadastre equipamentos primeiro para montar kits.</p>';
     }
 
     async function salvarKit() {
       if(!checkPermissaoOuAlerta()) return;
       const id = document.getElementById('kit-id').value;
       const nome = document.getElementById('kit-nome').value.trim();
-      if(!nome) return alert('Dê um nome ao kit.');
+      if(!nome) return alert('Dê um nome ao kit ou baú.');
+
+      const chks = document.querySelectorAll('.kit-chk-item:checked');
+      const itens = [];
+      chks.forEach(chk => {
+        const nomeItem = chk.value;
+        const inputQtd = document.querySelector(`.kit-qtd-item[data-nome="${nomeItem}"]`);
+        const qtd = inputQtd ? parseInt(inputQtd.value) || 1 : 1;
+        itens.push({ nome: nomeItem, quantidade: qtd });
+      });
+
+      const payload = { nome, itens, criado_por: usuarioAtual.nome };
 
       if(id) {
-        await db.from('kits').update({ nome }).eq('id', id);
+        await db.from('kits').update(payload).eq('id', id);
       } else {
-        await db.from('kits').insert([{ nome, criado_por: usuarioAtual.nome }]);
+        await db.from('kits').insert([payload]);
       }
       document.getElementById('modal-kit').classList.add('hidden');
       await carregarDadosGlobais(); carregarKits();
@@ -678,7 +910,7 @@
 
     async function apagarKit(id) {
       if(!checkPermissaoOuAlerta()) return;
-      if(confirm('Tem certeza que deseja apagar este Kit?')) {
+      if(confirm('Tem certeza que deseja apagar este Kit / Baú?')) {
         await db.from('kits').delete().eq('id', id);
         await carregarDadosGlobais(); carregarKits();
       }
@@ -687,19 +919,26 @@
     function carregarKits() {
       const adm = isAdministracaoOuSuperior();
       document.getElementById('cards-kits').innerHTML = kitsGlobal.map(k => `
-        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow flex flex-col justify-between">
+        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow flex flex-col justify-between space-y-4">
           <div>
-            <h4 class="font-black text-white text-base mb-1">${k.nome}</h4>
-            <p class="text-[10px] text-zinc-500 font-mono">Criado por: ${k.criado_por || 'Equipa'}</p>
+            <div class="flex justify-between items-start mb-1">
+              <h4 class="font-black text-white text-base">${k.nome}</h4>
+              <button onclick="gerarQRCodeItem('${k.nome.replace(/'/g, "\\'")}', 'BAÚ / KIT PRE-MONTADO')" class="bg-zinc-800 hover:bg-zinc-700 text-indigo-300 p-1.5 rounded-lg transition" title="QR Code do Baú"><i data-lucide="qr-code" class="w-4 h-4"></i></button>
+            </div>
+            <p class="text-[10px] text-zinc-500 font-mono mb-3">Criado por: ${k.criado_por || 'Equipa'}</p>
+            <div class="bg-zinc-950 p-3 rounded-xl text-xs space-y-1 max-h-32 overflow-y-auto">
+              ${(k.itens || []).map(i => `<div><span class="text-purple-400 font-bold">${i.quantidade}x</span>${i.nome}</div>`).join('') || '<span class="text-zinc-500 italic">Nenhum item associado.</span>'}
+            </div>
           </div>
           ${adm ? `
-            <div class="flex gap-3 pt-4 border-t border-zinc-800/60 mt-4">
+            <div class="flex gap-3 pt-3 border-t border-zinc-800/60">
               <button onclick="abrirModalKit('${k.id}')" class="text-blue-400 text-xs font-bold hover:underline">Editar</button>
-              <button onclick="apagarKit('${k.id}')" class="text-red-400 text-xs font-bold hover:underline">Excluir</button>
+              <button onclick="apagarKit('${k.id}')" class="text-red-400 text-xs font-bold hover:underline ml-auto">Excluir</button>
             </div>
           ` : ''}
         </div>
-      `).join('') || '<p class="text-zinc-500 text-xs italic col-span-3">Nenhum kit registado.</p>';
+      `).join('') || '<p class="text-zinc-500 text-xs italic col-span-3">Nenhum kit ou baú registado.</p>';
+      lucide.createIcons();
     }
 
     // ==========================================
@@ -856,30 +1095,54 @@
     }
 
     // ==========================================
-    // EVENTOS / SAÍDAS (Com PDF / Impressão corrigidos sem falhas)
+    // EVENTOS / ROMANEIOS COM BOTÕES +/- E LOGÓTIPO NO PDF
     // ==========================================
-    function atualizarDatalistEstoque() { document.getElementById('dl-estoque').innerHTML = estoqueGlobal.map(e => `<option value="${e.nome}">`).join(''); }
+    function atualizarDatalistEstoque() { document.getElementById('dl-estoque').innerHTML = estoqueGlobal.map(e => `<option value="${e.nome} (${e.modelo||'ND'})">`).join(''); }
     
+    function ajustarQtdAdicaoSaida(delta) {
+      const inp = document.getElementById('input-qtd-saida');
+      let val = (parseInt(inp.value) || 1) + delta;
+      if (val < 1) val = 1;
+      inp.value = val;
+    }
+
     function adicionarItemSaida() {
       if(!checkPermissaoOuAlerta()) return;
-      const nome = document.getElementById('input-item-saida').value.trim();
+      let bruto = document.getElementById('input-item-saida').value.trim();
+      if(!bruto) return;
+      // Extrai apenas o nome caso tenha vindo do datalist formatado
+      const nome = bruto.split(' (')[0];
       const qtd = parseInt(document.getElementById('input-qtd-saida').value) || 1;
-      if(!nome) return;
+      
       registrosSaida[nome] = (registrosSaida[nome] || 0) + qtd;
       renderizarTabelaSaida();
       document.getElementById('input-item-saida').value = '';
+      document.getElementById('input-qtd-saida').value = '1';
     }
+
     function removerItemSaida(k) {
       if(!checkPermissaoOuAlerta()) return;
       delete registrosSaida[k];
       renderizarTabelaSaida();
     }
+
     function renderizarTabelaSaida() {
       let htmlInteractive = '';
       Object.keys(registrosSaida).forEach(k => {
-        htmlInteractive += `<tr class="border-b border-zinc-800/60"><td class="p-3 text-white font-bold">${k}</td><td class="p-3 text-center text-emerald-400 font-bold">${registrosSaida[k]} un</td><td class="p-3 text-right"><button onclick="removerItemSaida('${k}')" class="text-red-400 text-xs font-bold hover:underline">Tirar</button></td></tr>`;
+        const itemAcervo = estoqueGlobal.find(e => e.nome.toLowerCase() === k.toLowerCase());
+        const cat = itemAcervo ? itemAcervo.categoria : 'Avulso';
+        htmlInteractive += `
+          <tr class="border-b border-zinc-800/60">
+            <td class="p-3">
+              <div class="text-white font-bold">${k}</div>
+              <div class="text-[10px] text-zinc-400">Cat: ${cat}</div>
+            </td>
+            <td class="p-3 text-center text-emerald-400 font-bold">${registrosSaida[k]} un</td>
+            <td class="p-3 text-right"><button onclick="removerItemSaida('${k}')" class="text-red-400 text-xs font-bold hover:underline">Tirar</button></td>
+          </tr>
+        `;
       });
-      document.getElementById('checklist-itens-evento').innerHTML = htmlInteractive || '<tr><td colspan="3" class="p-4 text-center text-zinc-500">Nenhum equipamento adicionado.</td></tr>';
+      document.getElementById('checklist-itens-evento').innerHTML = htmlInteractive || '<tr><td colspan="3" class="p-4 text-center text-zinc-500">Nenhum equipamento adicionado ao romaneio.</td></tr>';
     }
 
     async function salvarSaidaMaterialBD() {
@@ -889,14 +1152,23 @@
       if(!evt) return alert('Insira o nome do evento.');
       if(Object.keys(registrosSaida).length === 0) return alert('O romaneio está vazio!');
       
-      const itens = Object.keys(registrosSaida).map(k => ({ nome: k, quantidade: registrosSaida[k] }));
+      const itens = Object.keys(registrosSaida).map(k => {
+        const itemAcervo = estoqueGlobal.find(e => e.nome.toLowerCase() === k.toLowerCase());
+        return { 
+          nome: k, 
+          quantidade: registrosSaida[k], 
+          modelo: itemAcervo ? (itemAcervo.modelo || 'N/D') : 'N/D',
+          categoria: itemAcervo ? (itemAcervo.categoria || 'Avulso') : 'Avulso' 
+        };
+      });
+
       await db.from('saida_materiais').insert([{ evento_nome: evt, contato_evento: local, itens, responsavel: usuarioAtual.nome, status: 'EM ANDAMENTO' }]);
       
       registrosSaida = {};
       document.getElementById('ev-nome').value = ''; document.getElementById('ev-local').value = '';
       renderizarTabelaSaida();
       await carregarDadosGlobais(); carregarSaidasRegistradas();
-      alert('Evento registado com sucesso!');
+      alert('Evento e Romaneio registados com sucesso!');
     }
 
     async function finalizarEvento(id) {
@@ -918,9 +1190,16 @@
     function imprimirRomaneioIndividual(id) {
       const s = saidasGlobal.find(x => x.id == id);
       if(!s) return;
+      document.getElementById('print-empresa-nome').innerText = configEmpresa.nome || 'LEGALMART PRODUÇÕES';
       document.getElementById('print-header-nome-evento').innerText = `EVENTO: ${s.evento_nome}`;
       document.getElementById('print-header-local-evento').innerText = `LOCAL: ${s.contato_evento || '--'}`;
-      document.getElementById('print-tabela-corpo').innerHTML = (s.itens||[]).map(i => `<tr style="border-bottom:1px solid #ddd;"><td style="padding:8px; color:black;">${i.nome}</td><td style="padding:8px; text-align:center; font-weight:bold; color:black;">${i.quantidade}</td></tr>`).join('');
+      document.getElementById('print-tabela-corpo').innerHTML = (s.itens||[]).map(i => `
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px; color:black;"><b>${i.nome}</b> <span style="font-size:10px; color:#555;">(Mod: ${i.modelo||'N/D'})</span></td>
+          <td style="padding:8px; color:black;">${i.categoria||'Avulso'}</td>
+          <td style="padding:8px; text-align:center; font-weight:bold; color:black;">${i.quantidade}</td>
+        </tr>
+      `).join('');
       setTimeout(() => { window.print(); }, 250);
     }
 
@@ -929,9 +1208,16 @@
       if(!s) return;
       
       const pdfBox = document.getElementById('area-pdf-saida');
+      document.getElementById('print-empresa-nome').innerText = configEmpresa.nome || 'LEGALMART PRODUÇÕES';
       document.getElementById('print-header-nome-evento').innerText = `EVENTO: ${s.evento_nome}`;
       document.getElementById('print-header-local-evento').innerText = `LOCAL: ${s.contato_evento || '--'}`;
-      document.getElementById('print-tabela-corpo').innerHTML = (s.itens||[]).map(i => `<tr style="border-bottom:1px solid #ddd;"><td style="padding:8px; color:black;">${i.nome}</td><td style="padding:8px; text-align:center; font-weight:bold; color:black;">${i.quantidade}</td></tr>`).join('');
+      document.getElementById('print-tabela-corpo').innerHTML = (s.itens||[]).map(i => `
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px; color:black;"><b>${i.nome}</b> <span style="font-size:10px; color:#555;">(Mod: ${i.modelo||'N/D'})</span></td>
+          <td style="padding:8px; color:black;">${i.categoria||'Avulso'}</td>
+          <td style="padding:8px; text-align:center; font-weight:bold; color:black;">${i.quantidade}</td>
+        </tr>
+      `).join('');
       
       pdfBox.style.display = 'block';
 
@@ -957,7 +1243,7 @@
             <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${s.status === 'CONCLUIDO' ? 'bg-zinc-800 text-zinc-400' : 'bg-emerald-950 text-emerald-400 border border-emerald-800'}">${s.status}</span>
           </div>
           <p class="text-xs text-zinc-400">Local: ${s.contato_evento || '--'}</p>
-          <div class="bg-zinc-950 p-3 rounded-lg text-xs text-zinc-300 max-h-24 overflow-y-auto">${(s.itens||[]).map(i=>`<div><span class="text-emerald-400 font-bold">${i.quantidade}x</span>${i.nome}</div>`).join('')}</div>
+          <div class="bg-zinc-950 p-3 rounded-lg text-xs text-zinc-300 max-h-24 overflow-y-auto">${(s.itens||[]).map(i=>`<div><span class="text-emerald-400 font-bold">${i.quantidade}x</span>${i.nome} <span class="text-[10px] text-zinc-500">(${i.categoria})</span></div>`).join('')}</div>
           <div class="flex gap-2 pt-2 border-t border-zinc-800/60 flex-wrap">
             <button onclick="imprimirRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">Imprimir</button>
             <button onclick="gerarPDFRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">PDF</button>
@@ -969,7 +1255,7 @@
     }
 
     // ==========================================
-    // EQUIPA & GESTÃO DE MEMBROS E WHATSAPP
+    // EQUIPA & PERFIS COM FOTO, NASCIMENTO E WHATSAPP
     // ==========================================
     function abrirModalEditarMembro(id) {
       if(!checkPermissaoOuAlerta()) return;
@@ -979,6 +1265,8 @@
       document.getElementById('adm-edit-id').value = m.id;
       document.getElementById('adm-edit-nome').value = m.nome || '';
       document.getElementById('adm-edit-whatsapp').value = m.telefone || '';
+      document.getElementById('adm-edit-nascimento').value = m.data_nascimento || '';
+      document.getElementById('adm-edit-foto').value = m.foto_url || '';
       document.getElementById('adm-edit-cargo').value = m.cargo || 'tecnico';
     }
 
@@ -987,10 +1275,12 @@
       const id = document.getElementById('adm-edit-id').value;
       const nome = document.getElementById('adm-edit-nome').value.trim();
       const telefone = document.getElementById('adm-edit-whatsapp').value.trim();
+      const data_nascimento = document.getElementById('adm-edit-nascimento').value;
+      const foto_url = document.getElementById('adm-edit-foto').value.trim();
       const cargo = document.getElementById('adm-edit-cargo').value;
       if(!nome) return alert('O nome é obrigatório.');
 
-      const { error } = await db.from('perfis').update({ nome, telefone, cargo }).eq('id', id);
+      const { error } = await db.from('perfis').update({ nome, telefone, data_nascimento, foto_url, cargo }).eq('id', id);
       if(error) return alert('Erro ao atualizar membro.');
 
       document.getElementById('modal-editar-membro').classList.add('hidden');
@@ -1009,23 +1299,30 @@
     function carregarEquipe() {
       const adm = isAdministracaoOuSuperior();
       document.getElementById('cards-equipe').innerHTML = equipeGlobal.map(p => `
-        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow">
-          <div>
-            <h4 class="font-black text-white text-base">${p.nome}</h4>
-            <span class="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase bg-blue-900/50 text-blue-300 mt-1 inline-block">${p.cargo}</span>
+        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
+              ${p.foto_url ? `<img src="${p.foto_url}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-6 h-6 text-zinc-400"></i>`}
+            </div>
+            <div>
+              <h4 class="font-black text-white text-base">${p.nome}</h4>
+              <span class="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase bg-blue-900/50 text-blue-300 mt-1 inline-block">${p.cargo}</span>
+            </div>
           </div>
-          <div class="mt-4 text-xs text-zinc-400 space-y-1 font-mono">
-            <div>${p.email}</div>
-            <div>Tel: ${p.telefone ? `<a href="https://wa.me/${p.telefone.replace(/\D/g,'')}" target="_blank" class="text-emerald-400 underline font-bold">${p.telefone}</a>` : 'S/ Tel'}</div>
+          <div class="text-xs text-zinc-400 space-y-1 font-mono bg-zinc-950 p-3 rounded-xl">
+            <div><b>Email:</b> ${p.email}</div>
+            <div><b>Nascimento:</b> ${p.data_nascimento || 'Não informada'}</div>
+            <div><b>WhatsApp:</b> ${p.telefone ? `<a href="https://wa.me/${p.telefone.replace(/\D/g,'')}" target="_blank" class="text-emerald-400 underline font-bold">${p.telefone}</a>` : 'S/ Tel'}</div>
           </div>
           ${adm ? `
-            <div class="flex gap-2 pt-4 border-t border-zinc-800/60 mt-4 items-center justify-between">
+            <div class="flex gap-2 pt-3 border-t border-zinc-800/60 items-center justify-between">
               <button onclick="abrirModalEditarMembro('${p.id}')" class="text-blue-400 text-xs font-bold hover:underline">Editar / Cargo</button>
               <button onclick="apagarMembro('${p.id}')" class="text-red-400 text-xs font-bold hover:underline">Excluir</button>
             </div>
           ` : ''}
         </div>
       `).join('');
+      lucide.createIcons();
     }
 
     // Inicialização
@@ -1033,4 +1330,3 @@
   </script>
 </body>
 </html>
-
