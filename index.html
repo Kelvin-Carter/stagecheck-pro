@@ -44,6 +44,7 @@
     
     let estoqueGlobal = [], kitsGlobal = [], demandasGlobal = [], manutencaoGlobal = [], saidasGlobal = [], equipeGlobal = [];
     let registrosSaida = {};
+    let itensKitAtual = [];
   </script>
 
   <!-- LOGIN / CADASTRO -->
@@ -70,19 +71,31 @@
       </div>
 
       <div id="form-cadastro-box" class="space-y-3 hidden max-h-[75vh] overflow-y-auto custom-scroll pr-1">
+        <div>
+          <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Nome Completo</label>
+          <input type="text" id="cad-nome" placeholder="Nome Completo" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+        </div>
+        <div>
+          <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">WhatsApp</label>
+          <input type="tel" id="cad-whatsapp" placeholder="Ex: 5511999999999" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+        </div>
         <div class="grid grid-cols-2 gap-2">
-          <input type="text" id="cad-nome" placeholder="Nome Completo" class="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
-          <input type="tel" id="cad-whatsapp" placeholder="WhatsApp" class="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+          <div>
+            <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Nascimento</label>
+            <input type="date" id="cad-nascimento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+          </div>
+          <div>
+            <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Foto (URL)</label>
+            <input type="url" id="cad-foto" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+          </div>
         </div>
-        <input type="email" id="cad-email" placeholder="E-mail" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
-        <input type="password" id="cad-senha" placeholder="Crie uma Senha" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
         <div>
-          <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Data de Nascimento</label>
-          <input type="date" id="cad-nascimento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+          <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">E-mail</label>
+          <input type="email" id="cad-email" placeholder="seu@email.com" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
         </div>
         <div>
-          <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">URL da Foto de Perfil (Opcional)</label>
-          <input type="url" id="cad-foto" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+          <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Senha</label>
+          <input type="password" id="cad-senha" placeholder="Crie uma Senha" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
         </div>
         
         <label class="block text-[10px] font-bold text-zinc-400 uppercase mt-2">Nível de Acesso</label>
@@ -214,7 +227,7 @@
       
       <div id="area-add-saida" class="hidden space-y-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 no-print flex gap-3 items-center flex-wrap">
-          <input type="text" id="input-item-saida" list="dl-estoque" placeholder="Nome ou Modelo do Equipamento..." class="flex-1 min-w-[200px] bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+          <input type="text" id="input-item-saida" list="dl-estoque" placeholder="Nome do Equipamento ou Item Avulso..." class="flex-1 min-w-[200px] bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
           <datalist id="dl-estoque"></datalist>
           <div class="flex items-center gap-1 bg-zinc-950 border border-zinc-800 rounded-xl px-2 py-1">
             <button onclick="ajustarQtdAdicaoSaida(-1)" class="text-zinc-400 hover:text-white px-2 py-1 font-bold">-</button>
@@ -273,7 +286,7 @@
 
     <!-- EQUIPA -->
     <section id="sec-equipe" class="space-y-4 hidden no-print">
-      <h2 class="text-xl font-extrabold text-white">Membros da Equipa & Gestão</h2>
+      <h2 class="text-xl font-extrabold text-white">Membros da Equipa & Perfis</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="cards-equipe"></div>
     </section>
   </main>
@@ -326,17 +339,26 @@
   <div id="modal-meu-perfil" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 my-auto">
       <h3 class="text-base font-bold text-blue-400">Meu Perfil</h3>
-      <input type="text" id="my-nome" placeholder="Nome Completo" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
-      <input type="tel" id="my-whatsapp" placeholder="WhatsApp" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       <div>
-        <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Data de Nascimento</label>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nome Completo</label>
+        <input type="text" id="my-nome" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">WhatsApp</label>
+        <input type="tel" id="my-whatsapp" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Data de Nascimento</label>
         <input type="date" id="my-nascimento" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
       <div>
-        <label class="block text-[9px] font-bold text-zinc-400 uppercase mb-1">URL da Foto de Perfil</label>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">URL da Foto de Perfil</label>
         <input type="url" id="my-foto" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
-      <input type="password" id="my-senha" placeholder="Nova Senha (deixe em branco para manter)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nova Senha (Opcional)</label>
+        <input type="password" id="my-senha" placeholder="Deixe em branco para manter" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
+      </div>
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="document.getElementById('modal-meu-perfil').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button>
         <button onclick="salvarMeuPerfil()" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar Alterações</button>
@@ -412,16 +434,31 @@
     </div>
   </div>
 
-  <!-- MODAL KIT -->
+  <!-- MODAL KIT (COM SUPORTE A ITENS DO ACERVO E ITENS AVULSOS) -->
   <div id="modal-kit" class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-auto max-h-[90vh] overflow-y-auto custom-scroll">
       <h3 class="text-base font-bold text-purple-400" id="modal-kit-titulo">Novo Kit / Baú</h3>
       <input type="hidden" id="kit-id">
-      <input type="text" id="kit-nome" placeholder="Nome do Kit ou Baú (Ex: Baú Shure)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       <div>
-        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Selecionar Itens do Acervo para o Baú</label>
-        <div id="kit-itens-selecao" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 text-xs"></div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nome do Kit ou Baú</label>
+        <input type="text" id="kit-nome" placeholder="Ex: Baú Microfones Shure" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-xs">
       </div>
+
+      <!-- Adicionar item avulso ou do acervo no kit -->
+      <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
+        <label class="block text-[10px] font-bold text-purple-400 uppercase">Adicionar Itens ao Baú (Acervo ou Avulso)</label>
+        <div class="flex gap-2">
+          <input type="text" id="kit-novo-item-nome" list="dl-estoque" placeholder="Nome do item ou selecione..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-white text-xs">
+          <input type="number" id="kit-novo-item-qtd" value="1" min="1" class="w-16 bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-white text-xs text-center">
+          <button onclick="adicionarItemNoKitModal()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs">Adicionar</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Itens Atuais neste Kit / Baú</label>
+        <div id="kit-lista-itens-tabela" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2 text-xs"></div>
+      </div>
+
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="document.getElementById('modal-kit').classList.add('hidden')" class="text-zinc-400 text-xs">Cancelar</button>
         <button onclick="salvarKit()" class="bg-purple-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Salvar Kit / Baú</button>
@@ -795,7 +832,7 @@
       lucide.createIcons(); atualizarDatalistEstoque();
     }
 
-    // KITS
+    // KITS (COM SUPORTE A ADIÇÃO DE ITENS AVULSOS OU DO ACERVO)
     function abrirModalKit(id = null) {
       if(!checkPermissaoOuAlerta()) return;
       document.getElementById('modal-kit').classList.remove('hidden');
@@ -804,21 +841,40 @@
       document.getElementById('kit-id').value = kit ? kit.id : '';
       document.getElementById('kit-nome').value = kit ? (kit.nome || '') : '';
 
-      const itensSel = kit && kit.itens ? kit.itens : [];
-      document.getElementById('kit-itens-selecao').innerHTML = estoqueGlobal.map(e => {
-        const itemEncontrado = itensSel.find(i => i.nome === e.nome);
-        const check = !!itemEncontrado;
-        const qtdVal = itemEncontrado ? (itemEncontrado.quantidade || 1) : 1;
-        return `
-          <div class="flex items-center justify-between gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
-            <label class="flex items-center gap-2 flex-1 text-white cursor-pointer">
-              <input type="checkbox" value="${e.nome}" ${check ? 'checked' : ''} class="kit-chk-item rounded bg-zinc-950 border-zinc-700">
-              <span>${e.nome} <span class="text-[10px] text-zinc-400">(${e.modelo || 'N/D'})</span></span>
-            </label>
-            <input type="number" value="${qtdVal}" min="1" class="kit-qtd-item w-16 bg-zinc-950 border border-zinc-800 rounded p-1 text-center text-white text-xs" data-nome="${e.nome}">
-          </div>
-        `;
-      }).join('') || '<p class="text-zinc-500 italic">Cadastre equipamentos primeiro.</p>';
+      itensKitAtual = kit && kit.itens ? [...kit.itens] : [];
+      renderizarTabelaItensKitModal();
+    }
+
+    function adicionarItemNoKitModal() {
+      const nomeInput = document.getElementById('kit-novo-item-nome');
+      const qtdInput = document.getElementById('kit-novo-item-qtd');
+      const nome = nomeInput.value.trim();
+      const qtd = parseInt(qtdInput.value) || 1;
+      if(!nome) return alert('Insira o nome do item.');
+
+      const existente = itensKitAtual.find(i => i.nome.toLowerCase() === nome.toLowerCase());
+      if(existente) {
+        existente.quantidade += qtd;
+      } else {
+        itensKitAtual.push({ nome, quantidade: qtd });
+      }
+      nomeInput.value = '';
+      qtdInput.value = '1';
+      renderizarTabelaItensKitModal();
+    }
+
+    function removerItemKitModal(index) {
+      itensKitAtual.splice(index, 1);
+      renderizarTabelaItensKitModal();
+    }
+
+    function renderizarTabelaItensKitModal() {
+      document.getElementById('kit-lista-itens-tabela').innerHTML = itensKitAtual.map((i, idx) => `
+        <div class="flex items-center justify-between bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+          <span class="text-white"><b>${i.quantidade}x</b> ${i.nome}</span>
+          <button onclick="removerItemKitModal(${idx})" class="text-red-400 text-xs font-bold hover:underline">Remover</button>
+        </div>
+      `).join('') || '<p class="text-zinc-500 italic">Nenhum item adicionado a este kit ainda.</p>';
     }
 
     async function salvarKit() {
@@ -826,17 +882,9 @@
       const id = document.getElementById('kit-id').value;
       const nome = document.getElementById('kit-nome').value.trim();
       if(!nome) return alert('Dê um nome ao kit.');
+      if(itensKitAtual.length === 0) return alert('Adicione pelo menos um item ao kit.');
 
-      const chks = document.querySelectorAll('.kit-chk-item:checked');
-      const itens = [];
-      chks.forEach(chk => {
-        const nomeItem = chk.value;
-        const inputQtd = document.querySelector(`.kit-qtd-item[data-nome="${nomeItem}"]`);
-        const qtd = inputQtd ? parseInt(inputQtd.value) || 1 : 1;
-        itens.push({ nome: nomeItem, quantidade: qtd });
-      });
-
-      const payload = { nome, itens, criado_por: usuarioAtual.nome };
+      const payload = { nome, itens: itensKitAtual, criado_por: usuarioAtual.nome };
       if(id) await db.from('kits').update(payload).eq('id', id);
       else await db.from('kits').insert([payload]);
 
@@ -859,7 +907,7 @@
           <div>
             <div class="flex justify-between items-start mb-1">
               <h4 class="font-black text-white text-base">${k.nome}</h4>
-              <button onclick="gerarQRCodeItem('${k.nome.replace(/'/g, "\\'")}', 'BAÚ / KIT')" class="bg-zinc-800 hover:bg-zinc-700 text-indigo-300 p-1.5 rounded-lg transition"><i data-lucide="qr-code" class="w-4 h-4"></i></button>
+              <button onclick="gerarQRCodeItem('${k.nome.replace(/'/g, "\\'")}', 'BAÚ / KIT')" class="bg-zinc-800 hover:bg-zinc-700 text-indigo-300 p-1.5 rounded-lg transition" title="QR Code do Baú"><i data-lucide="qr-code" class="w-4 h-4"></i></button>
             </div>
             <p class="text-[10px] text-zinc-500 font-mono mb-3">Criado por: ${k.criado_por || 'Equipa'}</p>
             <div class="bg-zinc-950 p-3 rounded-xl text-xs space-y-1 max-h-32 overflow-y-auto">
@@ -1006,7 +1054,7 @@
       `).join('') || '<p class="text-zinc-500 text-xs italic col-span-3">Nenhuma manutenção.</p>';
     }
 
-    // EVENTOS
+    // EVENTOS / ROMANEIOS
     function atualizarDatalistEstoque() { document.getElementById('dl-estoque').innerHTML = estoqueGlobal.map(e => `<option value="${e.nome} (${e.modelo||'ND'})">`).join(''); }
     
     function ajustarQtdAdicaoSaida(delta) {
@@ -1039,9 +1087,10 @@
       Object.keys(registrosSaida).forEach(k => {
         const itemAcervo = estoqueGlobal.find(e => e.nome.toLowerCase() === k.toLowerCase());
         const cat = itemAcervo ? itemAcervo.categoria : 'Avulso';
+        const mod = itemAcervo ? (itemAcervo.modelo || 'N/D') : 'Avulso';
         htmlInteractive += `
           <tr class="border-b border-zinc-800/60">
-            <td class="p-3"><div class="text-white font-bold">${k}</div><div class="text-[10px] text-zinc-400">Cat: ${cat}</div></td>
+            <td class="p-3"><div class="text-white font-bold">${k}</div><div class="text-[10px] text-zinc-400">Modelo: ${mod} | Cat: ${cat}</div></td>
             <td class="p-3 text-center text-emerald-400 font-bold">${registrosSaida[k]} un</td>
             <td class="p-3 text-right"><button onclick="removerItemSaida('${k}')" class="text-red-400 text-xs font-bold hover:underline">Tirar</button></td>
           </tr>
@@ -1119,7 +1168,7 @@
             <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${s.status === 'CONCLUIDO' ? 'bg-zinc-800 text-zinc-400' : 'bg-emerald-950 text-emerald-400 border border-emerald-800'}">${s.status}</span>
           </div>
           <p class="text-xs text-zinc-400">Local: ${s.contato_evento || '--'}</p>
-          <div class="bg-zinc-950 p-3 rounded-lg text-xs text-zinc-300 max-h-24 overflow-y-auto">${(s.itens||[]).map(i=>`<div><span class="text-emerald-400 font-bold">${i.quantidade}x</span>${i.nome}</div>`).join('')}</div>
+          <div class="bg-zinc-950 p-3 rounded-lg text-xs text-zinc-300 max-h-24 overflow-y-auto">${(s.itens||[]).map(i=>`<div><span class="text-emerald-400 font-bold">${i.quantidade}x</span>${i.nome} <span class="text-[10px] text-zinc-500">(${i.categoria})</span></div>`).join('')}</div>
           <div class="flex gap-2 pt-2 border-t border-zinc-800/60 flex-wrap">
             <button onclick="imprimirRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">Imprimir</button>
             <button onclick="gerarPDFRomaneioIndividual('${s.id}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl text-xs font-semibold">PDF</button>
@@ -1130,7 +1179,7 @@
       `).join('') || '<p class="text-zinc-500 text-xs italic col-span-2">Nenhum evento registado.</p>';
     }
 
-    // EQUIPA & PERFIS
+    // EQUIPA & PERFIS COM FOTO, NASCIMENTO E WHATSAPP EM DESTAQUE
     function abrirModalEditarMembro(id) {
       if(!checkPermissaoOuAlerta()) return;
       const m = equipeGlobal.find(p => p.id == id);
@@ -1175,18 +1224,20 @@
       document.getElementById('cards-equipe').innerHTML = equipeGlobal.map(p => `
         <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow space-y-4">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
-              ${p.foto_url ? `<img src="${p.foto_url}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-6 h-6 text-zinc-400"></i>`}
+            <div class="w-14 h-14 rounded-full bg-zinc-800 border-2 border-blue-500/50 overflow-hidden flex items-center justify-center shrink-0 shadow">
+              ${p.foto_url ? `<img src="${p.foto_url}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-7 h-7 text-zinc-400"></i>`}
             </div>
             <div>
               <h4 class="font-black text-white text-base">${p.nome}</h4>
               <span class="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase bg-blue-900/50 text-blue-300 mt-1 inline-block">${p.cargo}</span>
             </div>
           </div>
-          <div class="text-xs text-zinc-400 space-y-1 font-mono bg-zinc-950 p-3 rounded-xl">
-            <div><b>Email:</b> ${p.email}</div>
-            <div><b>Nascimento:</b> ${p.data_nascimento || 'Não informada'}</div>
-            <div><b>WhatsApp:</b> ${p.telefone ? `<a href="https://wa.me/${p.telefone.replace(/\D/g,'')}" target="_blank" class="text-emerald-400 underline font-bold">${p.telefone}</a>` : 'S/ Tel'}</div>
+          <div class="text-xs text-zinc-300 space-y-1.5 font-mono bg-zinc-950 p-3.5 rounded-xl border border-zinc-800/80">
+            <div><span class="text-zinc-500">Email:</span> ${p.email}</div>
+            <div><span class="text-zinc-500">Nascimento:</span> ${p.data_nascimento ? p.data_nascimento.split('-').reverse().join('/') : 'Não informada'}</div>
+            <div class="pt-1 border-t border-zinc-800">
+              <span class="text-zinc-500">WhatsApp:</span> ${p.telefone ? `<a href="https://wa.me/${p.telefone.replace(/\D/g,'')}" target="_blank" class="text-emerald-400 underline font-bold ml-1">${p.telefone}</a>` : '<span class="text-zinc-500 italic">Não informado</span>'}
+            </div>
           </div>
           ${adm ? `<div class="flex gap-2 pt-3 border-t border-zinc-800/60 items-center justify-between"><button onclick="abrirModalEditarMembro('${p.id}')" class="text-blue-400 text-xs font-bold hover:underline">Editar / Cargo</button><button onclick="apagarMembro('${p.id}')" class="text-red-400 text-xs font-bold hover:underline">Excluir</button></div>` : ''}
         </div>
@@ -1198,4 +1249,3 @@
   </script>
 </body>
 </html>
-
