@@ -556,7 +556,7 @@
   <script>
     lucide.createIcons();
 
-    function atualizarIdentidadeVisualEmpresa() {
+ function atualizarIdentidadeVisualEmpresa() {
       document.getElementById('header-nome-empresa').innerText = configEmpresa.nome || 'LEGALMART';
       document.getElementById('login-titulo-empresa').innerText = configEmpresa.nome || 'LEGALMART';
       document.getElementById('print-empresa-nome').innerText = configEmpresa.nome || 'LEGALMART PRODUÇÕES';
@@ -565,9 +565,12 @@
       const logoBoxPrint = document.getElementById('print-logo-box');
 
       if (configEmpresa.logo) {
-        logoBoxHeader.innerHTML = `<img src="${configEmpresa.logo}" alt="Logo" class="w-10 h-10 rounded-xl object-cover bg-white">`;
+        // Remove o fundo antigo e ajusta a caixa para o logótipo preencher tudo perfeitamente
+        logoBoxHeader.className = "w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center shrink-0 bg-white";
+        logoBoxHeader.innerHTML = `<img src="${configEmpresa.logo}" alt="Logo" class="w-full h-full object-cover">`;
         logoBoxPrint.innerHTML = `<img src="${configEmpresa.logo}" alt="Logo" style="max-height: 45px; max-width: 140px; object-fit: contain;">`;
       } else {
+        logoBoxHeader.className = "bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-sm px-2.5 py-1.5 rounded-lg shadow-md flex items-center justify-center";
         logoBoxHeader.innerHTML = 'LM';
         logoBoxPrint.innerHTML = `<span style="font-size: 14px; font-weight: bold; color: #333;">${configEmpresa.nome}</span>`;
       }
@@ -1531,7 +1534,9 @@ function fecharModalScanner() {
         <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow space-y-4">
           <div class="flex items-center gap-3">
             <div class="w-14 h-14 rounded-full bg-zinc-800 border-2 border-blue-500/50 overflow-hidden flex items-center justify-center shrink-0 shadow">
-              ${p.foto_url && p.foto_url.trim() !== '' ? `<img src="${p.foto_url}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-7 h-7 text-zinc-400"></i>`}
+              ${p.foto_url && p.foto_url.trim() !== '' && p.foto_url !== 'null' && p.foto_url !== 'undefined' 
+  ? `<img src="${p.foto_url}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<i data-lucide=\\'user\\' class=\\'w-7 h-7 text-zinc-400\\'></i>'; lucide.createIcons();">` 
+  : `<i data-lucide="user" class="w-7 h-7 text-zinc-400"></i>`}
             </div>
             <div>
               <h4 class="font-black text-white text-base">${p.nome}</h4>
