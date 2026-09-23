@@ -932,7 +932,7 @@ function atualizarDatalistEstoque() {
     }
 
     // EQUIPAMENTOS
-    async function salvarEstoque() {
+   async function salvarEstoque() {
       if(!checkPermissaoOuAlerta()) return;
       const id = document.getElementById('est-id').value;
       const nome = document.getElementById('est-nome').value.trim();
@@ -941,11 +941,26 @@ function atualizarDatalistEstoque() {
       const propriedade = document.getElementById('est-propriedade').value;
       const quantidade = parseInt(document.getElementById('est-qtd').value) || 1;
       if(!nome) return alert('Preencha o nome.');
+
       const payload = { nome, modelo, categoria, propriedade, quantidade };
-      if(id) await db.from('estoque').update(payload).eq('id', id);
-      else await db.from('estoque').insert([payload]);
+      
+      let res;
+      if(id) {
+        res = await db.from('estoque').update(payload).eq('id', id);
+      } else {
+        res = await db.from('estoque').insert([payload]);
+      }
+
+      if(res.error) {
+        alert('Erro ao salvar equipamento no Supabase: ' + res.error.message);
+        console.error(res.error);
+        return;
+      }
+
       document.getElementById('modal-estoque').classList.add('hidden');
-      await carregarDadosGlobais(); carregarEstoque();
+      await carregarDadosGlobais(); 
+      carregarEstoque();
+      alert('Equipamento salvo com sucesso!');
     }
 
     async function apagarEstoque(id) {
@@ -1320,7 +1335,7 @@ function atualizarDatalistEstoque() {
       document.getElementById('checklist-itens-evento').innerHTML = htmlInteractive || '<tr><td colspan="3" class="p-4 text-center text-zinc-500">Nenhum equipamento adicionado.</td></tr>';
     }
 
-    async function salvarSaidaMaterialBD() {
+   async function salvarSaidaMaterialBD() {
       if(!checkPermissaoOuAlerta()) return;
       const evt = document.getElementById('ev-nome').value.trim();
       const local = document.getElementById('ev-local').value.trim();
@@ -1342,13 +1357,12 @@ function atualizarDatalistEstoque() {
         }
       }
 
-const { error } = await db.from('saida_materiais').insert([{
+      const { error } = await db.from('saida_materiais').insert([{
         evento_nome: evt, 
         contato_evento: local + (retiradoPor ? ` | Retirado por: ${retiradoPor}` : '') + (conferidoPor ? ` | Conferido: ${conferidoPor}` : ''), 
         itens,
         responsavel: usuarioAtual.nome, 
-        status: 'EM ANDAMENTO',
-        data_hora: new Date().toISOString()
+        status: 'EM ANDAMENTO'
       }]);
 
       if (error) {
@@ -1367,7 +1381,7 @@ const { error } = await db.from('saida_materiais').insert([{
       carregarSaidasRegistradas(); 
       carregarEstoque();
       alert('Evento registado e salvo com sucesso!');
-    }
+    } 
 
     async function finalizarEvento(id) {
       if(!checkPermissaoOuAlerta()) return;
