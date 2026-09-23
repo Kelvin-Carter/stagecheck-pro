@@ -128,7 +128,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dash-cards"></div>
     </section>
 
-    <!-- EQUIPAMENTOS (Layout Restaurado com Categoria, Propriedade e QR Code) -->
+    <!-- EQUIPAMENTOS -->
     <section id="sec-equipamentos" class="space-y-4 hidden no-print">
       <div class="flex justify-between items-center gap-2 flex-wrap">
         <h2 class="text-xl font-extrabold text-white">Gestão de Equipamentos & QR Code</h2>
@@ -252,7 +252,7 @@
   </div>
 
   <!-- MODAL SCANNER QR CODE -->
-  <div id="modal-scanner" class="fixed inset-0 bg-zinc-950/9 الخ flex items-center justify-center p-4 z-50 hidden no-print">
+  <div id="modal-scanner" class="fixed inset-0 bg-zinc-950/90 flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md space-y-4 my-auto">
       <div class="flex justify-between items-center">
         <h3 class="text-base font-bold text-indigo-400">Leitor de QR Code</h3>
@@ -566,9 +566,7 @@
           document.getElementById('scanner-status').innerText = `Detectado: ${decodedText}`;
           fecharModalScanner();
           alert(`Item Lido via QR Code: ${decodedText}`);
-        }, (error) => {
-          // Erros de leitura ignorados em loop
-        });
+        }, (error) => {});
       }, 300);
     }
 
@@ -580,7 +578,7 @@
     }
 
     // ==========================================
-    // EQUIPAMENTOS (Layout Restaurado com Categoria e Propriedade)
+    // EQUIPAMENTOS
     // ==========================================
     function abrirModalEstoque(id = null) {
       if(!checkPermissaoOuAlerta()) return;
@@ -774,7 +772,7 @@
     }
 
     // ==========================================
-    // MANUTENÇÃO (Puxa do acervo, com modelo, obs, resp e prazo)
+    // MANUTENÇÃO
     // ==========================================
     function preencherManutencaoComAcervo(nome) {
       const match = estoqueGlobal.find(e => e.nome.toLowerCase() === nome.toLowerCase());
@@ -947,7 +945,7 @@
         }).save().then(() => {
           pdfBox.style.display = 'none';
         });
-      }, 200);
+      }, 300);
     }
 
     function carregarSaidasRegistradas() {
