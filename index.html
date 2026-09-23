@@ -721,18 +721,22 @@
         preencherDatalistEstoque();
       } catch(e) { console.error("Erro na carga de dados", e); }
     }
-
-    function preencherDatalistEstoque() {
+    
+function atualizarDatalistEstoque() {
       const datalist = document.getElementById('dl-estoque');
       if (!datalist) return;
       datalist.innerHTML = '';
       if (window.estoqueGlobal && Array.isArray(estoqueGlobal)) {
         estoqueGlobal.forEach(item => {
           const option = document.createElement('option');
-          option.value = item.nome;
+          option.value = `${item.nome} (${item.modelo || 'ND'})`;
           datalist.appendChild(option);
         });
       }
+    }
+
+    function preencherDatalistEstoque() {
+      atualizarDatalistEstoque();
     }
 
     async function iniciarSistema() {
@@ -1338,10 +1342,12 @@
         }
       }
 
-      const { error } = await db.from('saida_materiais').insert([{
-        evento_nome: evt, contato_evento: local, itens,
-        responsavel: usuarioAtual.nome, status: 'EM ANDAMENTO',
-        retirado_por: retiradoPor, conferido_por: conferidoPor,
+const { error } = await db.from('saida_materiais').insert([{
+        evento_nome: evt, 
+        contato_evento: local + (retiradoPor ? ` | Retirado por: ${retiradoPor}` : '') + (conferidoPor ? ` | Conferido: ${conferidoPor}` : ''), 
+        itens,
+        responsavel: usuarioAtual.nome, 
+        status: 'EM ANDAMENTO',
         data_hora: new Date().toISOString()
       }]);
 
@@ -1352,10 +1358,14 @@
       }
 
       registrosSaida = {};
-      document.getElementById('ev-nome').value = ''; document.getElementById('ev-local').value = '';
-      document.getElementById('ev-retirado-por').value = ''; document.getElementById('ev-conferido-por').value = '';
+      document.getElementById('ev-nome').value = ''; 
+      document.getElementById('ev-local').value = '';
+      document.getElementById('ev-retirado-por').value = ''; 
+      document.getElementById('ev-conferido-por').value = '';
       renderizarTabelaSaida();
-      await carregarDadosGlobais(); carregarSaidasRegistradas(); carregarEstoque();
+      await carregarDadosGlobais(); 
+      carregarSaidasRegistradas(); 
+      carregarEstoque();
       alert('Evento registado e salvo com sucesso!');
     }
 
