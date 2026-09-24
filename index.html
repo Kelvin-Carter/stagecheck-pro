@@ -791,10 +791,20 @@ function atualizarDatalistEstoque() {
       document.getElementById('th-acoes-estoque').style.display = adm ? '' : 'none';
       document.getElementById('area-add-saida').classList.toggle('hidden', !adm);
 
-      await carregarDadosGlobais();
-      carregarAlertasInteligentes(); // <-- Coloca esta linha aqui
-      mudarAba('dashboard');
-    }
+  await carregarDadosGlobais();
+  carregarAlertasInteligentes();
+  
+  // --- ESCUTA EM TEMPO REAL (SUPABASE) ---
+  db.channel('mudancas-erp')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'saida_materiais' }, payload => {
+      tocarAlertaMensagem();
+      carregarAlertasInteligentes();
+      if(typeof carregarRadarDeRua === 'function') carregarRadarDeRua();
+    })
+    .subscribe();
+
+  mudarAba('dashboard');
+}
 
     function mudarAba(aba) {
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
@@ -1742,6 +1752,16 @@ async function carregarAlertasInteligentes() {
 
   container.innerHTML = alertasHtml;
   lucide.createIcons();
+}
+// --- FUNÇÃO DE ALERTA SONORO E VIBRAÇÃO ---
+function tocarAlertaMensagem() {
+  if ("vibrate" in navigator) {
+    navigator.vibrate([200, 100, 200]);
+  }
+  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+  audio.play().catch(e => {
+    console.log("O navegador bloqueou o áudio automático até haver um clique na página:", e);
+  });
 }
   </script>
 </body>
