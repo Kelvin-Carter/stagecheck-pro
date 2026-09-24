@@ -794,17 +794,33 @@ function atualizarDatalistEstoque() {
   await carregarDadosGlobais();
   carregarAlertasInteligentes();
   
-// --- ESCUTA EM TEMPO REAL (SUPABASE COM DEPURAÇÃO) ---
-  db.channel('mudancas-erp')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'saida_materiais' }, payload => {
-      console.log("📥 Novo registo detetado em tempo real:", payload);
-      tocarAlertaMensagem();
-      carregarAlertasInteligentes();
-      if(typeof carregarRadarDeRua === 'function') carregarRadarDeRua();
-    })
-    .subscribe((status) => {
-      console.log("🔌 Estado da ligação Realtime:", status);
-    });
+// --- VERIFICAÇÃO AUTOMÁTICA EM SEGUNDO PLANO (À PROVA DE FALHAS NO IPHONE) ---
+  let ultimoIdConhecido = null;
+
+  async function verificarNovasSaidasAutomatico() {
+    try {
+      const { data, error } = await db.from('saida_materiais').select('id').order('id', { ascending: false }).limit(1);
+      if (data && data.length > 0) {
+        const idMaisRecente = data[0].id;
+        
+        if (ultimoIdConhecido === null) {
+          ultimoIdConhecido = idMaisRecente; // Memoriza o último ID ao iniciar
+        } else if (ultimoIdConhecido !== idMaisRecente) {
+          // Novo registo detetado!
+          ultimoIdConhecido = idMaisRecente;
+          console.log("🔔 Novo registo detetado por verificação automática!");
+          tocarAlertaMensagem();
+          carregarAlertasInteligentes();
+          if(typeof carregarRadarDeRua === 'function') carregarRadarDeRua();
+        }
+      }
+    } catch (e) {
+      console.log("Erro na verificação automática:", e);
+    }
+  }
+
+  // Verifica a base de dados a cada 5 segundos
+  setInterval(verificarNovasSaidasAutomatico, 5000);
 
   mudarAba('dashboard');
 }
