@@ -1772,30 +1772,62 @@ async function carregarAlertasInteligentes() {
   container.innerHTML = alertasHtml;
   lucide.createIcons();
 }
-// --- FUNÇÃO DE ALERTA SONORO E VIBRAÇÃO (VERSÃO NATIVA) ---
+// --- 1. VARIÁVEL GLOBAL PARA ENGANAR O IPHONE ---
+let contextoAudioGlobal = null;
+
+// --- 2. FUNÇÃO QUE DESBLOQUEIA O ÁUDIO AO PRIMEIRO TOQUE ---
+function desbloquearAudioiOS() {
+  if (!contextoAudioGlobal) {
+    contextoAudioGlobal = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (contextoAudioGlobal.state === 'suspended') {
+    contextoAudioGlobal.resume();
+  }
+  // Tocar um som mudo muito rápido só para o iOS dar permissão
+  const osc = contextoAudioGlobal.createOscillator();
+  const gain = contextoAudioGlobal.createGain();
+  gain.gain.value = 0; // Volume zero (mudo)
+  osc.connect(gain);
+  gain.connect(contextoAudioGlobal.destination);
+  osc.start(0);
+  osc.stop(contextoAudioGlobal.currentTime + 0.1);
+  
+  console.log("🔊 Áudio desbloqueado para iPhone!");
+  
+  // Remove o ouvinte para não repetir
+  document.removeEventListener('touchstart', desbloquearAudioiOS);
+  document.removeEventListener('click', desbloquearAudioiOS);
+}
+
+// Fica à espera que toques no ecrã a primeira vez para desbloquear
+document.addEventListener('touchstart', desbloquearAudioiOS, { once: true });
+document.addEventListener('click', desbloquearAudioiOS, { once: true });
+
+
+// --- 3. FUNÇÃO DE ALERTA BLINDADA ---
 function tocarAlertaMensagem() {
-  // 1. Vibração estilo mensagem
+  // Vibração (Só funciona no Android, o iPhone ignora isto)
   if ("vibrate" in navigator) {
     navigator.vibrate([300, 150, 300]);
   }
 
-  // 2. Som de bip gerado por código (funciona sempre, sem falhas de links)
   try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    if (!contextoAudioGlobal) return; // Se ainda não tocou no ecrã, não faz nada
+    
+    const osc = contextoAudioGlobal.createOscillator();
+    const gain = contextoAudioGlobal.createGain();
     
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Tom agudo tipo notificação
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(880, contextoAudioGlobal.currentTime);
+    gain.gain.setValueAtTime(0.1, contextoAudioGlobal.currentTime);
     
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(contextoAudioGlobal.destination);
     
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.25); // Toca durante 0.25 segundos
+    osc.stop(contextoAudioGlobal.currentTime + 0.25);
   } catch (e) {
-    console.log("Áudio bloqueado ou não suportado:", e);
+    console.log("Erro no áudio:", e);
   }
 }
   </script>
